@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>락트리 강화소</title>
 <style>
 :root {
     --bg-color: #121214;
@@ -20,6 +21,11 @@ body { background-color: var(--bg-color); color: var(--text); display: flex; fle
 header { text-align: center; padding: 5px 0; }
 header h1 { font-size: 1.6rem; color: #ff6b81; font-weight: 800; }
 header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
+
+.status-bar { font-size: 0.78rem; padding: 7px 10px; border-radius: 8px; text-align: center; font-weight: bold; }
+.status-bar.loading { background: #2f3542; color: #ffa502; }
+.status-bar.ok { background: #1d3a2b; color: var(--accent); }
+.status-bar.error { background: #4a1f25; color: #ff6b81; line-height: 1.5; }
 
 .my-profile-box { background: #2f3542; border-radius: 10px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #455a64; }
 .my-label { font-size: 0.9rem; color: #fff; }
@@ -52,6 +58,7 @@ header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
 .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .shop-btn { background: #2f3542; border: 1px solid #455a64; color: white; padding: 10px 6px; border-radius: 8px; font-size: 0.78rem; cursor: pointer; font-weight: bold; }
 .shop-btn:active { background: #3742fa; }
+.shop-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .log-box { background: #18181c; border-radius: 10px; padding: 10px; height: 90px; overflow-y: auto; font-size: 0.78rem; border: 1px solid #2f3542; display: flex; flex-direction: column; gap: 4px; }
 .log-item { color: var(--subtext); }
@@ -70,6 +77,8 @@ header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
         <h1>락트리 강화소</h1>
         <p>(락트리에서 트레이닝 하면 리얼 세진다)</p>
     </header>
+
+    <div class="status-bar loading" id="status-bar">⏳ 서버에서 데이터 불러오는 중...</div>
 
     <div class="my-profile-box">
         <span class="my-label">👤 내 캐릭터: <strong id="my-name-display">미설정</strong></span>
@@ -91,9 +100,9 @@ header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
         <div style="font-size: 0.9rem; color: var(--subtext);" id="current-user-label">프로젝트 진척도</div>
         <div class="grade-badge" id="grade-display">V0</div>
         <div class="rate-info" id="rate-display">성공 확률: 100% | 보상: +150G</div>
-        
-        <button class="upgrade-btn" id="upgrade-btn" onclick="tryUpgrade()">🧗‍♂️ 볼더링 도전하기!</button>
-        
+
+        <button class="upgrade-btn" id="upgrade-btn" onclick="tryUpgrade()" disabled>⏳ 데이터 불러오는 중...</button>
+
         <div class="tape-toggle">
             <label><input type="checkbox" id="use-tape-check"> 🩹 이번 도전에 안전 테이핑 사용 (하락 방지)</label>
         </div>
@@ -102,8 +111,8 @@ header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
     <div class="shop-panel">
         <div class="shop-title">🏪 락트리 상점</div>
         <div class="shop-grid">
-            <button class="shop-btn" onclick="buyTape()">🩹 안전 테이핑 구매<br><small>(1,000G / 1회 하락 방지)</small></button>
-            <button class="shop-btn" onclick="buyShoes()">👟 부토라 뉴코멧 암벽화<br><small>(5,000G / 성공률 +5%)</small></button>
+            <button class="shop-btn" id="buy-tape-btn" onclick="buyTape()" disabled>🩹 안전 테이핑 구매<br><small>(1,000G / 1회 하락 방지)</small></button>
+            <button class="shop-btn" id="buy-shoes-btn" onclick="buyShoes()" disabled>👟 부토라 뉴코멧 암벽화<br><small>(5,000G / 성공률 +5%)</small></button>
         </div>
     </div>
 
@@ -114,7 +123,7 @@ header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDglmYcqh8myVGW0qnjNb0RbUJM5W0jweE",
@@ -126,23 +135,18 @@ const firebaseConfig = {
     appId: "1:962454047078:web:9b76ee5ff5e9a4fe6da0a7"
 };
 
+/* ---------- 상수 / 상태 ---------- */
+const NAMES = ["조돌맹", "은비땅", "리치맨", "꼬북린"];
+const defaultPlayer = () => ({ grade: 0, gold: 0, tape: 0, hasShoes: false });
+
 let db = null;
-try {
-    const app = initializeApp(firebaseConfig);
-    db = getDatabase(app);
-} catch (e) {
-    console.log("Firebase 미설정 상태");
-}
+let dbReady = false;          // 서버에서 첫 데이터를 받기 전에는 절대 쓰기/조작 금지
+let myCharacter = localStorage.getItem('rocktree_my_char');
+if (!NAMES.includes(myCharacter)) myCharacter = null;
+let viewingPlayer = myCharacter || NAMES[0];
 
-let myCharacter = localStorage.getItem('rocktree_my_char') || null;
-let viewingPlayer = myCharacter || "조돌맹";
-
-let playersData = {
-    "조돌맹": { grade: 0, gold: 0, tape: 0, hasShoes: false },
-    "은비땅": { grade: 0, gold: 0, tape: 0, hasShoes: false },
-    "리치맨": { grade: 0, gold: 0, tape: 0, hasShoes: false },
-    "꼬북린": { grade: 0, gold: 0, tape: 0, hasShoes: false }
-};
+let playersData = {};
+NAMES.forEach(n => playersData[n] = defaultPlayer());
 
 let isCooldown = false;
 let pumpCount = 0;
@@ -157,16 +161,114 @@ const failReasons = [
     "스타트 홀드 잡고 바로 런지하다가 추락!"
 ];
 
+/* ---------- 유틸 ---------- */
+function normalize(raw) {
+    // Firebase에서 빠진 필드/문자열 값이 와도 안전하게 보정
+    if (!raw || typeof raw !== 'object') return defaultPlayer();
+    return {
+        grade: Math.min(17, Math.max(0, Number(raw.grade) || 0)),
+        gold: Math.max(0, Number(raw.gold) || 0),
+        tape: Math.max(0, Number(raw.tape) || 0),
+        hasShoes: raw.hasShoes === true
+    };
+}
+
+function setStatus(type, msg) {
+    const bar = document.getElementById('status-bar');
+    if (!bar) return;
+    bar.className = 'status-bar ' + type;
+    bar.innerHTML = msg;
+}
+
+function addLog(text, type = "") {
+    const box = document.getElementById('log-box');
+    if (box) {
+        const item = document.createElement('div');
+        item.className = `log-item ${type}`;
+        item.innerText = text;
+        box.insertBefore(item, box.firstChild);
+    }
+}
+
+function showSaveError(err) {
+    console.error("Firebase 저장 실패:", err);
+    const code = (err && err.code) ? err.code : '';
+    if (/permission/i.test(code) || /PERMISSION_DENIED/i.test(String(err))) {
+        setStatus('error', '❌ 저장 권한 없음 (PERMISSION_DENIED)<br>Firebase 콘솔 → Realtime Database → 규칙(Rules)을 확인하세요.');
+    } else {
+        setStatus('error', '❌ 서버 저장 실패: 네트워크 또는 설정을 확인하세요.<br>(' + (code || err) + ')');
+    }
+    addLog("⚠️ 서버에 저장되지 못했습니다. 새로고침하면 이전 상태로 돌아갈 수 있어요.", "fail");
+}
+
+/* ---------- Firebase 초기화 ---------- */
+try {
+    const app = initializeApp(firebaseConfig);
+    db = getDatabase(app);
+} catch (e) {
+    console.error("Firebase 초기화 실패:", e);
+    setStatus('error', '❌ Firebase 초기화 실패: firebaseConfig를 확인하세요.');
+}
+
+function saveMyData() {
+    if (!db || !dbReady || !myCharacter) return Promise.resolve();
+    return set(ref(db, 'players/' + myCharacter), playersData[myCharacter])
+        .then(() => setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중'))
+        .catch(showSaveError);
+}
+
+function ensureNodeExists(name) {
+    // 서버에 해당 캐릭터 데이터가 "없을 때만" 기본값을 생성 (기존 데이터는 절대 덮어쓰지 않음)
+    return runTransaction(ref(db, 'players/' + name), (current) => {
+        if (current === null) return defaultPlayer();
+        return; // undefined 반환 = 변경 없이 중단
+    }).catch(showSaveError);
+}
+
+if (db) {
+    // 서버 응답이 8초 넘게 없으면 안내
+    const loadTimer = setTimeout(() => {
+        if (!dbReady) {
+            setStatus('error', '❌ 서버 응답이 없습니다.<br>데이터베이스 URL/규칙(Rules)/네트워크를 확인하세요. (F12 콘솔 참고)');
+        }
+    }, 8000);
+
+    onValue(ref(db, 'players'), (snapshot) => {
+        const val = snapshot.val() || {};
+        NAMES.forEach(n => {
+            if (val[n] === undefined || val[n] === null) {
+                playersData[n] = defaultPlayer();
+                if (!dbReady) ensureNodeExists(n);   // 최초 로드 때만 빈 슬롯 생성
+            } else {
+                playersData[n] = normalize(val[n]);   // 서버 값이 항상 기준
+            }
+        });
+        if (!dbReady) {
+            dbReady = true;
+            clearTimeout(loadTimer);
+            setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중');
+        }
+        updateUI();
+    }, (err) => {
+        console.error("Firebase 읽기 실패:", err);
+        setStatus('error', '❌ 데이터 읽기 실패 (' + (err.code || err.message) + ')<br>Firebase 콘솔 → Realtime Database → 규칙(Rules)에서 read/write 허용 여부를 확인하세요.');
+    });
+
+    onValue(ref(db, '.info/connected'), (snap) => {
+        if (dbReady && snap.val() === false) {
+            setStatus('loading', '⚠️ 연결이 끊겼습니다. 재연결 중... (그 사이 조작은 저장되지 않을 수 있어요)');
+        } else if (dbReady && snap.val() === true) {
+            setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중');
+        }
+    });
+}
+
+/* ---------- 캐릭터 선택 ---------- */
 function checkMyCharacter() {
     if (!myCharacter) {
         let choice = prompt("본인의 캐릭터 이름을 선택하세요:\n(조돌맹, 은비땅, 리치맨, 꼬북린)", "조돌맹");
-        if (choice && playersData[choice]) {
-            myCharacter = choice;
-            localStorage.setItem('rocktree_my_char', myCharacter);
-        } else {
-            myCharacter = "조돌맹";
-            localStorage.setItem('rocktree_my_char', myCharacter);
-        }
+        myCharacter = (choice && NAMES.includes(choice.trim())) ? choice.trim() : NAMES[0];
+        localStorage.setItem('rocktree_my_char', myCharacter);
     }
     viewingPlayer = myCharacter;
     document.getElementById('my-name-display').innerText = myCharacter;
@@ -174,7 +276,8 @@ function checkMyCharacter() {
 
 window.resetMyCharacter = function() {
     let choice = prompt("변경할 내 캐릭터 이름을 입력하세요:\n(조돌맹, 은비땅, 리치맨, 꼬북린)", myCharacter);
-    if (choice && playersData[choice]) {
+    choice = choice ? choice.trim() : choice;
+    if (choice && NAMES.includes(choice)) {
         myCharacter = choice;
         localStorage.setItem('rocktree_my_char', myCharacter);
         viewingPlayer = myCharacter;
@@ -190,6 +293,7 @@ window.selectViewPlayer = function(name) {
     updateUI();
 }
 
+/* ---------- 게임 로직 ---------- */
 function getSuccessRate(grade, hasShoes) {
     let base = 90;
     if (grade > 3) base = 60;
@@ -203,12 +307,20 @@ function getRewardGold(grade) {
     return (grade + 1) * 150;
 }
 
-window.tryUpgrade = function() {
-    if (viewingPlayer !== myCharacter) {
-        alert(`관전 중입니다! 내 캐릭터(${myCharacter})만 도전할 수 있습니다.`);
-        return;
+function canAct(actionName) {
+    if (!dbReady) {
+        alert("아직 서버 데이터를 불러오는 중이에요. 잠시 후 다시 시도해주세요.");
+        return false;
     }
+    if (viewingPlayer !== myCharacter) {
+        alert(`관전 중입니다! 내 캐릭터(${myCharacter})만 ${actionName}할 수 있습니다.`);
+        return false;
+    }
+    return true;
+}
 
+window.tryUpgrade = function() {
+    if (!canAct("도전")) return;
     if (isCooldown) return;
 
     let now = Date.now();
@@ -265,7 +377,7 @@ window.tryUpgrade = function() {
         pumpCount = 0;
     } else {
         let reason = failReasons[Math.floor(Math.random() * failReasons.length)];
-        
+
         if (useTape) {
             pData.tape -= 1;
             addLog(`🛡️ [방어] ${myCharacter}님 추락! (${reason}) -> 안전 테이핑으로 등급 보호!`, "fail");
@@ -281,10 +393,7 @@ window.tryUpgrade = function() {
 }
 
 window.buyTape = function() {
-    if (viewingPlayer !== myCharacter) {
-        alert(`관전 중입니다! 내 캐릭터(${myCharacter})만 구매할 수 있습니다.`);
-        return;
-    }
+    if (!canAct("구매")) return;
     let pData = playersData[myCharacter];
     if (pData.gold < 1000) {
         alert("골드가 부족합니다! (1,000G 필요)");
@@ -297,10 +406,7 @@ window.buyTape = function() {
 }
 
 window.buyShoes = function() {
-    if (viewingPlayer !== myCharacter) {
-        alert(`관전 중입니다! 내 캐릭터(${myCharacter})만 구매할 수 있습니다.`);
-        return;
-    }
+    if (!canAct("구매")) return;
     let pData = playersData[myCharacter];
     if (pData.hasShoes) {
         alert("이미 부토라 뉴코멧 암벽화를 착용 중입니다!");
@@ -317,10 +423,8 @@ window.buyShoes = function() {
 }
 
 function syncAndRender() {
-    if (db) {
-        set(ref(db, 'players/' + myCharacter), playersData[myCharacter]);
-    }
     updateUI();
+    saveMyData();
 }
 
 function triggerEffect(grade) {
@@ -332,45 +436,46 @@ function triggerEffect(grade) {
     }
 }
 
-function addLog(text, type = "") {
-    const box = document.getElementById('log-box');
-    if (box) {
-        const item = document.createElement('div');
-        item.className = `log-item ${type}`;
-        item.innerText = text;
-        box.insertBefore(item, box.firstChild);
-    }
-}
-
+/* ---------- 화면 ---------- */
 function updateUI() {
     let pData = playersData[viewingPlayer];
     if (!pData) return;
 
     let isMe = (viewingPlayer === myCharacter);
     document.getElementById('current-user-label').innerText = `${viewingPlayer}님의 프로젝트 ${isMe ? '(내 캐릭터)' : '(👀 관전 중)'}`;
-    
+
     document.getElementById('grade-display').innerText = `V${pData.grade}`;
     document.getElementById('rate-display').innerText = `성공 확률: ${getSuccessRate(pData.grade, pData.hasShoes)}% | 완등 보상: +${getRewardGold(pData.grade)}G`;
-    
+
     document.getElementById('gold-display').innerText = `${pData.gold.toLocaleString()}G`;
     document.getElementById('gear-display').innerText = pData.hasShoes ? "👟 부토라 뉴코멧 (+5%)" : "기본 운동화";
     document.getElementById('tape-display').innerText = `${pData.tape}개`;
 
     const upgradeBtn = document.getElementById('upgrade-btn');
     if (upgradeBtn) {
-        if (!isMe) {
+        if (!dbReady) {
+            upgradeBtn.disabled = true;
+            upgradeBtn.innerText = "⏳ 데이터 불러오는 중...";
+        } else if (!isMe) {
             upgradeBtn.disabled = true;
             upgradeBtn.innerText = "👀 상대방 관전 중 (조작 불가)";
         } else {
             upgradeBtn.disabled = false;
-            if(!isCooldown) upgradeBtn.innerText = "🧗‍♂️ 볼더링 도전하기!";
+            if (!isCooldown) upgradeBtn.innerText = "🧗‍♂️ 볼더링 도전하기!";
         }
     }
+
+    const shopEnabled = dbReady && isMe;
+    const tapeBtn = document.getElementById('buy-tape-btn');
+    const shoesBtn = document.getElementById('buy-shoes-btn');
+    if (tapeBtn) tapeBtn.disabled = !shopEnabled;
+    if (shoesBtn) shoesBtn.disabled = !shopEnabled;
 
     const grid = document.getElementById('player-grid');
     if (grid) {
         grid.innerHTML = '';
-        for (let [name, data] of Object.entries(playersData)) {
+        for (const name of NAMES) {
+            const data = playersData[name];
             let activeClass = (name === viewingPlayer) ? 'active' : '';
             let meClass = (name === myCharacter) ? 'is-me' : '';
             grid.innerHTML += `
@@ -381,30 +486,6 @@ function updateUI() {
             `;
         }
     }
-}
-
-if (db) {
-    // 1. 처음 접속 시 파이어베이스에 데이터가 없으면 기본값(0)을 채워넣고, 있으면 가져옴
-    const dbRef = ref(db);
-    get(child(dbRef, 'players')).then((snapshot) => {
-        if (snapshot.exists()) {
-            playersData = snapshot.val();
-        } else {
-            set(ref(db, 'players'), playersData);
-        }
-        updateUI();
-    }).catch((error) => {
-        console.error(error);
-    });
-
-    // 2. 실시간 동기화 리스너
-    onValue(ref(db, 'players'), (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            playersData = data;
-            updateUI();
-        }
-    });
 }
 
 checkMyCharacter();
