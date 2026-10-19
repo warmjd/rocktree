@@ -18,9 +18,11 @@ body { background-color: var(--bg-color); color: var(--text); display: flex; fle
 
 .container { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 12px; }
 
-header { text-align: center; padding: 5px 0; }
+header { text-align: center; padding: 5px 0; position: relative; }
 header h1 { font-size: 1.6rem; color: #ff6b81; font-weight: 800; }
 header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
+
+.notice-btn { position: absolute; right: 0; top: 5px; background: #2f3542; color: #ffa502; border: 1px solid #455a64; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
 
 .status-bar { font-size: 0.78rem; padding: 7px 10px; border-radius: 8px; text-align: center; font-weight: bold; }
 .status-bar.loading { background: #2f3542; color: #ffa502; }
@@ -70,6 +72,14 @@ header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
 .log-item.success { color: var(--accent); font-weight: bold; }
 .log-item.fail { color: var(--primary); }
 
+/* 모달 팝업 스타일 */
+#notice-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 20px; }
+.modal-content { background: #1e1e24; border: 2px solid #ffa502; border-radius: 14px; width: 100%; max-width: 380px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.modal-title { font-size: 1.1rem; color: #ffa502; font-weight: bold; text-align: center; }
+.modal-body { font-size: 0.82rem; color: var(--text); line-height: 1.5; display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; padding-right: 5px; }
+.modal-body ul { padding-left: 15px; }
+.modal-close { background: #ff4757; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; }
+
 #effect-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: 900; color: #ffd700; text-shadow: 0 0 20px rgba(0,0,0,0.8); opacity: 0; transition: opacity 0.3s; }
 </style>
 </head>
@@ -77,10 +87,28 @@ header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
 
 <div id="effect-overlay">✨ V17 완등 성공! ✨</div>
 
+<!-- 패치노트 모달 팝업 -->
+<div id="notice-modal">
+    <div class="modal-content">
+        <div class="modal-title">📢 락트리 강화소 패치노트</div>
+        <div class="modal-body">
+            <p><strong>🔥 v1.1 확장팩 업데이트 내용</strong></p>
+            <ul>
+                <li><strong>👑 환생(등반가 랭크) 시스템 오픈</strong><br>V17 만렙 달성 시 환생 가능! 영구 성공률 +3% 및 왕관(👑) 칭호 획득</li>
+                <li><strong>🏪 확장 상점 오픈</strong><br> - 초크백 (추락 시 골드 유실 방어)<br> - 고강도 트레이닝권 (다음 도전 성공률 +10%)</li>
+                <li><strong>🔥 실시간 현황판 개편</strong><br>친구들의 환생 횟수와 왕관이 실시간 공유됩니다.</li>
+                <li><strong>🛡️ 데이터 안정성 강화</strong><br>자동 저장 기능이 더욱 강력하게 유지됩니다.</li>
+            </ul>
+        </div>
+        <button class="modal-close" onclick="toggleNotice(false)">확인</button>
+    </div>
+</div>
+
 <div class="container">
     <header>
         <h1>락트리 강화소</h1>
         <p>(락트리에서 트레이닝 하면 리얼 세진다)</p>
+        <button class="notice-btn" onclick="toggleNotice(true)">📢 공지사항</button>
     </header>
 
     <div class="status-bar loading" id="status-bar">⏳ 서버에서 데이터 불러오는 중...</div>
@@ -131,7 +159,7 @@ header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
     </div>
 
     <div class="log-box" id="log-box">
-        <div class="log-item">락트리 강화소 입장 완료! 내 캐릭터를 골라 V17에 도전하세요.</div>
+        <div class="log-item">락트리 강화소 확장팩 입장 완료! 우측 상단 공지사항을 확인하세요.</div>
     </div>
 </div>
 
@@ -149,7 +177,6 @@ const firebaseConfig = {
     appId: "1:962454047078:web:9b76ee5ff5e9a4fe6da0a7"
 };
 
-/* ---------- 상수 / 상태 ---------- */
 const NAMES = ["조돌맹", "은비땅", "리치맨", "꼬북린"];
 const defaultPlayer = () => ({ 
     grade: 0, 
@@ -183,7 +210,6 @@ const failReasons = [
     "스타트 홀드 잡고 바로 런지하다가 추락!"
 ];
 
-/* ---------- 유틸 ---------- */
 function normalize(raw) {
     if (!raw || typeof raw !== 'object') return defaultPlayer();
     return {
@@ -216,16 +242,10 @@ function addLog(text, type = "") {
 
 function showSaveError(err) {
     console.error("Firebase 저장 실패:", err);
-    const code = (err && err.code) ? err.code : '';
-    if (/permission/i.test(code) || /PERMISSION_DENIED/i.test(String(err))) {
-        setStatus('error', '❌ 저장 권한 없음 (PERMISSION_DENIED)');
-    } else {
-        setStatus('error', '❌ 서버 저장 실패: 네트워크를 확인하세요.');
-    }
+    setStatus('error', '❌ 서버 저장 실패: 네트워크를 확인하세요.');
     addLog("⚠️ 서버에 저장되지 못했습니다.", "fail");
 }
 
-/* ---------- Firebase 초기화 ---------- */
 try {
     const app = initializeApp(firebaseConfig);
     db = getDatabase(app);
@@ -250,9 +270,7 @@ function ensureNodeExists(name) {
 
 if (db) {
     const loadTimer = setTimeout(() => {
-        if (!dbReady) {
-            setStatus('error', '❌ 서버 응답이 없습니다.');
-        }
+        if (!dbReady) setStatus('error', '❌ 서버 응답이 없습니다.');
     }, 8000);
 
     onValue(ref(db, 'players'), (snapshot) => {
@@ -285,7 +303,6 @@ if (db) {
     });
 }
 
-/* ---------- 캐릭터 선택 ---------- */
 function checkMyCharacter() {
     if (!myCharacter) {
         let choice = prompt("본인의 캐릭터 이름을 선택하세요:\n(조돌맹, 은비땅, 리치맨, 꼬북린)", "조돌맹");
@@ -315,7 +332,13 @@ window.selectViewPlayer = function(name) {
     updateUI();
 }
 
-/* ---------- 게임 로직 ---------- */
+window.toggleNotice = function(show) {
+    const modal = document.getElementById('notice-modal');
+    if (modal) {
+        modal.style.display = show ? 'flex' : 'none';
+    }
+}
+
 function getSuccessRate(pData) {
     let grade = pData.grade;
     let base = 90;
@@ -323,13 +346,13 @@ function getSuccessRate(pData) {
     if (grade > 7) base = 30;
     if (grade > 12) base = 10;
     if (pData.hasShoes) base += 5;
-    base += (pData.rebirthCount * 3); // 환생당 영구 성공률 +3%
-    if (pData.buffNext) base += 10; // 일회성 트레이닝권 버프
+    base += (pData.rebirthCount * 3); 
+    if (pData.buffNext) base += 10; 
     return Math.min(98, base);
 }
 
 function getRewardGold(grade, rebirthCount) {
-    let mult = 1 + (rebirthCount * 0.2); // 환생당 골드 획득량 20% 증가
+    let mult = 1 + (rebirthCount * 0.2); 
     return Math.floor((grade + 1) * 150 * mult);
 }
 
@@ -394,7 +417,7 @@ window.tryUpgrade = function() {
     let finalRate = Math.max(5, baseRate - penaltyRate);
     let roll = Math.random() * 100;
 
-    if (pData.buffNext) pData.buffNext = false; // 소모성 버프 해제
+    if (pData.buffNext) pData.buffNext = false; 
 
     if (roll <= finalRate) {
         pData.grade += 1;
@@ -422,7 +445,6 @@ window.tryUpgrade = function() {
     syncAndRender();
 }
 
-// 환생 시스템 함수
 window.tryRebirth = function() {
     if (!canAct("환생")) return;
     let pData = playersData[myCharacter];
@@ -496,7 +518,6 @@ function triggerEffect(grade) {
     }
 }
 
-/* ---------- 화면 ---------- */
 function updateUI() {
     let pData = playersData[viewingPlayer];
     if (!pData) return;
@@ -504,7 +525,6 @@ function updateUI() {
     let isMe = (viewingPlayer === myCharacter);
     document.getElementById('current-user-label').innerText = `${viewingPlayer}님의 프로젝트 ${isMe ? '(내 캐릭터)' : '(👀 관전 중)'}`;
 
-    // 환생 정보 및 프로필 UI 업데이트
     document.getElementById('my-sub-info').innerText = `환생 ${pData.rebirthCount}회 | 영구 보너스 +${pData.rebirthCount * 3}%`;
     const rebirthBtn = document.getElementById('rebirth-main-btn');
     if (isMe && pData.grade >= 17) {
@@ -530,8 +550,8 @@ function updateUI() {
             upgradeBtn.disabled = true;
             upgradeBtn.innerText = "👀 상대방 관전 중 (조작 불가)";
         } else if (pData.grade >= 17) {
-            upgradeBtn.disabled = true;
-            upgradeBtn.innerText = "👑 V17 만렙 달성! 환생하세요!";
+            upgradeBtn.disabled = false; // 환생 전이라도 도전 버튼은 누를 수 있게 하거나 만렙 안내
+            upgradeBtn.innerText = "👑 V17 만렙 달성! (환생 가능)";
         } else {
             upgradeBtn.disabled = false;
             if (!isCooldown) upgradeBtn.innerText = "🧗‍♂️ 볼더링 도전하기!";
