@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root {
+    --bg-color: #121214;
+    --card-bg: #1e1e24;
+    --primary: #ff4757;
+    --accent: #2ed573;
+    --text: #f1f2f6;
+    --subtext: #a4b0be;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif; }
+body { background-color: var(--bg-color); color: var(--text); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 15px; }
+
+.container { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 12px; }
+
+header { text-align: center; padding: 5px 0; }
+header h1 { font-size: 1.6rem; color: #ff6b81; font-weight: 800; }
+header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
+
+.my-profile-box { background: #2f3542; border-radius: 10px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #455a64; }
+.my-label { font-size: 0.9rem; color: #fff; }
+.my-label strong { color: #ffa502; }
+.change-btn { background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
+
+.live-panel { background: var(--card-bg); border-radius: 12px; padding: 12px; border: 1px solid #2f3542; }
+.live-title { font-size: 0.8rem; color: var(--accent); margin-bottom: 8px; font-weight: bold; }
+.player-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.player-card { background: #2f3542; padding: 10px; border-radius: 8px; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: transform 0.1s; }
+.player-card:active { transform: scale(0.97); }
+.player-card.active { border: 2px solid var(--accent); background: #252a34; }
+.player-card.is-me { border-left: 4px solid #ffa502; }
+
+.resource-panel { background: #1a1a20; border-radius: 10px; padding: 10px; border: 1px solid #3a3a48; display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; }
+.res-item .highlight { color: #ffd700; font-weight: bold; }
+
+.stage-box { background: var(--card-bg); border-radius: 16px; padding: 18px; text-align: center; border: 2px solid #3742fa; position: relative; }
+.grade-badge { font-size: 2.5rem; font-weight: 900; color: #ffa502; margin: 8px 0; text-shadow: 0 0 15px rgba(255,165,2,0.4); }
+.rate-info { font-size: 0.85rem; color: var(--subtext); margin-bottom: 12px; }
+
+.upgrade-btn { width: 100%; background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; border: none; padding: 15px; font-size: 1.15rem; font-weight: bold; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,71,87,0.4); transition: transform 0.1s; }
+.upgrade-btn:active { transform: scale(0.96); }
+.upgrade-btn:disabled { background: #57606f !important; box-shadow: none !important; cursor: not-allowed; }
+
+.tape-toggle { margin-top: 10px; font-size: 0.8rem; color: var(--subtext); display: flex; align-items: center; justify-content: center; gap: 5px; }
+
+.shop-panel { background: var(--card-bg); border-radius: 12px; padding: 12px; border: 1px solid #2f3542; }
+.shop-title { font-size: 0.85rem; color: #ffa502; margin-bottom: 8px; font-weight: bold; }
+.shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.shop-btn { background: #2f3542; border: 1px solid #455a64; color: white; padding: 10px 6px; border-radius: 8px; font-size: 0.78rem; cursor: pointer; font-weight: bold; }
+.shop-btn:active { background: #3742fa; }
+
+.log-box { background: #18181c; border-radius: 10px; padding: 10px; height: 90px; overflow-y: auto; font-size: 0.78rem; border: 1px solid #2f3542; display: flex; flex-direction: column; gap: 4px; }
+.log-item { color: var(--subtext); }
+.log-item.success { color: var(--accent); font-weight: bold; }
+.log-item.fail { color: var(--primary); }
+
+#effect-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: 900; color: #ffd700; text-shadow: 0 0 20px rgba(0,0,0,0.8); opacity: 0; transition: opacity 0.3s; }
+</style>
+</head>
+<body>
+
+<div id="effect-overlay">✨ V17 완등 성공! ✨</div>
+
+<div class="container">
+    <header>
+        <h1>락트리 강화소</h1>
+        <p>(락트리에서 트레이닝 하면 리얼 세진다)</p>
+    </header>
+
+    <div class="my-profile-box">
+        <span class="my-label">👤 내 캐릭터: <strong id="my-name-display">미설정</strong></span>
+        <button class="change-btn" onclick="resetMyCharacter()">캐릭터 변경</button>
+    </div>
+
+    <div class="live-panel">
+        <div class="live-title">🔥 4인방 실시간 볼더링 현황 (터치하여 관전)</div>
+        <div class="player-grid" id="player-grid"></div>
+    </div>
+
+    <div class="resource-panel">
+        <div class="res-item">💰 보유 골드: <span id="gold-display" class="highlight">0G</span></div>
+        <div class="res-item">👟 장비: <span id="gear-display">기본 운동화</span></div>
+        <div class="res-item">🩹 안전 테이핑: <span id="tape-display" class="highlight">0개</span></div>
+    </div>
+
+    <div class="stage-box">
+        <div style="font-size: 0.9rem; color: var(--subtext);" id="current-user-label">프로젝트 진척도</div>
+        <div class="grade-badge" id="grade-display">V0</div>
+        <div class="rate-info" id="rate-display">성공 확률: 100% | 보상: +150G</div>
+        
+        <button class="upgrade-btn" id="upgrade-btn" onclick="tryUpgrade()">🧗‍♂️ 볼더링 도전하기!</button>
+        
+        <div class="tape-toggle">
+            <label><input type="checkbox" id="use-tape-check"> 🩹 이번 도전에 안전 테이핑 사용 (하락 방지)</label>
+        </div>
+    </div>
+
+    <div class="shop-panel">
+        <div class="shop-title">🏪 락트리 상점</div>
+        <div class="shop-grid">
+            <button class="shop-btn" onclick="buyTape()">🩹 안전 테이핑 구매<br><small>(1,000G / 1회 하락 방지)</small></button>
+            <button class="shop-btn" onclick="buyShoes()">👟 부토라 뉴코멧 암벽화<br><small>(5,000G / 성공률 +5%)</small></button>
+        </div>
+    </div>
+
+    <div class="log-box" id="log-box">
+        <div class="log-item">락트리 강화소 입장 완료! 내 캐릭터를 골라 V17에 도전하세요.</div>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDglmYcqh8myVGW0qnjNb0RbUJM5W0jweE",
+    authDomain: "eunbiland-d5a0d.firebaseapp.com",
+    databaseURL: "https://eunbiland-d5a0d-default-rtdb.firebaseio.com",
+    projectId: "eunbiland-d5a0d",
+    storageBucket: "eunbiland-d5a0d.firebasestorage.app",
+    messagingSenderId: "962454047078",
+    appId: "1:962454047078:web:9b76ee5ff5e9a4fe6da0a7"
+};
+
+let db = null;
+try {
+    const app = initializeApp(firebaseConfig);
+    db = getDatabase(app);
+} catch (e) {
+    console.log("Firebase 미설정 상태");
+}
+
+let myCharacter = localStorage.getItem('rocktree_my_char') || null;
+let viewingPlayer = myCharacter || "조돌맹";
+
+let playersData = {
+    "조돌맹": { grade: 0, gold: 0, tape: 0, hasShoes: false },
+    "은비땅": { grade: 0, gold: 0, tape: 0, hasShoes: false },
+    "리치맨": { grade: 0, gold: 0, tape: 0, hasShoes: false },
+    "꼬북린": { grade: 0, gold: 0, tape: 0, hasShoes: false }
+};
+
+let isCooldown = false;
+let pumpCount = 0;
+let lastClickTime = 0;
+
+const failReasons = [
+    "손에 초크를 안 칠해서 핑거 슬립 발생!",
+    "오버행에서 코어 힘 풀려서 족발처럼 떨어짐!",
+    "다이노 뛰다가 매트 구석으로 터져나감!",
+    "크림프 홀드 잡았는데 손톱 깨짐!",
+    "힐훅 걸다가 바지 찢어짐!",
+    "스타트 홀드 잡고 바로 런지하다가 추락!"
+];
+
+function checkMyCharacter() {
+    if (!myCharacter) {
+        let choice = prompt("본인의 캐릭터 이름을 선택하세요:\n(조돌맹, 은비땅, 리치맨, 꼬북린)", "조돌맹");
+        if (choice && playersData[choice]) {
+            myCharacter = choice;
+            localStorage.setItem('rocktree_my_char', myCharacter);
+        } else {
+            myCharacter = "조돌맹";
+            localStorage.setItem('rocktree_my_char', myCharacter);
+        }
+    }
+    viewingPlayer = myCharacter;
+    document.getElementById('my-name-display').innerText = myCharacter;
+}
+
+window.resetMyCharacter = function() {
+    let choice = prompt("변경할 내 캐릭터 이름을 입력하세요:\n(조돌맹, 은비땅, 리치맨, 꼬북린)", myCharacter);
+    if (choice && playersData[choice]) {
+        myCharacter = choice;
+        localStorage.setItem('rocktree_my_char', myCharacter);
+        viewingPlayer = myCharacter;
+        document.getElementById('my-name-display').innerText = myCharacter;
+        updateUI();
+    } else {
+        alert("올바른 캐릭터 이름을 입력해주세요.");
+    }
+}
+
+window.selectViewPlayer = function(name) {
+    viewingPlayer = name;
+    updateUI();
+}
+
+function getSuccessRate(grade, hasShoes) {
+    let base = 90;
+    if (grade > 3) base = 60;
+    if (grade > 7) base = 30;
+    if (grade > 12) base = 10;
+    if (hasShoes) base += 5;
+    return Math.min(95, base);
+}
+
+function getRewardGold(grade) {
+    return (grade + 1) * 150;
+}
+
+window.tryUpgrade = function() {
+    if (viewingPlayer !== myCharacter) {
+        alert(`관전 중입니다! 내 캐릭터(${myCharacter})만 도전할 수 있습니다.`);
+        return;
+    }
+
+    if (isCooldown) return;
+
+    let now = Date.now();
+    if (now - lastClickTime < 800) pumpCount++;
+    else pumpCount = Math.max(0, pumpCount - 1);
+    lastClickTime = now;
+
+    let penaltyRate = 0;
+    if (pumpCount >= 3) {
+        penaltyRate = 15;
+        addLog(`⚠️ [펌핑 경고] 과부하 발생! (성공 확률 -15%)`, "fail");
+    }
+
+    let pData = playersData[myCharacter];
+    if (pData.grade >= 17) {
+        alert("이미 최고 등급 V17을 달성하셨습니다!");
+        return;
+    }
+
+    const useTapeCheck = document.getElementById('use-tape-check');
+    let useTape = useTapeCheck && useTapeCheck.checked;
+
+    if (useTape && pData.tape <= 0) {
+        alert("안전 테이핑이 부족합니다! 상점에서 먼저 구매하세요.");
+        useTapeCheck.checked = false;
+        return;
+    }
+
+    isCooldown = true;
+    const btn = document.getElementById('upgrade-btn');
+    if (btn) {
+        btn.style.opacity = "0.5";
+        btn.innerText = "⏳ 다음 홀드 잡는 중...";
+    }
+
+    setTimeout(() => {
+        isCooldown = false;
+        if (btn) {
+            btn.style.opacity = "1";
+            btn.innerText = "🧗‍♂️ 볼더링 도전하기!";
+        }
+    }, 1200);
+
+    let baseRate = getSuccessRate(pData.grade, pData.hasShoes);
+    let finalRate = Math.max(5, baseRate - penaltyRate);
+    let roll = Math.random() * 100;
+
+    if (roll <= finalRate) {
+        pData.grade += 1;
+        let reward = getRewardGold(pData.grade);
+        pData.gold += reward;
+        addLog(`🎉 [성공] ${myCharacter}님 V${pData.grade} 완등! (+${reward}G 획득)`, "success");
+        triggerEffect(pData.grade);
+        pumpCount = 0;
+    } else {
+        let reason = failReasons[Math.floor(Math.random() * failReasons.length)];
+        
+        if (useTape) {
+            pData.tape -= 1;
+            addLog(`🛡️ [방어] ${myCharacter}님 추락! (${reason}) -> 안전 테이핑으로 등급 보호!`, "fail");
+        } else if (pData.grade >= 8 && Math.random() < 0.5) {
+            pData.grade = Math.max(0, pData.grade - 1);
+            addLog(`💥 [추락] ${myCharacter}님 실패! (${reason}) -> 등급 하락!`, "fail");
+        } else {
+            addLog(`❌ [실패] ${myCharacter}님 추락! (${reason})`, "fail");
+        }
+    }
+
+    syncAndRender();
+}
+
+window.buyTape = function() {
+    if (viewingPlayer !== myCharacter) {
+        alert(`관전 중입니다! 내 캐릭터(${myCharacter})만 구매할 수 있습니다.`);
+        return;
+    }
+    let pData = playersData[myCharacter];
+    if (pData.gold < 1000) {
+        alert("골드가 부족합니다! (1,000G 필요)");
+        return;
+    }
+    pData.gold -= 1000;
+    pData.tape += 1;
+    addLog(`🛒 [상점] ${myCharacter}님이 안전 테이핑을 구매했습니다.`, "success");
+    syncAndRender();
+}
+
+window.buyShoes = function() {
+    if (viewingPlayer !== myCharacter) {
+        alert(`관전 중입니다! 내 캐릭터(${myCharacter})만 구매할 수 있습니다.`);
+        return;
+    }
+    let pData = playersData[myCharacter];
+    if (pData.hasShoes) {
+        alert("이미 부토라 뉴코멧 암벽화를 착용 중입니다!");
+        return;
+    }
+    if (pData.gold < 5000) {
+        alert("골드가 부족합니다! (5,000G 필요)");
+        return;
+    }
+    pData.gold -= 5000;
+    pData.hasShoes = true;
+    addLog(`👞 [상점] ${myCharacter}님이 부토라 뉴코멧 암벽화를 장착했습니다! (성공률 +5%)`, "success");
+    syncAndRender();
+}
+
+function syncAndRender() {
+    if (db) {
+        set(ref(db, 'players/' + myCharacter), playersData[myCharacter]);
+    }
+    updateUI();
+}
+
+function triggerEffect(grade) {
+    const overlay = document.getElementById('effect-overlay');
+    if (overlay) {
+        overlay.innerText = `✨ V${grade} 완등 성공! ✨`;
+        overlay.style.opacity = '1';
+        setTimeout(() => overlay.style.opacity = '0', 1000);
+    }
+}
+
+function addLog(text, type = "") {
+    const box = document.getElementById('log-box');
+    if (box) {
+        const item = document.createElement('div');
+        item.className = `log-item ${type}`;
+        item.innerText = text;
+        box.insertBefore(item, box.firstChild);
+    }
+}
+
+function updateUI() {
+    let pData = playersData[viewingPlayer];
+    if (!pData) return;
+
+    let isMe = (viewingPlayer === myCharacter);
+    document.getElementById('current-user-label').innerText = `${viewingPlayer}님의 프로젝트 ${isMe ? '(내 캐릭터)' : '(👀 관전 중)'}`;
+    
+    document.getElementById('grade-display').innerText = `V${pData.grade}`;
+    document.getElementById('rate-display').innerText = `성공 확률: ${getSuccessRate(pData.grade, pData.hasShoes)}% | 완등 보상: +${getRewardGold(pData.grade)}G`;
+    
+    document.getElementById('gold-display').innerText = `${pData.gold.toLocaleString()}G`;
+    document.getElementById('gear-display').innerText = pData.hasShoes ? "👟 부토라 뉴코멧 (+5%)" : "기본 운동화";
+    document.getElementById('tape-display').innerText = `${pData.tape}개`;
+
+    const upgradeBtn = document.getElementById('upgrade-btn');
+    if (upgradeBtn) {
+        if (!isMe) {
+            upgradeBtn.disabled = true;
+            upgradeBtn.innerText = "👀 상대방 관전 중 (조작 불가)";
+        } else {
+            upgradeBtn.disabled = false;
+            if(!isCooldown) upgradeBtn.innerText = "🧗‍♂️ 볼더링 도전하기!";
+        }
+    }
+
+    const grid = document.getElementById('player-grid');
+    if (grid) {
+        grid.innerHTML = '';
+        for (let [name, data] of Object.entries(playersData)) {
+            let activeClass = (name === viewingPlayer) ? 'active' : '';
+            let meClass = (name === myCharacter) ? 'is-me' : '';
+            grid.innerHTML += `
+                <div class="player-card ${activeClass} ${meClass}" onclick="selectViewPlayer('${name}')">
+                    <span>${name} ${name === myCharacter ? '👤' : ''}</span>
+                    <span style="color: #ffa502; font-weight: bold;">V${data.grade}</span>
+                </div>
+            `;
+        }
+    }
+}
+
+if (db) {
+    onValue(ref(db, 'players'), (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            playersData = data;
+            updateUI();
+        }
+    });
+}
+
+checkMyCharacter();
+updateUI();
+</script>
+</body>
+</html>
