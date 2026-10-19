@@ -28,17 +28,21 @@ header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
 .status-bar.error { background: #4a1f25; color: #ff6b81; line-height: 1.5; }
 
 .my-profile-box { background: #2f3542; border-radius: 10px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #455a64; }
-.my-label { font-size: 0.9rem; color: #fff; }
-.my-label strong { color: #ffa502; }
+.my-label { font-size: 0.85rem; color: #fff; display: flex; flex-direction: column; gap: 2px; }
+.my-label strong { color: #ffa502; font-size: 1rem; }
+.btn-group { display: flex; gap: 5px; }
 .change-btn { background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
+.rebirth-btn { background: linear-gradient(135deg, #ffa502, #ff7f50); color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: bold; display: none; box-shadow: 0 0 10px rgba(255,165,2,0.5); }
 
 .live-panel { background: var(--card-bg); border-radius: 12px; padding: 12px; border: 1px solid #2f3542; }
 .live-title { font-size: 0.8rem; color: var(--accent); margin-bottom: 8px; font-weight: bold; }
 .player-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.player-card { background: #2f3542; padding: 10px; border-radius: 8px; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: transform 0.1s; }
+.player-card { background: #2f3542; padding: 10px; border-radius: 8px; font-size: 0.8rem; display: flex; flex-direction: column; gap: 4px; cursor: pointer; transition: transform 0.1s; border: 1px solid transparent; }
 .player-card:active { transform: scale(0.97); }
 .player-card.active { border: 2px solid var(--accent); background: #252a34; }
 .player-card.is-me { border-left: 4px solid #ffa502; }
+.card-top { display: flex; justify-content: space-between; align-items: center; }
+.card-sub { font-size: 0.7rem; color: #ffa502; }
 
 .resource-panel { background: #1a1a20; border-radius: 10px; padding: 10px; border: 1px solid #3a3a48; display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; }
 .res-item .highlight { color: #ffd700; font-weight: bold; }
@@ -56,9 +60,10 @@ header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
 .shop-panel { background: var(--card-bg); border-radius: 12px; padding: 12px; border: 1px solid #2f3542; }
 .shop-title { font-size: 0.85rem; color: #ffa502; margin-bottom: 8px; font-weight: bold; }
 .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.shop-btn { background: #2f3542; border: 1px solid #455a64; color: white; padding: 10px 6px; border-radius: 8px; font-size: 0.78rem; cursor: pointer; font-weight: bold; }
+.shop-btn { background: #2f3542; border: 1px solid #455a64; color: white; padding: 10px 6px; border-radius: 8px; font-size: 0.78rem; cursor: pointer; font-weight: bold; text-align: left; display: flex; flex-direction: column; gap: 3px; }
 .shop-btn:active { background: #3742fa; }
 .shop-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.shop-btn small { color: var(--subtext); font-size: 0.7rem; }
 
 .log-box { background: #18181c; border-radius: 10px; padding: 10px; height: 90px; overflow-y: auto; font-size: 0.78rem; border: 1px solid #2f3542; display: flex; flex-direction: column; gap: 4px; }
 .log-item { color: var(--subtext); }
@@ -81,8 +86,14 @@ header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
     <div class="status-bar loading" id="status-bar">⏳ 서버에서 데이터 불러오는 중...</div>
 
     <div class="my-profile-box">
-        <span class="my-label">👤 내 캐릭터: <strong id="my-name-display">미설정</strong></span>
-        <button class="change-btn" onclick="resetMyCharacter()">캐릭터 변경</button>
+        <span class="my-label">
+            👤 내 캐릭터: <strong id="my-name-display">미설정</strong>
+            <span id="my-sub-info" style="font-size:0.75rem; color:var(--subtext);">환생 0회 | 보너스 +0%</span>
+        </span>
+        <div class="btn-group">
+            <button class="rebirth-btn" id="rebirth-main-btn" onclick="tryRebirth()">👑 환생</button>
+            <button class="change-btn" onclick="resetMyCharacter()">변경</button>
+        </div>
     </div>
 
     <div class="live-panel">
@@ -94,6 +105,7 @@ header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
         <div class="res-item">💰 보유 골드: <span id="gold-display" class="highlight">0G</span></div>
         <div class="res-item">👟 장비: <span id="gear-display">기본 운동화</span></div>
         <div class="res-item">🩹 안전 테이핑: <span id="tape-display" class="highlight">0개</span></div>
+        <div class="res-item">🧗‍♂️ 초크백: <span id="chalk-display" class="highlight">미보유</span></div>
     </div>
 
     <div class="stage-box">
@@ -109,10 +121,12 @@ header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
     </div>
 
     <div class="shop-panel">
-        <div class="shop-title">🏪 락트리 상점</div>
+        <div class="shop-title">🏪 락트리 확장 상점</div>
         <div class="shop-grid">
-            <button class="shop-btn" id="buy-tape-btn" onclick="buyTape()" disabled>🩹 안전 테이핑 구매<br><small>(1,000G / 1회 하락 방지)</small></button>
-            <button class="shop-btn" id="buy-shoes-btn" onclick="buyShoes()" disabled>👟 부토라 뉴코멧 암벽화<br><small>(5,000G / 성공률 +5%)</small></button>
+            <button class="shop-btn" id="buy-tape-btn" onclick="buyTape()" disabled>🩹 안전 테이핑<br><small>1,000G / 1회 방지</small></button>
+            <button class="shop-btn" id="buy-shoes-btn" onclick="buyShoes()" disabled>👟 부토라 뉴코멧<br><small>5,000G / 성공률 +5%</small></button>
+            <button class="shop-btn" id="buy-chalk-btn" onclick="buyChalkBag()" disabled>🧗‍♂️ 초크백 (영구)<br><small>15,000G / 추락 골드보호</small></button>
+            <button class="shop-btn" id="buy-pass-btn" onclick="buyTrainingPass()" disabled>🎫 트레이닝권<br><small>8,000G / 다음 성공률+10%</small></button>
         </div>
     </div>
 
@@ -137,10 +151,18 @@ const firebaseConfig = {
 
 /* ---------- 상수 / 상태 ---------- */
 const NAMES = ["조돌맹", "은비땅", "리치맨", "꼬북린"];
-const defaultPlayer = () => ({ grade: 0, gold: 0, tape: 0, hasShoes: false });
+const defaultPlayer = () => ({ 
+    grade: 0, 
+    gold: 0, 
+    tape: 0, 
+    hasShoes: false, 
+    rebirthCount: 0, 
+    hasChalkBag: false, 
+    buffNext: false 
+});
 
 let db = null;
-let dbReady = false;          // 서버에서 첫 데이터를 받기 전에는 절대 쓰기/조작 금지
+let dbReady = false;          
 let myCharacter = localStorage.getItem('rocktree_my_char');
 if (!NAMES.includes(myCharacter)) myCharacter = null;
 let viewingPlayer = myCharacter || NAMES[0];
@@ -163,13 +185,15 @@ const failReasons = [
 
 /* ---------- 유틸 ---------- */
 function normalize(raw) {
-    // Firebase에서 빠진 필드/문자열 값이 와도 안전하게 보정
     if (!raw || typeof raw !== 'object') return defaultPlayer();
     return {
         grade: Math.min(17, Math.max(0, Number(raw.grade) || 0)),
         gold: Math.max(0, Number(raw.gold) || 0),
         tape: Math.max(0, Number(raw.tape) || 0),
-        hasShoes: raw.hasShoes === true
+        hasShoes: raw.hasShoes === true,
+        rebirthCount: Math.max(0, Number(raw.rebirthCount) || 0),
+        hasChalkBag: raw.hasChalkBag === true,
+        buffNext: raw.buffNext === true
     };
 }
 
@@ -194,11 +218,11 @@ function showSaveError(err) {
     console.error("Firebase 저장 실패:", err);
     const code = (err && err.code) ? err.code : '';
     if (/permission/i.test(code) || /PERMISSION_DENIED/i.test(String(err))) {
-        setStatus('error', '❌ 저장 권한 없음 (PERMISSION_DENIED)<br>Firebase 콘솔 → Realtime Database → 규칙(Rules)을 확인하세요.');
+        setStatus('error', '❌ 저장 권한 없음 (PERMISSION_DENIED)');
     } else {
-        setStatus('error', '❌ 서버 저장 실패: 네트워크 또는 설정을 확인하세요.<br>(' + (code || err) + ')');
+        setStatus('error', '❌ 서버 저장 실패: 네트워크를 확인하세요.');
     }
-    addLog("⚠️ 서버에 저장되지 못했습니다. 새로고침하면 이전 상태로 돌아갈 수 있어요.", "fail");
+    addLog("⚠️ 서버에 저장되지 못했습니다.", "fail");
 }
 
 /* ---------- Firebase 초기화 ---------- */
@@ -207,7 +231,7 @@ try {
     db = getDatabase(app);
 } catch (e) {
     console.error("Firebase 초기화 실패:", e);
-    setStatus('error', '❌ Firebase 초기화 실패: firebaseConfig를 확인하세요.');
+    setStatus('error', '❌ Firebase 초기화 실패');
 }
 
 function saveMyData() {
@@ -218,18 +242,16 @@ function saveMyData() {
 }
 
 function ensureNodeExists(name) {
-    // 서버에 해당 캐릭터 데이터가 "없을 때만" 기본값을 생성 (기존 데이터는 절대 덮어쓰지 않음)
     return runTransaction(ref(db, 'players/' + name), (current) => {
         if (current === null) return defaultPlayer();
-        return; // undefined 반환 = 변경 없이 중단
+        return; 
     }).catch(showSaveError);
 }
 
 if (db) {
-    // 서버 응답이 8초 넘게 없으면 안내
     const loadTimer = setTimeout(() => {
         if (!dbReady) {
-            setStatus('error', '❌ 서버 응답이 없습니다.<br>데이터베이스 URL/규칙(Rules)/네트워크를 확인하세요. (F12 콘솔 참고)');
+            setStatus('error', '❌ 서버 응답이 없습니다.');
         }
     }, 8000);
 
@@ -238,9 +260,9 @@ if (db) {
         NAMES.forEach(n => {
             if (val[n] === undefined || val[n] === null) {
                 playersData[n] = defaultPlayer();
-                if (!dbReady) ensureNodeExists(n);   // 최초 로드 때만 빈 슬롯 생성
+                if (!dbReady) ensureNodeExists(n);   
             } else {
-                playersData[n] = normalize(val[n]);   // 서버 값이 항상 기준
+                playersData[n] = normalize(val[n]);   
             }
         });
         if (!dbReady) {
@@ -251,12 +273,12 @@ if (db) {
         updateUI();
     }, (err) => {
         console.error("Firebase 읽기 실패:", err);
-        setStatus('error', '❌ 데이터 읽기 실패 (' + (err.code || err.message) + ')<br>Firebase 콘솔 → Realtime Database → 규칙(Rules)에서 read/write 허용 여부를 확인하세요.');
+        setStatus('error', '❌ 데이터 읽기 실패');
     });
 
     onValue(ref(db, '.info/connected'), (snap) => {
         if (dbReady && snap.val() === false) {
-            setStatus('loading', '⚠️ 연결이 끊겼습니다. 재연결 중... (그 사이 조작은 저장되지 않을 수 있어요)');
+            setStatus('loading', '⚠️ 연결이 끊겼습니다. 재연결 중...');
         } else if (dbReady && snap.val() === true) {
             setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중');
         }
@@ -294,17 +316,21 @@ window.selectViewPlayer = function(name) {
 }
 
 /* ---------- 게임 로직 ---------- */
-function getSuccessRate(grade, hasShoes) {
+function getSuccessRate(pData) {
+    let grade = pData.grade;
     let base = 90;
     if (grade > 3) base = 60;
     if (grade > 7) base = 30;
     if (grade > 12) base = 10;
-    if (hasShoes) base += 5;
-    return Math.min(95, base);
+    if (pData.hasShoes) base += 5;
+    base += (pData.rebirthCount * 3); // 환생당 영구 성공률 +3%
+    if (pData.buffNext) base += 10; // 일회성 트레이닝권 버프
+    return Math.min(98, base);
 }
 
-function getRewardGold(grade) {
-    return (grade + 1) * 150;
+function getRewardGold(grade, rebirthCount) {
+    let mult = 1 + (rebirthCount * 0.2); // 환생당 골드 획득량 20% 증가
+    return Math.floor((grade + 1) * 150 * mult);
 }
 
 function canAct(actionName) {
@@ -323,6 +349,12 @@ window.tryUpgrade = function() {
     if (!canAct("도전")) return;
     if (isCooldown) return;
 
+    let pData = playersData[myCharacter];
+    if (pData.grade >= 17) {
+        alert("이미 V17 만렙입니다! '환생' 버튼을 눌러 명예를 높여보세요!");
+        return;
+    }
+
     let now = Date.now();
     if (now - lastClickTime < 800) pumpCount++;
     else pumpCount = Math.max(0, pumpCount - 1);
@@ -332,12 +364,6 @@ window.tryUpgrade = function() {
     if (pumpCount >= 3) {
         penaltyRate = 15;
         addLog(`⚠️ [펌핑 경고] 과부하 발생! (성공 확률 -15%)`, "fail");
-    }
-
-    let pData = playersData[myCharacter];
-    if (pData.grade >= 17) {
-        alert("이미 최고 등급 V17을 달성하셨습니다!");
-        return;
     }
 
     const useTapeCheck = document.getElementById('use-tape-check');
@@ -364,13 +390,15 @@ window.tryUpgrade = function() {
         }
     }, 1200);
 
-    let baseRate = getSuccessRate(pData.grade, pData.hasShoes);
+    let baseRate = getSuccessRate(pData);
     let finalRate = Math.max(5, baseRate - penaltyRate);
     let roll = Math.random() * 100;
 
+    if (pData.buffNext) pData.buffNext = false; // 소모성 버프 해제
+
     if (roll <= finalRate) {
         pData.grade += 1;
-        let reward = getRewardGold(pData.grade);
+        let reward = getRewardGold(pData.grade, pData.rebirthCount);
         pData.gold += reward;
         addLog(`🎉 [성공] ${myCharacter}님 V${pData.grade} 완등! (+${reward}G 획득)`, "success");
         triggerEffect(pData.grade);
@@ -383,7 +411,9 @@ window.tryUpgrade = function() {
             addLog(`🛡️ [방어] ${myCharacter}님 추락! (${reason}) -> 안전 테이핑으로 등급 보호!`, "fail");
         } else if (pData.grade >= 8 && Math.random() < 0.5) {
             pData.grade = Math.max(0, pData.grade - 1);
-            addLog(`💥 [추락] ${myCharacter}님 실패! (${reason}) -> 등급 하락!`, "fail");
+            let lostGold = pData.hasChalkBag ? 0 : Math.floor(pData.gold * 0.1);
+            if (!pData.hasChalkBag && lostGold > 0) pData.gold -= lostGold;
+            addLog(`💥 [추락] ${myCharacter}님 실패! (${reason}) -> 등급 하락! ${lostGold > 0 ? `(골드 일부 유실)` : '(초크백으로 골드 보호됨!)'}`, "fail");
         } else {
             addLog(`❌ [실패] ${myCharacter}님 추락! (${reason})`, "fail");
         }
@@ -392,13 +422,27 @@ window.tryUpgrade = function() {
     syncAndRender();
 }
 
+// 환생 시스템 함수
+window.tryRebirth = function() {
+    if (!canAct("환생")) return;
+    let pData = playersData[myCharacter];
+    if (pData.grade < 17) {
+        alert("아직 V17을 달성하지 못했습니다! V17을 찍어야 환생할 수 있습니다.");
+        return;
+    }
+    
+    if (confirm(`👑 [등반가 환생]\n환생하시면 V0로 초기화되지만, 환생 횟수가 증가하며 [영구 성공률 +3%] 및 [골드 획득량 보너스]가 주어집니다!\n환생하시겠습니까?`)) {
+        pData.rebirthCount += 1;
+        pData.grade = 0;
+        addLog(`👑 [환생 완료] ${myCharacter}님이 제${pData.rebirthCount}차 환생에 성공했습니다! (영구 버프 강화)`, "success");
+        syncAndRender();
+    }
+}
+
 window.buyTape = function() {
     if (!canAct("구매")) return;
     let pData = playersData[myCharacter];
-    if (pData.gold < 1000) {
-        alert("골드가 부족합니다! (1,000G 필요)");
-        return;
-    }
+    if (pData.gold < 1000) return alert("골드가 부족합니다! (1,000G 필요)");
     pData.gold -= 1000;
     pData.tape += 1;
     addLog(`🛒 [상점] ${myCharacter}님이 안전 테이핑을 구매했습니다.`, "success");
@@ -408,17 +452,33 @@ window.buyTape = function() {
 window.buyShoes = function() {
     if (!canAct("구매")) return;
     let pData = playersData[myCharacter];
-    if (pData.hasShoes) {
-        alert("이미 부토라 뉴코멧 암벽화를 착용 중입니다!");
-        return;
-    }
-    if (pData.gold < 5000) {
-        alert("골드가 부족합니다! (5,000G 필요)");
-        return;
-    }
+    if (pData.hasShoes) return alert("이미 부토라 뉴코멧 암벽화를 착용 중입니다!");
+    if (pData.gold < 5000) return alert("골드가 부족합니다! (5,000G 필요)");
     pData.gold -= 5000;
     pData.hasShoes = true;
     addLog(`👞 [상점] ${myCharacter}님이 부토라 뉴코멧 암벽화를 장착했습니다! (성공률 +5%)`, "success");
+    syncAndRender();
+}
+
+window.buyChalkBag = function() {
+    if (!canAct("구매")) return;
+    let pData = playersData[myCharacter];
+    if (pData.hasChalkBag) return alert("이미 초크백을 보유 중입니다!");
+    if (pData.gold < 15000) return alert("골드가 부족합니다! (15,000G 필요)");
+    pData.gold -= 15000;
+    pData.hasChalkBag = true;
+    addLog(`🧗‍♂️ [상점] ${myCharacter}님이 초크백을 구매했습니다! (추락 시 골드 하락 방어)`, "success");
+    syncAndRender();
+}
+
+window.buyTrainingPass = function() {
+    if (!canAct("구매")) return;
+    let pData = playersData[myCharacter];
+    if (pData.buffNext) return alert("이미 고강도 트레이닝 버프가 대기 중입니다!");
+    if (pData.gold < 8000) return alert("골드가 부족합니다! (8,000G 필요)");
+    pData.gold -= 8000;
+    pData.buffNext = true;
+    addLog(`🎫 [상점] ${myCharacter}님이 고강도 트레이닝권을 사용했습니다! (다음 도전 성공률 +10%)`, "success");
     syncAndRender();
 }
 
@@ -444,12 +504,22 @@ function updateUI() {
     let isMe = (viewingPlayer === myCharacter);
     document.getElementById('current-user-label').innerText = `${viewingPlayer}님의 프로젝트 ${isMe ? '(내 캐릭터)' : '(👀 관전 중)'}`;
 
+    // 환생 정보 및 프로필 UI 업데이트
+    document.getElementById('my-sub-info').innerText = `환생 ${pData.rebirthCount}회 | 영구 보너스 +${pData.rebirthCount * 3}%`;
+    const rebirthBtn = document.getElementById('rebirth-main-btn');
+    if (isMe && pData.grade >= 17) {
+        rebirthBtn.style.display = "block";
+    } else {
+        rebirthBtn.style.display = "none";
+    }
+
     document.getElementById('grade-display').innerText = `V${pData.grade}`;
-    document.getElementById('rate-display').innerText = `성공 확률: ${getSuccessRate(pData.grade, pData.hasShoes)}% | 완등 보상: +${getRewardGold(pData.grade)}G`;
+    document.getElementById('rate-display').innerText = `성공 확률: ${getSuccessRate(pData)}${pData.buffNext ? ' (🎫버프+10%)' : ''}% | 완등 보상: +${getRewardGold(pData.grade, pData.rebirthCount)}G`;
 
     document.getElementById('gold-display').innerText = `${pData.gold.toLocaleString()}G`;
     document.getElementById('gear-display').innerText = pData.hasShoes ? "👟 부토라 뉴코멧 (+5%)" : "기본 운동화";
     document.getElementById('tape-display').innerText = `${pData.tape}개`;
+    document.getElementById('chalk-display').innerText = pData.hasChalkBag ? "🛡️ 보유중 (골드 보호)" : "미보유";
 
     const upgradeBtn = document.getElementById('upgrade-btn');
     if (upgradeBtn) {
@@ -459,6 +529,9 @@ function updateUI() {
         } else if (!isMe) {
             upgradeBtn.disabled = true;
             upgradeBtn.innerText = "👀 상대방 관전 중 (조작 불가)";
+        } else if (pData.grade >= 17) {
+            upgradeBtn.disabled = true;
+            upgradeBtn.innerText = "👑 V17 만렙 달성! 환생하세요!";
         } else {
             upgradeBtn.disabled = false;
             if (!isCooldown) upgradeBtn.innerText = "🧗‍♂️ 볼더링 도전하기!";
@@ -466,10 +539,10 @@ function updateUI() {
     }
 
     const shopEnabled = dbReady && isMe;
-    const tapeBtn = document.getElementById('buy-tape-btn');
-    const shoesBtn = document.getElementById('buy-shoes-btn');
-    if (tapeBtn) tapeBtn.disabled = !shopEnabled;
-    if (shoesBtn) shoesBtn.disabled = !shopEnabled;
+    document.getElementById('buy-tape-btn').disabled = !shopEnabled;
+    document.getElementById('buy-shoes-btn').disabled = !shopEnabled;
+    document.getElementById('buy-chalk-btn').disabled = !shopEnabled;
+    document.getElementById('buy-pass-btn').disabled = !shopEnabled;
 
     const grid = document.getElementById('player-grid');
     if (grid) {
@@ -478,10 +551,14 @@ function updateUI() {
             const data = playersData[name];
             let activeClass = (name === viewingPlayer) ? 'active' : '';
             let meClass = (name === myCharacter) ? 'is-me' : '';
+            let crown = data.rebirthCount > 0 ? `👑${data.rebirthCount}` : '';
             grid.innerHTML += `
                 <div class="player-card ${activeClass} ${meClass}" onclick="selectViewPlayer('${name}')">
-                    <span>${name} ${name === myCharacter ? '👤' : ''}</span>
-                    <span style="color: #ffa502; font-weight: bold;">V${data.grade}</span>
+                    <div class="card-top">
+                        <span>${crown} ${name} ${name === myCharacter ? '👤' : ''}</span>
+                        <span style="color: #ffa502; font-weight: bold;">V${data.grade}</span>
+                    </div>
+                    <div class="card-sub">환생 ${data.rebirthCount}회</div>
                 </div>
             `;
         }
