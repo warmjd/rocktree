@@ -52,6 +52,8 @@ header p { font-size:.85rem; color:var(--sub); margin-top:2px; }
 .log-item { color:var(--sub); }
 .log-item.success { color:var(--accent); font-weight:bold; }
 .log-item.fail { color:var(--primary); }
+.cheer-btn { width:100%; margin-top:8px; background:#3742fa; color:#fff; border:none; padding:12px; font-size:1rem; font-weight:bold; border-radius:12px; cursor:pointer; }
+.rank-row { display:flex; justify-content:space-between; padding:6px 4px; font-size:.85rem; border-bottom:1px solid #2f3542; }
 #notice-modal { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:1000; display:none; justify-content:center; align-items:center; padding:20px; }
 .modal-content { background:var(--card); border:2px solid #ffa502; border-radius:14px; width:100%; max-width:380px; padding:20px; display:flex; flex-direction:column; gap:12px; }
 .modal-title { font-size:1.1rem; color:#ffa502; font-weight:bold; text-align:center; }
@@ -68,9 +70,13 @@ header p { font-size:.85rem; color:var(--sub); margin-top:2px; }
   <div class="modal-content">
     <div class="modal-title">📢 락트리 강화소 패치노트</div>
     <div class="modal-body">
-      <p><strong>🔥 v1.2 업데이트</strong></p>
+      <p><strong>🔥 v1.3 업데이트</strong></p>
       <ul>
-        <li><strong>👑 환생 시스템</strong><br>V17 달성 후 환생하면 영구 성공률 +3%, 골드 보상 +20%, 왕관 칭호!</li>
+        <li><strong>📣 응원 기능</strong><br>친구를 관전하다 응원하면 그 친구의 다음 도전 성공률 +2%! (최대 3중첩, 같은 친구는 5분에 1번)</li>
+        <li><strong>🏆 랭킹 &amp; 칭호</strong><br>실시간 랭킹과 등반가 칭호가 추가됐습니다.</li>
+        <li><strong>💬 공용 로그</strong><br>친구들의 완등·추락·응원이 모두에게 실시간으로 보입니다.</li>
+        <li><strong>⚖️ 밸런스</strong><br>환생 보너스 +3% → +2%, 성공률 상한 95%</li>
+        <li><strong>👑 환생 시스템</strong><br>V17 달성 후 환생하면 영구 성공률 +2%, 골드 보상 +20%, 왕관 칭호!</li>
         <li><strong>🏪 확장 상점</strong><br>초크백(추락 시 골드 보호), 트레이닝권(다음 도전 +10%)</li>
         <li><strong>🛡️ 데이터 보호</strong><br>저장 방식을 개선해 환생·아이템 정보가 덮어써지지 않습니다.</li>
         <li><strong>🔧 수정</strong><br>확률 표시 오류, 관전 중 내 정보가 바뀌던 문제를 고쳤습니다.</li>
@@ -106,6 +112,11 @@ header p { font-size:.85rem; color:var(--sub); margin-top:2px; }
     <div class="player-grid" id="player-grid"></div>
   </div>
 
+  <div class="live-panel">
+    <div class="live-title">🏆 실시간 랭킹 (환생 → 등급 → 골드)</div>
+    <div id="rank-list"></div>
+  </div>
+
   <div class="resource-panel">
     <div>💰 보유 골드: <span id="gold-display" class="highlight">0G</span></div>
     <div>👟 장비: <span id="gear-display">기본 운동화</span></div>
@@ -119,6 +130,7 @@ header p { font-size:.85rem; color:var(--sub); margin-top:2px; }
     <div class="grade-badge" id="grade-display">V0</div>
     <div class="rate-info" id="rate-display"></div>
     <button class="upgrade-btn" id="upgrade-btn" onclick="tryUpgrade()" disabled>⏳ 데이터 불러오는 중...</button>
+    <button class="cheer-btn" id="cheer-btn" onclick="cheerPlayer()" style="display:none">📣 응원하기 (다음 도전 +2%)</button>
     <div class="tape-toggle">
       <label><input type="checkbox" id="use-tape-check"> 🩹 이번 도전에 안전 테이핑 사용 (하락 방지)</label>
     </div>
@@ -141,9 +153,9 @@ header p { font-size:.85rem; color:var(--sub); margin-top:2px; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, update, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, update, onValue, runTransaction, push, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-const APP_VERSION = '1.2';
+const APP_VERSION = '1.3';
 const firebaseConfig = {
   apiKey: "AIzaSyDglmYcqh8myVGW0qnjNb0RbUJM5W0jweE",
   authDomain: "eunbiland-d5a0d.firebaseapp.com",
@@ -157,7 +169,7 @@ const firebaseConfig = {
 const NAMES = ["조돌맹", "은비땅", "리치맨", "꼬북린"];
 const MAX_GRADE = 17;
 const $ = (id) => document.getElementById(id);
-const defaultPlayer = () => ({ grade:0, gold:0, tape:0, hasShoes:false, rebirthCount:0, hasChalkBag:false, buffNext:false });
+const defaultPlayer = () => ({ grade:0, gold:0, tape:0, hasShoes:false, rebirthCount:0, hasChalkBag:false, buffNext:false, cheer:0 });
 
 let db = null, dbReady = false;
 let myCharacter = localStorage.getItem('rocktree_my_char');
@@ -186,7 +198,8 @@ function normalize(raw) {
     hasShoes: raw.hasShoes === true,
     rebirthCount: Math.max(0, Number(raw.rebirthCount) || 0),
     hasChalkBag: raw.hasChalkBag === true,
-    buffNext: raw.buffNext === true
+    buffNext: raw.buffNext === true,
+    cheer: Math.min(3, Math.max(0, Number(raw.cheer) || 0))
   };
 }
 
@@ -203,6 +216,7 @@ function addLog(text, type = "") {
   item.textContent = text;
   box.insertBefore(item, box.firstChild);
   while (box.children.length > 50) box.removeChild(box.lastChild);
+  if (db) push(ref(db, 'logs'), { m: text, y: type, t: Date.now() }).catch(() => {});
 }
 
 function showSaveError(err) {
@@ -221,7 +235,8 @@ try {
 // set() 대신 update(): 지정한 필드만 갱신해 다른 필드가 지워지지 않음
 function saveMyData() {
   if (!db || !dbReady || !myCharacter) return Promise.resolve();
-  return update(ref(db, 'players/' + myCharacter), normalize(playersData[myCharacter]))
+  const { cheer, ...rest } = normalize(playersData[myCharacter]);
+  return update(ref(db, 'players/' + myCharacter), rest)
     .then(() => setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중'))
     .catch(showSaveError);
 }
@@ -265,6 +280,45 @@ if (db) {
   });
 }
 
+// 공용 로그: 4명 모두에게 실시간으로 보임
+if (db) {
+  onValue(query(ref(db, 'logs'), limitToLast(30)), (snap) => {
+    const arr = [];
+    snap.forEach(c => { arr.push(c.val()); });
+    const box = $('log-box');
+    box.innerHTML = '';
+    arr.reverse().forEach(l => {
+      const d = document.createElement('div');
+      d.className = 'log-item ' + (l.y || '');
+      d.textContent = l.m || '';
+      box.appendChild(d);
+    });
+  });
+}
+
+const score = (d) => (d.rebirthCount * 17 + d.grade) * 1e9 + Math.min(d.gold, 1e9 - 1);
+function getTitle(d) {
+  if (d.rebirthCount >= 3) return '🏔️ 전설의 등반가';
+  if (d.rebirthCount >= 1) return '👑 환생 클라이머';
+  if (d.grade >= 13) return '🔥 V13+ 괴물';
+  if (d.grade >= 8) return '💪 중급 클라이머';
+  return '🌱 초보 클라이머';
+}
+
+// 응원: 상대의 다음 도전 성공률 +2% (최대 3중첩, 같은 사람은 5분에 1번)
+window.cheerPlayer = function () {
+  const target = viewingPlayer;
+  if (!dbReady || target === myCharacter) return;
+  const key = 'rocktree_cheer_' + target;
+  const wait = 300000 - (Date.now() - Number(localStorage.getItem(key) || 0));
+  if (wait > 0) return alert(`${target}님은 ${Math.ceil(wait / 60000)}분 뒤에 다시 응원할 수 있어요!`);
+  runTransaction(ref(db, 'players/' + target + '/cheer'), (c) => Math.min(3, (c || 0) + 1))
+    .then(() => {
+      localStorage.setItem(key, String(Date.now()));
+      addLog(`📣 ${myCharacter}님이 ${target}님을 응원했습니다! (다음 도전 +2%)`, "success");
+    }).catch(showSaveError);
+};
+
 function chooseCharacter(defaultName) {
   const choice = (prompt("본인의 캐릭터 이름을 선택하세요:\n(" + NAMES.join(", ") + ")", defaultName) || "").trim();
   return NAMES.includes(choice) ? choice : null;
@@ -298,9 +352,10 @@ function getSuccessRate(p) {
   if (p.grade > 7) base = 30;
   if (p.grade > 12) base = 10;
   if (p.hasShoes) base += 5;
-  base += p.rebirthCount * 3;
+  base += p.rebirthCount * 2;
   if (p.buffNext) base += 10;
-  return Math.min(98, base);
+  base += (p.cheer || 0) * 2;
+  return Math.min(95, base);
 }
 
 function getRewardGold(grade, rebirthCount) {
@@ -340,6 +395,10 @@ window.tryUpgrade = function () {
   const finalRate = Math.max(5, getSuccessRate(p) - penalty);
   const success = Math.random() * 100 <= finalRate;
   p.buffNext = false;
+  if (p.cheer > 0) {
+    const used = p.cheer; p.cheer = 0;
+    runTransaction(ref(db, 'players/' + myCharacter + '/cheer'), (c) => Math.max(0, (c || 0) - used)).catch(() => {});
+  }
 
   if (success) {
     p.grade += 1;
@@ -369,7 +428,7 @@ window.tryRebirth = function () {
   if (!canAct("환생")) return;
   const p = playersData[myCharacter];
   if (p.grade < MAX_GRADE) return alert("아직 V17을 달성하지 못했습니다!");
-  if (confirm("👑 [등반가 환생]\nV0로 초기화되지만 [영구 성공률 +3%]와 [골드 보상 +20%]를 얻습니다. (골드·아이템은 유지)\n환생하시겠습니까?")) {
+  if (confirm("👑 [등반가 환생]\nV0로 초기화되지만 [영구 성공률 +2%]와 [골드 보상 +20%]를 얻습니다. (골드·아이템은 유지)\n환생하시겠습니까?")) {
     p.rebirthCount += 1;
     p.grade = 0;
     addLog(`👑 [환생 완료] ${myCharacter}님이 제${p.rebirthCount}차 환생에 성공했습니다!`, "success");
@@ -408,11 +467,11 @@ function updateUI() {
   const isMe = viewingPlayer === myCharacter;
 
   $('current-user-label').textContent = `${viewingPlayer}님의 프로젝트 ${isMe ? '(내 캐릭터)' : '(👀 관전 중)'}`;
-  $('my-sub-info').textContent = `환생 ${me.rebirthCount}회 | 영구 보너스 +${me.rebirthCount * 3}%`;
+  $('my-sub-info').textContent = `환생 ${me.rebirthCount}회 | 영구 보너스 +${me.rebirthCount * 2}%`;
   $('rebirth-main-btn').style.display = (isMe && p.grade >= MAX_GRADE) ? "block" : "none";
 
   $('grade-display').textContent = `V${p.grade}`;
-  $('rate-display').textContent = `성공 확률: ${getSuccessRate(p)}%${p.buffNext ? ' (🎫 버프 적용중)' : ''} | 완등 보상: +${getRewardGold(p.grade + 1, p.rebirthCount)}G`;
+  $('rate-display').textContent = `성공 확률: ${getSuccessRate(p)}%${p.buffNext ? ' (🎫 버프)' : ''}${p.cheer ? ` (📣 응원 +${p.cheer * 2}%)` : ''} | 완등 보상: +${getRewardGold(p.grade + 1, p.rebirthCount)}G`;
 
   $('gold-display').textContent = `${p.gold.toLocaleString()}G`;
   $('gear-display').textContent = p.hasShoes ? "👟 부토라 뉴코멧 (+5%)" : "기본 운동화";
@@ -426,6 +485,12 @@ function updateUI() {
   else if (p.grade >= MAX_GRADE) { btn.disabled = true; btn.textContent = "👑 V17 만렙! 위의 '환생' 버튼을 누르세요"; }
   else { btn.disabled = false; btn.textContent = isCooldown ? "⏳ 다음 홀드 잡는 중..." : "🧗‍♂️ 볼더링 도전하기!"; }
 
+  $('cheer-btn').style.display = (dbReady && !isMe) ? 'block' : 'none';
+  $('rank-list').innerHTML = [...NAMES].sort((a, b) => score(playersData[b]) - score(playersData[a])).map((n, i) => {
+    const d = playersData[n];
+    return `<div class="rank-row"><span>${['🥇', '🥈', '🥉', '4️⃣'][i]} ${n}</span><span>V${d.grade} · 👑${d.rebirthCount}</span></div>`;
+  }).join('');
+
   const shopOn = dbReady && isMe;
   ['buy-tape-btn', 'buy-shoes-btn', 'buy-chalk-btn', 'buy-pass-btn'].forEach(id => $(id).disabled = !shopOn);
 
@@ -434,7 +499,7 @@ function updateUI() {
     const crown = d.rebirthCount > 0 ? `👑${d.rebirthCount}` : '';
     return `<div class="player-card ${name === viewingPlayer ? 'active' : ''} ${name === myCharacter ? 'is-me' : ''}" onclick="selectViewPlayer('${name}')">
       <div class="card-top"><span>${crown} ${name} ${name === myCharacter ? '👤' : ''}</span><span style="color:#ffa502;font-weight:bold;">V${d.grade}</span></div>
-      <div class="card-sub">환생 ${d.rebirthCount}회 · ${d.gold.toLocaleString()}G</div>
+      <div class="card-sub">${getTitle(d)}</div><div class="card-sub">환생 ${d.rebirthCount}회 · ${d.gold.toLocaleString()}G</div>
     </div>`;
   }).join('');
 }
