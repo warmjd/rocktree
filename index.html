@@ -5,588 +5,447 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>락트리 강화소</title>
 <style>
-:root {
-    --bg-color: #121214;
-    --card-bg: #1e1e24;
-    --primary: #ff4757;
-    --accent: #2ed573;
-    --text: #f1f2f6;
-    --subtext: #a4b0be;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif; }
-body { background-color: var(--bg-color); color: var(--text); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 15px; }
-
-.container { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 12px; }
-
-header { text-align: center; padding: 5px 0; position: relative; }
-header h1 { font-size: 1.6rem; color: #ff6b81; font-weight: 800; }
-header p { font-size: 0.85rem; color: var(--subtext); margin-top: 2px; }
-
-.notice-btn { position: absolute; right: 0; top: 5px; background: #2f3542; color: #ffa502; border: 1px solid #455a64; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
-
-.status-bar { font-size: 0.78rem; padding: 7px 10px; border-radius: 8px; text-align: center; font-weight: bold; }
-.status-bar.loading { background: #2f3542; color: #ffa502; }
-.status-bar.ok { background: #1d3a2b; color: var(--accent); }
-.status-bar.error { background: #4a1f25; color: #ff6b81; line-height: 1.5; }
-
-.my-profile-box { background: #2f3542; border-radius: 10px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #455a64; }
-.my-label { font-size: 0.85rem; color: #fff; display: flex; flex-direction: column; gap: 2px; }
-.my-label strong { color: #ffa502; font-size: 1rem; }
-.btn-group { display: flex; gap: 5px; }
-.change-btn { background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
-.rebirth-btn { background: linear-gradient(135deg, #ffa502, #ff7f50); color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: bold; display: none; box-shadow: 0 0 10px rgba(255,165,2,0.5); }
-
-.live-panel { background: var(--card-bg); border-radius: 12px; padding: 12px; border: 1px solid #2f3542; }
-.live-title { font-size: 0.8rem; color: var(--accent); margin-bottom: 8px; font-weight: bold; }
-.player-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.player-card { background: #2f3542; padding: 10px; border-radius: 8px; font-size: 0.8rem; display: flex; flex-direction: column; gap: 4px; cursor: pointer; transition: transform 0.1s; border: 1px solid transparent; }
-.player-card:active { transform: scale(0.97); }
-.player-card.active { border: 2px solid var(--accent); background: #252a34; }
-.player-card.is-me { border-left: 4px solid #ffa502; }
-.card-top { display: flex; justify-content: space-between; align-items: center; }
-.card-sub { font-size: 0.7rem; color: #ffa502; }
-
-.resource-panel { background: #1a1a20; border-radius: 10px; padding: 10px; border: 1px solid #3a3a48; display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; }
-.res-item .highlight { color: #ffd700; font-weight: bold; }
-
-.stage-box { background: var(--card-bg); border-radius: 16px; padding: 18px; text-align: center; border: 2px solid #3742fa; position: relative; }
-.grade-badge { font-size: 2.5rem; font-weight: 900; color: #ffa502; margin: 8px 0; text-shadow: 0 0 15px rgba(255,165,2,0.4); }
-.rate-info { font-size: 0.85rem; color: var(--subtext); margin-bottom: 12px; }
-
-.upgrade-btn { width: 100%; background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; border: none; padding: 15px; font-size: 1.15rem; font-weight: bold; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,71,87,0.4); transition: transform 0.1s; }
-.upgrade-btn:active { transform: scale(0.96); }
-.upgrade-btn:disabled { background: #57606f !important; box-shadow: none !important; cursor: not-allowed; }
-
-.tape-toggle { margin-top: 10px; font-size: 0.8rem; color: var(--subtext); display: flex; align-items: center; justify-content: center; gap: 5px; }
-
-.shop-panel { background: var(--card-bg); border-radius: 12px; padding: 12px; border: 1px solid #2f3542; }
-.shop-title { font-size: 0.85rem; color: #ffa502; margin-bottom: 8px; font-weight: bold; }
-.shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.shop-btn { background: #2f3542; border: 1px solid #455a64; color: white; padding: 10px 6px; border-radius: 8px; font-size: 0.78rem; cursor: pointer; font-weight: bold; text-align: left; display: flex; flex-direction: column; gap: 3px; }
-.shop-btn:active { background: #3742fa; }
-.shop-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.shop-btn small { color: var(--subtext); font-size: 0.7rem; }
-
-.log-box { background: #18181c; border-radius: 10px; padding: 10px; height: 90px; overflow-y: auto; font-size: 0.78rem; border: 1px solid #2f3542; display: flex; flex-direction: column; gap: 4px; }
-.log-item { color: var(--subtext); }
-.log-item.success { color: var(--accent); font-weight: bold; }
-.log-item.fail { color: var(--primary); }
-
-/* 모달 팝업 스타일 */
-#notice-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 20px; }
-.modal-content { background: #1e1e24; border: 2px solid #ffa502; border-radius: 14px; width: 100%; max-width: 380px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-.modal-title { font-size: 1.1rem; color: #ffa502; font-weight: bold; text-align: center; }
-.modal-body { font-size: 0.82rem; color: var(--text); line-height: 1.5; display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; padding-right: 5px; }
-.modal-body ul { padding-left: 15px; }
-.modal-close { background: #ff4757; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; }
-
-#effect-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: 900; color: #ffd700; text-shadow: 0 0 20px rgba(0,0,0,0.8); opacity: 0; transition: opacity 0.3s; }
+:root { --bg:#121214; --card:#1e1e24; --primary:#ff4757; --accent:#2ed573; --text:#f1f2f6; --sub:#a4b0be; }
+* { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif; }
+button { touch-action:manipulation; }
+body { background:var(--bg); color:var(--text); display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:15px; }
+.container { width:100%; max-width:420px; display:flex; flex-direction:column; gap:12px; }
+header { text-align:center; padding:5px 0; position:relative; }
+header h1 { font-size:1.6rem; color:#ff6b81; font-weight:800; }
+header p { font-size:.85rem; color:var(--sub); margin-top:2px; }
+#ver { font-size:.7rem; color:#57606f; }
+.notice-btn { position:absolute; right:0; top:5px; background:#2f3542; color:#ffa502; border:1px solid #455a64; padding:4px 8px; border-radius:6px; font-size:.75rem; cursor:pointer; font-weight:bold; }
+.status-bar { font-size:.78rem; padding:7px 10px; border-radius:8px; text-align:center; font-weight:bold; }
+.status-bar.loading { background:#2f3542; color:#ffa502; }
+.status-bar.ok { background:#1d3a2b; color:var(--accent); }
+.status-bar.error { background:#4a1f25; color:#ff6b81; line-height:1.5; }
+.my-profile-box { background:#2f3542; border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; border:1px solid #455a64; }
+.my-label { font-size:.85rem; display:flex; flex-direction:column; gap:2px; }
+.my-label strong { color:#ffa502; font-size:1rem; }
+.btn-group { display:flex; gap:5px; }
+.change-btn { background:#ff4757; color:#fff; border:none; padding:5px 10px; border-radius:6px; font-size:.75rem; cursor:pointer; font-weight:bold; }
+.rebirth-btn { background:linear-gradient(135deg,#ffa502,#ff7f50); color:#fff; border:none; padding:5px 10px; border-radius:6px; font-size:.75rem; cursor:pointer; font-weight:bold; display:none; box-shadow:0 0 10px rgba(255,165,2,.5); }
+.live-panel,.shop-panel { background:var(--card); border-radius:12px; padding:12px; border:1px solid #2f3542; }
+.live-title { font-size:.8rem; color:var(--accent); margin-bottom:8px; font-weight:bold; }
+.player-grid,.shop-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+.player-card { background:#2f3542; padding:10px; border-radius:8px; font-size:.8rem; display:flex; flex-direction:column; gap:4px; cursor:pointer; border:2px solid transparent; }
+.player-card:active { transform:scale(.97); }
+.player-card.active { border-color:var(--accent); background:#252a34; }
+.player-card.is-me { border-left:4px solid #ffa502; }
+.card-top { display:flex; justify-content:space-between; align-items:center; }
+.card-sub { font-size:.7rem; color:#ffa502; }
+.resource-panel { background:#1a1a20; border-radius:10px; padding:10px; border:1px solid #3a3a48; display:flex; flex-direction:column; gap:4px; font-size:.85rem; }
+.highlight { color:#ffd700; font-weight:bold; }
+.stage-box { background:var(--card); border-radius:16px; padding:18px; text-align:center; border:2px solid #3742fa; }
+.grade-badge { font-size:2.5rem; font-weight:900; color:#ffa502; margin:8px 0; text-shadow:0 0 15px rgba(255,165,2,.4); }
+.rate-info { font-size:.85rem; color:var(--sub); margin-bottom:12px; }
+.upgrade-btn { width:100%; background:linear-gradient(135deg,#ff4757,#ff6b81); color:#fff; border:none; padding:15px; font-size:1.15rem; font-weight:bold; border-radius:12px; cursor:pointer; box-shadow:0 4px 15px rgba(255,71,87,.4); }
+.upgrade-btn:active { transform:scale(.96); }
+.upgrade-btn:disabled { background:#57606f; box-shadow:none; cursor:not-allowed; }
+.tape-toggle { margin-top:10px; font-size:.8rem; color:var(--sub); }
+.shop-title { font-size:.85rem; color:#ffa502; margin-bottom:8px; font-weight:bold; }
+.shop-btn { background:#2f3542; border:1px solid #455a64; color:#fff; padding:10px 6px; border-radius:8px; font-size:.78rem; cursor:pointer; font-weight:bold; text-align:left; display:flex; flex-direction:column; gap:3px; }
+.shop-btn:active { background:#3742fa; }
+.shop-btn:disabled { opacity:.4; cursor:not-allowed; }
+.shop-btn small { color:var(--sub); font-size:.7rem; }
+.log-box { background:#18181c; border-radius:10px; padding:10px; height:110px; overflow-y:auto; font-size:.78rem; border:1px solid #2f3542; display:flex; flex-direction:column; gap:4px; }
+.log-item { color:var(--sub); }
+.log-item.success { color:var(--accent); font-weight:bold; }
+.log-item.fail { color:var(--primary); }
+#notice-modal { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:1000; display:none; justify-content:center; align-items:center; padding:20px; }
+.modal-content { background:var(--card); border:2px solid #ffa502; border-radius:14px; width:100%; max-width:380px; padding:20px; display:flex; flex-direction:column; gap:12px; }
+.modal-title { font-size:1.1rem; color:#ffa502; font-weight:bold; text-align:center; }
+.modal-body { font-size:.82rem; line-height:1.5; display:flex; flex-direction:column; gap:8px; max-height:60vh; overflow-y:auto; }
+.modal-body ul { padding-left:15px; display:flex; flex-direction:column; gap:6px; }
+.modal-close { background:#ff4757; color:#fff; border:none; padding:10px; border-radius:8px; font-weight:bold; cursor:pointer; }
+#effect-overlay { position:fixed; inset:0; pointer-events:none; z-index:999; display:flex; justify-content:center; align-items:center; font-size:2rem; font-weight:900; color:#ffd700; text-shadow:0 0 20px rgba(0,0,0,.8); opacity:0; transition:opacity .3s; }
 </style>
 </head>
 <body>
+<div id="effect-overlay"></div>
 
-<div id="effect-overlay">✨ V17 완등 성공! ✨</div>
-
-<!-- 패치노트 모달 팝업 -->
 <div id="notice-modal">
-    <div class="modal-content">
-        <div class="modal-title">📢 락트리 강화소 패치노트</div>
-        <div class="modal-body">
-            <p><strong>🔥 v1.1 확장팩 업데이트 내용</strong></p>
-            <ul>
-                <li><strong>👑 환생(등반가 랭크) 시스템 오픈</strong><br>V17 만렙 달성 시 환생 가능! 영구 성공률 +3% 및 왕관(👑) 칭호 획득</li>
-                <li><strong>🏪 확장 상점 오픈</strong><br> - 초크백 (추락 시 골드 유실 방어)<br> - 고강도 트레이닝권 (다음 도전 성공률 +10%)</li>
-                <li><strong>🔥 실시간 현황판 개편</strong><br>친구들의 환생 횟수와 왕관이 실시간 공유됩니다.</li>
-                <li><strong>🛡️ 데이터 안정성 강화</strong><br>자동 저장 기능이 더욱 강력하게 유지됩니다.</li>
-            </ul>
-        </div>
-        <button class="modal-close" onclick="toggleNotice(false)">확인</button>
+  <div class="modal-content">
+    <div class="modal-title">📢 락트리 강화소 패치노트</div>
+    <div class="modal-body">
+      <p><strong>🔥 v1.2 업데이트</strong></p>
+      <ul>
+        <li><strong>👑 환생 시스템</strong><br>V17 달성 후 환생하면 영구 성공률 +3%, 골드 보상 +20%, 왕관 칭호!</li>
+        <li><strong>🏪 확장 상점</strong><br>초크백(추락 시 골드 보호), 트레이닝권(다음 도전 +10%)</li>
+        <li><strong>🛡️ 데이터 보호</strong><br>저장 방식을 개선해 환생·아이템 정보가 덮어써지지 않습니다.</li>
+        <li><strong>🔧 수정</strong><br>확률 표시 오류, 관전 중 내 정보가 바뀌던 문제를 고쳤습니다.</li>
+      </ul>
     </div>
+    <button class="modal-close" onclick="toggleNotice(false)">확인</button>
+  </div>
 </div>
 
 <div class="container">
-    <header>
-        <h1>락트리 강화소</h1>
-        <p>(락트리에서 트레이닝 하면 리얼 세진다)</p>
-        <button class="notice-btn" onclick="toggleNotice(true)">📢 공지사항</button>
-    </header>
+  <header>
+    <h1>락트리 강화소</h1>
+    <p>(락트리에서 트레이닝 하면 리얼 세진다)</p>
+    <p id="ver"></p>
+    <button class="notice-btn" onclick="toggleNotice(true)">📢 공지사항</button>
+  </header>
 
-    <div class="status-bar loading" id="status-bar">⏳ 서버에서 데이터 불러오는 중...</div>
+  <div class="status-bar loading" id="status-bar">⏳ 서버에서 데이터 불러오는 중...</div>
 
-    <div class="my-profile-box">
-        <span class="my-label">
-            👤 내 캐릭터: <strong id="my-name-display">미설정</strong>
-            <span id="my-sub-info" style="font-size:0.75rem; color:var(--subtext);">환생 0회 | 보너스 +0%</span>
-        </span>
-        <div class="btn-group">
-            <button class="rebirth-btn" id="rebirth-main-btn" onclick="tryRebirth()">👑 환생</button>
-            <button class="change-btn" onclick="resetMyCharacter()">변경</button>
-        </div>
+  <div class="my-profile-box">
+    <span class="my-label">
+      👤 내 캐릭터: <strong id="my-name-display">미설정</strong>
+      <span id="my-sub-info" style="font-size:.75rem;color:var(--sub);">환생 0회 | 영구 보너스 +0%</span>
+    </span>
+    <div class="btn-group">
+      <button class="rebirth-btn" id="rebirth-main-btn" onclick="tryRebirth()">👑 환생</button>
+      <button class="change-btn" onclick="resetMyCharacter()">변경</button>
     </div>
+  </div>
 
-    <div class="live-panel">
-        <div class="live-title">🔥 4인방 실시간 볼더링 현황 (터치하여 관전)</div>
-        <div class="player-grid" id="player-grid"></div>
+  <div class="live-panel">
+    <div class="live-title">🔥 4인방 실시간 볼더링 현황 (터치하여 관전)</div>
+    <div class="player-grid" id="player-grid"></div>
+  </div>
+
+  <div class="resource-panel">
+    <div>💰 보유 골드: <span id="gold-display" class="highlight">0G</span></div>
+    <div>👟 장비: <span id="gear-display">기본 운동화</span></div>
+    <div>🩹 안전 테이핑: <span id="tape-display" class="highlight">0개</span></div>
+    <div>🧗‍♂️ 초크백: <span id="chalk-display" class="highlight">미보유</span></div>
+    <div>🎫 트레이닝권: <span id="pass-display" class="highlight">없음</span></div>
+  </div>
+
+  <div class="stage-box">
+    <div style="font-size:.9rem;color:var(--sub);" id="current-user-label">프로젝트 진척도</div>
+    <div class="grade-badge" id="grade-display">V0</div>
+    <div class="rate-info" id="rate-display"></div>
+    <button class="upgrade-btn" id="upgrade-btn" onclick="tryUpgrade()" disabled>⏳ 데이터 불러오는 중...</button>
+    <div class="tape-toggle">
+      <label><input type="checkbox" id="use-tape-check"> 🩹 이번 도전에 안전 테이핑 사용 (하락 방지)</label>
     </div>
+  </div>
 
-    <div class="resource-panel">
-        <div class="res-item">💰 보유 골드: <span id="gold-display" class="highlight">0G</span></div>
-        <div class="res-item">👟 장비: <span id="gear-display">기본 운동화</span></div>
-        <div class="res-item">🩹 안전 테이핑: <span id="tape-display" class="highlight">0개</span></div>
-        <div class="res-item">🧗‍♂️ 초크백: <span id="chalk-display" class="highlight">미보유</span></div>
+  <div class="shop-panel">
+    <div class="shop-title">🏪 락트리 확장 상점</div>
+    <div class="shop-grid">
+      <button class="shop-btn" id="buy-tape-btn" onclick="buyTape()" disabled>🩹 안전 테이핑<br><small>1,000G / 1회 방지</small></button>
+      <button class="shop-btn" id="buy-shoes-btn" onclick="buyShoes()" disabled>👟 부토라 뉴코멧<br><small>5,000G / 성공률 +5%</small></button>
+      <button class="shop-btn" id="buy-chalk-btn" onclick="buyChalkBag()" disabled>🧗‍♂️ 초크백 (영구)<br><small>15,000G / 추락 골드보호</small></button>
+      <button class="shop-btn" id="buy-pass-btn" onclick="buyTrainingPass()" disabled>🎫 트레이닝권<br><small>8,000G / 다음 성공률+10%</small></button>
     </div>
+  </div>
 
-    <div class="stage-box">
-        <div style="font-size: 0.9rem; color: var(--subtext);" id="current-user-label">프로젝트 진척도</div>
-        <div class="grade-badge" id="grade-display">V0</div>
-        <div class="rate-info" id="rate-display">성공 확률: 100% | 보상: +150G</div>
-
-        <button class="upgrade-btn" id="upgrade-btn" onclick="tryUpgrade()" disabled>⏳ 데이터 불러오는 중...</button>
-
-        <div class="tape-toggle">
-            <label><input type="checkbox" id="use-tape-check"> 🩹 이번 도전에 안전 테이핑 사용 (하락 방지)</label>
-        </div>
-    </div>
-
-    <div class="shop-panel">
-        <div class="shop-title">🏪 락트리 확장 상점</div>
-        <div class="shop-grid">
-            <button class="shop-btn" id="buy-tape-btn" onclick="buyTape()" disabled>🩹 안전 테이핑<br><small>1,000G / 1회 방지</small></button>
-            <button class="shop-btn" id="buy-shoes-btn" onclick="buyShoes()" disabled>👟 부토라 뉴코멧<br><small>5,000G / 성공률 +5%</small></button>
-            <button class="shop-btn" id="buy-chalk-btn" onclick="buyChalkBag()" disabled>🧗‍♂️ 초크백 (영구)<br><small>15,000G / 추락 골드보호</small></button>
-            <button class="shop-btn" id="buy-pass-btn" onclick="buyTrainingPass()" disabled>🎫 트레이닝권<br><small>8,000G / 다음 성공률+10%</small></button>
-        </div>
-    </div>
-
-    <div class="log-box" id="log-box">
-        <div class="log-item">락트리 강화소 확장팩 입장 완료! 우측 상단 공지사항을 확인하세요.</div>
-    </div>
+  <div class="log-box" id="log-box">
+    <div class="log-item">락트리 강화소 입장 완료! 우측 상단 공지사항을 확인하세요.</div>
+  </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, update, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+const APP_VERSION = '1.2';
 const firebaseConfig = {
-    apiKey: "AIzaSyDglmYcqh8myVGW0qnjNb0RbUJM5W0jweE",
-    authDomain: "eunbiland-d5a0d.firebaseapp.com",
-    databaseURL: "https://eunbiland-d5a0d-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "eunbiland-d5a0d",
-    storageBucket: "eunbiland-d5a0d.firebasestorage.app",
-    messagingSenderId: "962454047078",
-    appId: "1:962454047078:web:9b76ee5ff5e9a4fe6da0a7"
+  apiKey: "AIzaSyDglmYcqh8myVGW0qnjNb0RbUJM5W0jweE",
+  authDomain: "eunbiland-d5a0d.firebaseapp.com",
+  databaseURL: "https://eunbiland-d5a0d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "eunbiland-d5a0d",
+  storageBucket: "eunbiland-d5a0d.firebasestorage.app",
+  messagingSenderId: "962454047078",
+  appId: "1:962454047078:web:9b76ee5ff5e9a4fe6da0a7"
 };
 
 const NAMES = ["조돌맹", "은비땅", "리치맨", "꼬북린"];
-const defaultPlayer = () => ({ 
-    grade: 0, 
-    gold: 0, 
-    tape: 0, 
-    hasShoes: false, 
-    rebirthCount: 0, 
-    hasChalkBag: false, 
-    buffNext: false 
-});
+const MAX_GRADE = 17;
+const $ = (id) => document.getElementById(id);
+const defaultPlayer = () => ({ grade:0, gold:0, tape:0, hasShoes:false, rebirthCount:0, hasChalkBag:false, buffNext:false });
 
-let db = null;
-let dbReady = false;          
+let db = null, dbReady = false;
 let myCharacter = localStorage.getItem('rocktree_my_char');
 if (!NAMES.includes(myCharacter)) myCharacter = null;
 let viewingPlayer = myCharacter || NAMES[0];
-
-let playersData = {};
+const playersData = {};
 NAMES.forEach(n => playersData[n] = defaultPlayer());
 
-let isCooldown = false;
-let pumpCount = 0;
-let lastClickTime = 0;
+let isCooldown = false, pumpCount = 0, lastClickTime = 0;
 
 const failReasons = [
-    "손에 초크를 안 칠해서 핑거 슬립 발생!",
-    "오버행에서 코어 힘 풀려서 족발처럼 떨어짐!",
-    "다이노 뛰다가 매트 구석으로 터져나감!",
-    "크림프 홀드 잡았는데 손톱 깨짐!",
-    "힐훅 걸다가 바지 찢어짐!",
-    "스타트 홀드 잡고 바로 런지하다가 추락!"
+  "손에 초크를 안 칠해서 핑거 슬립 발생!",
+  "오버행에서 코어 힘 풀려서 족발처럼 떨어짐!",
+  "다이노 뛰다가 매트 구석으로 터져나감!",
+  "크림프 홀드 잡았는데 손톱 깨짐!",
+  "힐훅 걸다가 바지 찢어짐!",
+  "스타트 홀드 잡고 바로 런지하다가 추락!"
 ];
 
 function normalize(raw) {
-    if (!raw || typeof raw !== 'object') return defaultPlayer();
-    return {
-        grade: Math.min(17, Math.max(0, Number(raw.grade) || 0)),
-        gold: Math.max(0, Number(raw.gold) || 0),
-        tape: Math.max(0, Number(raw.tape) || 0),
-        hasShoes: raw.hasShoes === true,
-        rebirthCount: Math.max(0, Number(raw.rebirthCount) || 0),
-        hasChalkBag: raw.hasChalkBag === true,
-        buffNext: raw.buffNext === true
-    };
+  if (!raw || typeof raw !== 'object') return defaultPlayer();
+  return {
+    grade: Math.min(MAX_GRADE, Math.max(0, Number(raw.grade) || 0)),
+    gold: Math.max(0, Number(raw.gold) || 0),
+    tape: Math.max(0, Number(raw.tape) || 0),
+    hasShoes: raw.hasShoes === true,
+    rebirthCount: Math.max(0, Number(raw.rebirthCount) || 0),
+    hasChalkBag: raw.hasChalkBag === true,
+    buffNext: raw.buffNext === true
+  };
 }
 
 function setStatus(type, msg) {
-    const bar = document.getElementById('status-bar');
-    if (!bar) return;
-    bar.className = 'status-bar ' + type;
-    bar.innerHTML = msg;
+  const bar = $('status-bar');
+  bar.className = 'status-bar ' + type;
+  bar.textContent = msg;
 }
 
 function addLog(text, type = "") {
-    const box = document.getElementById('log-box');
-    if (box) {
-        const item = document.createElement('div');
-        item.className = `log-item ${type}`;
-        item.innerText = text;
-        box.insertBefore(item, box.firstChild);
-    }
+  const box = $('log-box');
+  const item = document.createElement('div');
+  item.className = 'log-item ' + type;
+  item.textContent = text;
+  box.insertBefore(item, box.firstChild);
+  while (box.children.length > 50) box.removeChild(box.lastChild);
 }
 
 function showSaveError(err) {
-    console.error("Firebase 저장 실패:", err);
-    setStatus('error', '❌ 서버 저장 실패: 네트워크를 확인하세요.');
-    addLog("⚠️ 서버에 저장되지 못했습니다.", "fail");
+  console.error("Firebase 저장 실패:", err);
+  setStatus('error', '❌ 서버 저장 실패: 네트워크/규칙을 확인하세요.');
+  addLog("⚠️ 서버에 저장되지 못했습니다.", "fail");
 }
 
 try {
-    const app = initializeApp(firebaseConfig);
-    db = getDatabase(app);
+  db = getDatabase(initializeApp(firebaseConfig));
 } catch (e) {
-    console.error("Firebase 초기화 실패:", e);
-    setStatus('error', '❌ Firebase 초기화 실패');
+  console.error("Firebase 초기화 실패:", e);
+  setStatus('error', '❌ Firebase 초기화 실패');
 }
 
+// set() 대신 update(): 지정한 필드만 갱신해 다른 필드가 지워지지 않음
 function saveMyData() {
-    if (!db || !dbReady || !myCharacter) return Promise.resolve();
-    return set(ref(db, 'players/' + myCharacter), playersData[myCharacter])
-        .then(() => setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중'))
-        .catch(showSaveError);
+  if (!db || !dbReady || !myCharacter) return Promise.resolve();
+  return update(ref(db, 'players/' + myCharacter), normalize(playersData[myCharacter]))
+    .then(() => setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중'))
+    .catch(showSaveError);
 }
 
 function ensureNodeExists(name) {
-    return runTransaction(ref(db, 'players/' + name), (current) => {
-        if (current === null) return defaultPlayer();
-        return; 
-    }).catch(showSaveError);
+  return runTransaction(ref(db, 'players/' + name), (cur) => cur === null ? defaultPlayer() : undefined)
+    .catch(showSaveError);
 }
 
 if (db) {
-    const loadTimer = setTimeout(() => {
-        if (!dbReady) setStatus('error', '❌ 서버 응답이 없습니다.');
-    }, 8000);
+  const loadTimer = setTimeout(() => {
+    if (!dbReady) setStatus('error', '❌ 서버 응답이 없습니다. (Firebase 규칙/네트워크 확인)');
+  }, 8000);
 
-    onValue(ref(db, 'players'), (snapshot) => {
-        const val = snapshot.val() || {};
-        NAMES.forEach(n => {
-            if (val[n] === undefined || val[n] === null) {
-                playersData[n] = defaultPlayer();
-                if (!dbReady) ensureNodeExists(n);   
-            } else {
-                playersData[n] = normalize(val[n]);   
-            }
-        });
-        if (!dbReady) {
-            dbReady = true;
-            clearTimeout(loadTimer);
-            setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중');
-        }
-        updateUI();
-    }, (err) => {
-        console.error("Firebase 읽기 실패:", err);
-        setStatus('error', '❌ 데이터 읽기 실패');
+  onValue(ref(db, 'players'), (snap) => {
+    const val = snap.val() || {};
+    const first = !dbReady;
+    NAMES.forEach(n => {
+      if (val[n] == null) {
+        playersData[n] = defaultPlayer();
+        if (first) ensureNodeExists(n);
+      } else {
+        playersData[n] = normalize(val[n]);
+      }
     });
+    if (first) {
+      dbReady = true;
+      clearTimeout(loadTimer);
+      setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중');
+    }
+    updateUI();
+  }, (err) => {
+    console.error("Firebase 읽기 실패:", err);
+    setStatus('error', '❌ 데이터 읽기 실패 (Firebase 규칙을 확인하세요)');
+  });
 
-    onValue(ref(db, '.info/connected'), (snap) => {
-        if (dbReady && snap.val() === false) {
-            setStatus('loading', '⚠️ 연결이 끊겼습니다. 재연결 중...');
-        } else if (dbReady && snap.val() === true) {
-            setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중');
-        }
-    });
+  onValue(ref(db, '.info/connected'), (snap) => {
+    if (!dbReady) return;
+    if (snap.val() === false) setStatus('loading', '⚠️ 연결이 끊겼습니다. 재연결 중...');
+    else setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중');
+  });
+}
+
+function chooseCharacter(defaultName) {
+  const choice = (prompt("본인의 캐릭터 이름을 선택하세요:\n(" + NAMES.join(", ") + ")", defaultName) || "").trim();
+  return NAMES.includes(choice) ? choice : null;
 }
 
 function checkMyCharacter() {
-    if (!myCharacter) {
-        let choice = prompt("본인의 캐릭터 이름을 선택하세요:\n(조돌맹, 은비땅, 리치맨, 꼬북린)", "조돌맹");
-        myCharacter = (choice && NAMES.includes(choice.trim())) ? choice.trim() : NAMES[0];
-        localStorage.setItem('rocktree_my_char', myCharacter);
-    }
-    viewingPlayer = myCharacter;
-    document.getElementById('my-name-display').innerText = myCharacter;
+  if (!myCharacter) {
+    myCharacter = chooseCharacter(NAMES[0]) || NAMES[0];
+    localStorage.setItem('rocktree_my_char', myCharacter);
+  }
+  viewingPlayer = myCharacter;
+  $('my-name-display').textContent = myCharacter;
 }
 
-window.resetMyCharacter = function() {
-    let choice = prompt("변경할 내 캐릭터 이름을 입력하세요:\n(조돌맹, 은비땅, 리치맨, 꼬북린)", myCharacter);
-    choice = choice ? choice.trim() : choice;
-    if (choice && NAMES.includes(choice)) {
-        myCharacter = choice;
-        localStorage.setItem('rocktree_my_char', myCharacter);
-        viewingPlayer = myCharacter;
-        document.getElementById('my-name-display').innerText = myCharacter;
-        updateUI();
-    } else {
-        alert("올바른 캐릭터 이름을 입력해주세요.");
-    }
-}
+window.resetMyCharacter = function () {
+  const choice = chooseCharacter(myCharacter);
+  if (!choice) return alert("올바른 캐릭터 이름을 입력해주세요.");
+  myCharacter = choice;
+  localStorage.setItem('rocktree_my_char', myCharacter);
+  viewingPlayer = myCharacter;
+  $('my-name-display').textContent = myCharacter;
+  updateUI();
+};
 
-window.selectViewPlayer = function(name) {
-    viewingPlayer = name;
-    updateUI();
-}
+window.selectViewPlayer = (name) => { viewingPlayer = name; updateUI(); };
+window.toggleNotice = (show) => { $('notice-modal').style.display = show ? 'flex' : 'none'; };
 
-window.toggleNotice = function(show) {
-    const modal = document.getElementById('notice-modal');
-    if (modal) {
-        modal.style.display = show ? 'flex' : 'none';
-    }
-}
-
-function getSuccessRate(pData) {
-    let grade = pData.grade;
-    let base = 90;
-    if (grade > 3) base = 60;
-    if (grade > 7) base = 30;
-    if (grade > 12) base = 10;
-    if (pData.hasShoes) base += 5;
-    base += (pData.rebirthCount * 3); 
-    if (pData.buffNext) base += 10; 
-    return Math.min(98, base);
+function getSuccessRate(p) {
+  let base = 90;
+  if (p.grade > 3) base = 60;
+  if (p.grade > 7) base = 30;
+  if (p.grade > 12) base = 10;
+  if (p.hasShoes) base += 5;
+  base += p.rebirthCount * 3;
+  if (p.buffNext) base += 10;
+  return Math.min(98, base);
 }
 
 function getRewardGold(grade, rebirthCount) {
-    let mult = 1 + (rebirthCount * 0.2); 
-    return Math.floor((grade + 1) * 150 * mult);
+  return Math.floor((grade + 1) * 150 * (1 + rebirthCount * 0.2));
 }
 
 function canAct(actionName) {
-    if (!dbReady) {
-        alert("아직 서버 데이터를 불러오는 중이에요. 잠시 후 다시 시도해주세요.");
-        return false;
-    }
-    if (viewingPlayer !== myCharacter) {
-        alert(`관전 중입니다! 내 캐릭터(${myCharacter})만 ${actionName}할 수 있습니다.`);
-        return false;
-    }
-    return true;
+  if (!dbReady) { alert("아직 서버 데이터를 불러오는 중이에요. 잠시 후 다시 시도해주세요."); return false; }
+  if (viewingPlayer !== myCharacter) { alert(`관전 중입니다! 내 캐릭터(${myCharacter})만 ${actionName}할 수 있습니다.`); return false; }
+  return true;
 }
 
-window.tryUpgrade = function() {
-    if (!canAct("도전")) return;
-    if (isCooldown) return;
+window.tryUpgrade = function () {
+  if (!canAct("도전") || isCooldown) return;
+  const p = playersData[myCharacter];
+  if (p.grade >= MAX_GRADE) return alert("이미 V17 만렙입니다! '👑 환생' 버튼을 눌러보세요.");
 
-    let pData = playersData[myCharacter];
-    if (pData.grade >= 17) {
-        alert("이미 V17 만렙입니다! '환생' 버튼을 눌러 명예를 높여보세요!");
-        return;
-    }
+  const tapeCheck = $('use-tape-check');
+  const useTape = tapeCheck.checked;
+  if (useTape && p.tape <= 0) {
+    tapeCheck.checked = false;
+    return alert("안전 테이핑이 부족합니다! 상점에서 먼저 구매하세요.");
+  }
 
-    let now = Date.now();
-    if (now - lastClickTime < 800) pumpCount++;
-    else pumpCount = Math.max(0, pumpCount - 1);
-    lastClickTime = now;
+  const now = Date.now();
+  pumpCount = (now - lastClickTime < 800) ? pumpCount + 1 : Math.max(0, pumpCount - 1);
+  lastClickTime = now;
+  let penalty = 0;
+  if (pumpCount >= 3) { penalty = 15; addLog("⚠️ [펌핑 경고] 과부하 발생! (성공 확률 -15%)", "fail"); }
 
-    let penaltyRate = 0;
-    if (pumpCount >= 3) {
-        penaltyRate = 15;
-        addLog(`⚠️ [펌핑 경고] 과부하 발생! (성공 확률 -15%)`, "fail");
-    }
+  isCooldown = true;
+  const btn = $('upgrade-btn');
+  btn.style.opacity = "0.5";
+  btn.textContent = "⏳ 다음 홀드 잡는 중...";
+  setTimeout(() => { isCooldown = false; btn.style.opacity = "1"; updateUI(); }, 1200);
 
-    const useTapeCheck = document.getElementById('use-tape-check');
-    let useTape = useTapeCheck && useTapeCheck.checked;
+  const finalRate = Math.max(5, getSuccessRate(p) - penalty);
+  const success = Math.random() * 100 <= finalRate;
+  p.buffNext = false;
 
-    if (useTape && pData.tape <= 0) {
-        alert("안전 테이핑이 부족합니다! 상점에서 먼저 구매하세요.");
-        useTapeCheck.checked = false;
-        return;
-    }
-
-    isCooldown = true;
-    const btn = document.getElementById('upgrade-btn');
-    if (btn) {
-        btn.style.opacity = "0.5";
-        btn.innerText = "⏳ 다음 홀드 잡는 중...";
-    }
-
-    setTimeout(() => {
-        isCooldown = false;
-        if (btn) {
-            btn.style.opacity = "1";
-            btn.innerText = "🧗‍♂️ 볼더링 도전하기!";
-        }
-    }, 1200);
-
-    let baseRate = getSuccessRate(pData);
-    let finalRate = Math.max(5, baseRate - penaltyRate);
-    let roll = Math.random() * 100;
-
-    if (pData.buffNext) pData.buffNext = false; 
-
-    if (roll <= finalRate) {
-        pData.grade += 1;
-        let reward = getRewardGold(pData.grade, pData.rebirthCount);
-        pData.gold += reward;
-        addLog(`🎉 [성공] ${myCharacter}님 V${pData.grade} 완등! (+${reward}G 획득)`, "success");
-        triggerEffect(pData.grade);
-        pumpCount = 0;
+  if (success) {
+    p.grade += 1;
+    const reward = getRewardGold(p.grade, p.rebirthCount);
+    p.gold += reward;
+    addLog(`🎉 [성공] ${myCharacter}님 V${p.grade} 완등! (+${reward}G)`, "success");
+    triggerEffect(p.grade);
+    pumpCount = 0;
+  } else {
+    const reason = failReasons[Math.floor(Math.random() * failReasons.length)];
+    if (useTape) {
+      p.tape -= 1;
+      addLog(`🛡️ [방어] ${myCharacter}님 추락! (${reason}) → 안전 테이핑으로 등급 보호!`, "fail");
+    } else if (p.grade >= 8 && Math.random() < 0.5) {
+      p.grade -= 1;
+      const lost = p.hasChalkBag ? 0 : Math.floor(p.gold * 0.1);
+      p.gold -= lost;
+      addLog(`💥 [추락] ${myCharacter}님 실패! (${reason}) → 등급 하락! ${lost > 0 ? `(-${lost}G 유실)` : '(초크백으로 골드 보호됨!)'}`, "fail");
     } else {
-        let reason = failReasons[Math.floor(Math.random() * failReasons.length)];
-
-        if (useTape) {
-            pData.tape -= 1;
-            addLog(`🛡️ [방어] ${myCharacter}님 추락! (${reason}) -> 안전 테이핑으로 등급 보호!`, "fail");
-        } else if (pData.grade >= 8 && Math.random() < 0.5) {
-            pData.grade = Math.max(0, pData.grade - 1);
-            let lostGold = pData.hasChalkBag ? 0 : Math.floor(pData.gold * 0.1);
-            if (!pData.hasChalkBag && lostGold > 0) pData.gold -= lostGold;
-            addLog(`💥 [추락] ${myCharacter}님 실패! (${reason}) -> 등급 하락! ${lostGold > 0 ? `(골드 일부 유실)` : '(초크백으로 골드 보호됨!)'}`, "fail");
-        } else {
-            addLog(`❌ [실패] ${myCharacter}님 추락! (${reason})`, "fail");
-        }
+      addLog(`❌ [실패] ${myCharacter}님 추락! (${reason})`, "fail");
     }
+  }
+  syncAndRender();
+};
 
+window.tryRebirth = function () {
+  if (!canAct("환생")) return;
+  const p = playersData[myCharacter];
+  if (p.grade < MAX_GRADE) return alert("아직 V17을 달성하지 못했습니다!");
+  if (confirm("👑 [등반가 환생]\nV0로 초기화되지만 [영구 성공률 +3%]와 [골드 보상 +20%]를 얻습니다. (골드·아이템은 유지)\n환생하시겠습니까?")) {
+    p.rebirthCount += 1;
+    p.grade = 0;
+    addLog(`👑 [환생 완료] ${myCharacter}님이 제${p.rebirthCount}차 환생에 성공했습니다!`, "success");
     syncAndRender();
-}
+  }
+};
 
-window.tryRebirth = function() {
-    if (!canAct("환생")) return;
-    let pData = playersData[myCharacter];
-    if (pData.grade < 17) {
-        alert("아직 V17을 달성하지 못했습니다! V17을 찍어야 환생할 수 있습니다.");
-        return;
-    }
-    
-    if (confirm(`👑 [등반가 환생]\n환생하시면 V0로 초기화되지만, 환생 횟수가 증가하며 [영구 성공률 +3%] 및 [골드 획득량 보너스]가 주어집니다!\n환생하시겠습니까?`)) {
-        pData.rebirthCount += 1;
-        pData.grade = 0;
-        addLog(`👑 [환생 완료] ${myCharacter}님이 제${pData.rebirthCount}차 환생에 성공했습니다! (영구 버프 강화)`, "success");
-        syncAndRender();
-    }
+function buy(cost, apply, logMsg, blockedMsg, isBlocked) {
+  if (!canAct("구매")) return;
+  const p = playersData[myCharacter];
+  if (isBlocked && isBlocked(p)) return alert(blockedMsg);
+  if (p.gold < cost) return alert(`골드가 부족합니다! (${cost.toLocaleString()}G 필요)`);
+  p.gold -= cost;
+  apply(p);
+  addLog(`🛒 [상점] ${myCharacter}님 ${logMsg}`, "success");
+  syncAndRender();
 }
+window.buyTape = () => buy(1000, p => p.tape += 1, "안전 테이핑 구매!");
+window.buyShoes = () => buy(5000, p => p.hasShoes = true, "부토라 뉴코멧 장착! (성공률 +5%)", "이미 착용 중입니다!", p => p.hasShoes);
+window.buyChalkBag = () => buy(15000, p => p.hasChalkBag = true, "초크백 구매! (추락 시 골드 보호)", "이미 보유 중입니다!", p => p.hasChalkBag);
+window.buyTrainingPass = () => buy(8000, p => p.buffNext = true, "트레이닝권 사용! (다음 도전 +10%)", "이미 트레이닝 버프가 대기 중입니다!", p => p.buffNext);
 
-window.buyTape = function() {
-    if (!canAct("구매")) return;
-    let pData = playersData[myCharacter];
-    if (pData.gold < 1000) return alert("골드가 부족합니다! (1,000G 필요)");
-    pData.gold -= 1000;
-    pData.tape += 1;
-    addLog(`🛒 [상점] ${myCharacter}님이 안전 테이핑을 구매했습니다.`, "success");
-    syncAndRender();
-}
-
-window.buyShoes = function() {
-    if (!canAct("구매")) return;
-    let pData = playersData[myCharacter];
-    if (pData.hasShoes) return alert("이미 부토라 뉴코멧 암벽화를 착용 중입니다!");
-    if (pData.gold < 5000) return alert("골드가 부족합니다! (5,000G 필요)");
-    pData.gold -= 5000;
-    pData.hasShoes = true;
-    addLog(`👞 [상점] ${myCharacter}님이 부토라 뉴코멧 암벽화를 장착했습니다! (성공률 +5%)`, "success");
-    syncAndRender();
-}
-
-window.buyChalkBag = function() {
-    if (!canAct("구매")) return;
-    let pData = playersData[myCharacter];
-    if (pData.hasChalkBag) return alert("이미 초크백을 보유 중입니다!");
-    if (pData.gold < 15000) return alert("골드가 부족합니다! (15,000G 필요)");
-    pData.gold -= 15000;
-    pData.hasChalkBag = true;
-    addLog(`🧗‍♂️ [상점] ${myCharacter}님이 초크백을 구매했습니다! (추락 시 골드 하락 방어)`, "success");
-    syncAndRender();
-}
-
-window.buyTrainingPass = function() {
-    if (!canAct("구매")) return;
-    let pData = playersData[myCharacter];
-    if (pData.buffNext) return alert("이미 고강도 트레이닝 버프가 대기 중입니다!");
-    if (pData.gold < 8000) return alert("골드가 부족합니다! (8,000G 필요)");
-    pData.gold -= 8000;
-    pData.buffNext = true;
-    addLog(`🎫 [상점] ${myCharacter}님이 고강도 트레이닝권을 사용했습니다! (다음 도전 성공률 +10%)`, "success");
-    syncAndRender();
-}
-
-function syncAndRender() {
-    updateUI();
-    saveMyData();
-}
+function syncAndRender() { updateUI(); saveMyData(); }
 
 function triggerEffect(grade) {
-    const overlay = document.getElementById('effect-overlay');
-    if (overlay) {
-        overlay.innerText = `✨ V${grade} 완등 성공! ✨`;
-        overlay.style.opacity = '1';
-        setTimeout(() => overlay.style.opacity = '0', 1000);
-    }
+  const o = $('effect-overlay');
+  o.textContent = `✨ V${grade} 완등 성공! ✨`;
+  o.style.opacity = '1';
+  setTimeout(() => o.style.opacity = '0', 1000);
 }
 
 function updateUI() {
-    let pData = playersData[viewingPlayer];
-    if (!pData) return;
+  const p = playersData[viewingPlayer];
+  const me = playersData[myCharacter];
+  if (!p || !me) return;
+  const isMe = viewingPlayer === myCharacter;
 
-    let isMe = (viewingPlayer === myCharacter);
-    document.getElementById('current-user-label').innerText = `${viewingPlayer}님의 프로젝트 ${isMe ? '(내 캐릭터)' : '(👀 관전 중)'}`;
+  $('current-user-label').textContent = `${viewingPlayer}님의 프로젝트 ${isMe ? '(내 캐릭터)' : '(👀 관전 중)'}`;
+  $('my-sub-info').textContent = `환생 ${me.rebirthCount}회 | 영구 보너스 +${me.rebirthCount * 3}%`;
+  $('rebirth-main-btn').style.display = (isMe && p.grade >= MAX_GRADE) ? "block" : "none";
 
-    document.getElementById('my-sub-info').innerText = `환생 ${pData.rebirthCount}회 | 영구 보너스 +${pData.rebirthCount * 3}%`;
-    const rebirthBtn = document.getElementById('rebirth-main-btn');
-    if (isMe && pData.grade >= 17) {
-        rebirthBtn.style.display = "block";
-    } else {
-        rebirthBtn.style.display = "none";
-    }
+  $('grade-display').textContent = `V${p.grade}`;
+  $('rate-display').textContent = `성공 확률: ${getSuccessRate(p)}%${p.buffNext ? ' (🎫 버프 적용중)' : ''} | 완등 보상: +${getRewardGold(p.grade + 1, p.rebirthCount)}G`;
 
-    document.getElementById('grade-display').innerText = `V${pData.grade}`;
-    document.getElementById('rate-display').innerText = `성공 확률: ${getSuccessRate(pData)}${pData.buffNext ? ' (🎫버프+10%)' : ''}% | 완등 보상: +${getRewardGold(pData.grade, pData.rebirthCount)}G`;
+  $('gold-display').textContent = `${p.gold.toLocaleString()}G`;
+  $('gear-display').textContent = p.hasShoes ? "👟 부토라 뉴코멧 (+5%)" : "기본 운동화";
+  $('tape-display').textContent = `${p.tape}개`;
+  $('chalk-display').textContent = p.hasChalkBag ? "🛡️ 보유중 (골드 보호)" : "미보유";
+  $('pass-display').textContent = p.buffNext ? "🎫 대기중 (+10%)" : "없음";
 
-    document.getElementById('gold-display').innerText = `${pData.gold.toLocaleString()}G`;
-    document.getElementById('gear-display').innerText = pData.hasShoes ? "👟 부토라 뉴코멧 (+5%)" : "기본 운동화";
-    document.getElementById('tape-display').innerText = `${pData.tape}개`;
-    document.getElementById('chalk-display').innerText = pData.hasChalkBag ? "🛡️ 보유중 (골드 보호)" : "미보유";
+  const btn = $('upgrade-btn');
+  if (!dbReady) { btn.disabled = true; btn.textContent = "⏳ 데이터 불러오는 중..."; }
+  else if (!isMe) { btn.disabled = true; btn.textContent = "👀 상대방 관전 중 (조작 불가)"; }
+  else if (p.grade >= MAX_GRADE) { btn.disabled = true; btn.textContent = "👑 V17 만렙! 위의 '환생' 버튼을 누르세요"; }
+  else { btn.disabled = false; btn.textContent = isCooldown ? "⏳ 다음 홀드 잡는 중..." : "🧗‍♂️ 볼더링 도전하기!"; }
 
-    const upgradeBtn = document.getElementById('upgrade-btn');
-    if (upgradeBtn) {
-        if (!dbReady) {
-            upgradeBtn.disabled = true;
-            upgradeBtn.innerText = "⏳ 데이터 불러오는 중...";
-        } else if (!isMe) {
-            upgradeBtn.disabled = true;
-            upgradeBtn.innerText = "👀 상대방 관전 중 (조작 불가)";
-        } else if (pData.grade >= 17) {
-            upgradeBtn.disabled = false; // 환생 전이라도 도전 버튼은 누를 수 있게 하거나 만렙 안내
-            upgradeBtn.innerText = "👑 V17 만렙 달성! (환생 가능)";
-        } else {
-            upgradeBtn.disabled = false;
-            if (!isCooldown) upgradeBtn.innerText = "🧗‍♂️ 볼더링 도전하기!";
-        }
-    }
+  const shopOn = dbReady && isMe;
+  ['buy-tape-btn', 'buy-shoes-btn', 'buy-chalk-btn', 'buy-pass-btn'].forEach(id => $(id).disabled = !shopOn);
 
-    const shopEnabled = dbReady && isMe;
-    document.getElementById('buy-tape-btn').disabled = !shopEnabled;
-    document.getElementById('buy-shoes-btn').disabled = !shopEnabled;
-    document.getElementById('buy-chalk-btn').disabled = !shopEnabled;
-    document.getElementById('buy-pass-btn').disabled = !shopEnabled;
-
-    const grid = document.getElementById('player-grid');
-    if (grid) {
-        grid.innerHTML = '';
-        for (const name of NAMES) {
-            const data = playersData[name];
-            let activeClass = (name === viewingPlayer) ? 'active' : '';
-            let meClass = (name === myCharacter) ? 'is-me' : '';
-            let crown = data.rebirthCount > 0 ? `👑${data.rebirthCount}` : '';
-            grid.innerHTML += `
-                <div class="player-card ${activeClass} ${meClass}" onclick="selectViewPlayer('${name}')">
-                    <div class="card-top">
-                        <span>${crown} ${name} ${name === myCharacter ? '👤' : ''}</span>
-                        <span style="color: #ffa502; font-weight: bold;">V${data.grade}</span>
-                    </div>
-                    <div class="card-sub">환생 ${data.rebirthCount}회</div>
-                </div>
-            `;
-        }
-    }
+  $('player-grid').innerHTML = NAMES.map(name => {
+    const d = playersData[name];
+    const crown = d.rebirthCount > 0 ? `👑${d.rebirthCount}` : '';
+    return `<div class="player-card ${name === viewingPlayer ? 'active' : ''} ${name === myCharacter ? 'is-me' : ''}" onclick="selectViewPlayer('${name}')">
+      <div class="card-top"><span>${crown} ${name} ${name === myCharacter ? '👤' : ''}</span><span style="color:#ffa502;font-weight:bold;">V${d.grade}</span></div>
+      <div class="card-sub">환생 ${d.rebirthCount}회 · ${d.gold.toLocaleString()}G</div>
+    </div>`;
+  }).join('');
 }
 
+$('ver').textContent = 'v' + APP_VERSION;
 checkMyCharacter();
 updateUI();
+if (localStorage.getItem('rocktree_seen_ver') !== APP_VERSION) {
+  toggleNotice(true);
+  localStorage.setItem('rocktree_seen_ver', APP_VERSION);
+}
 </script>
 </body>
 </html>
