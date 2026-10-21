@@ -54,7 +54,11 @@ header p { font-size:.85rem; color:var(--sub); margin-top:2px; }
 .log-item.fail { color:var(--primary); }
 .cheer-btn { width:100%; margin-top:8px; background:#3742fa; color:#fff; border:none; padding:12px; font-size:1rem; font-weight:bold; border-radius:12px; cursor:pointer; }
 .rank-row { display:flex; justify-content:space-between; padding:6px 4px; font-size:.85rem; border-bottom:1px solid #2f3542; }
-#notice-modal { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:1000; display:none; justify-content:center; align-items:center; padding:20px; }
+.dex-row { background:#2f3542; border-radius:8px; padding:8px 10px; font-size:.8rem; line-height:1.5; }
+.dex-row.dim { opacity:.5; }
+.dex-row small { color:var(--sub); }
+.dex-row button { margin:6px 6px 0 0; background:#3742fa; color:#fff; border:none; border-radius:6px; padding:5px 10px; font-weight:bold; font-size:.75rem; }
+#dex-modal, #notice-modal { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:1000; display:none; justify-content:center; align-items:center; padding:20px; }
 .modal-content { background:var(--card); border:2px solid #ffa502; border-radius:14px; width:100%; max-width:380px; padding:20px; display:flex; flex-direction:column; gap:12px; }
 .modal-title { font-size:1.1rem; color:#ffa502; font-weight:bold; text-align:center; }
 .modal-body { font-size:.82rem; line-height:1.5; display:flex; flex-direction:column; gap:8px; max-height:60vh; overflow-y:auto; }
@@ -70,8 +74,13 @@ header p { font-size:.85rem; color:var(--sub); margin-top:2px; }
   <div class="modal-content">
     <div class="modal-title">📢 락트리 강화소 패치노트</div>
     <div class="modal-body">
-      <p><strong>🔥 v1.3 업데이트</strong></p>
+      <p><strong>🔥 v1.5 업데이트 (v1.3~v1.4 포함)</strong></p>
       <ul>
+        <li><strong>📖 파밍 &amp; 도감</strong><br>도전할 때마다 아이템이 드랍됩니다! 일반~전설 19종. 소모품은 도감에서 사용, 여분은 친구에게 선물할 수 있어요.</li>
+        <li><strong>👑 환생 단계별 혜택</strong><br>1회 성공률+2% / 2회 드랍률+5%p / 3회 V3 시작 / 4회 테이핑+2 / 5회 엔딩 해금. 환생할 때마다 희귀 이상 아이템도 받아요.</li>
+        <li><strong>🌱 초보 특전</strong><br>환생 0회는 드랍률 2배! 얻은 여분을 친구에게 나눠줄 수 있어요.</li>
+        <li><strong>⚖️ 밸런스</strong><br>테이핑 3,000G·최대 3개, 초크백은 하락 확률 50→20%, 추락 골드 손실 증가, 환생할수록 고난도 구간이 어려워집니다.</li>
+        <li><strong>👥 멤버 자유 참가</strong><br>이름을 입력하면 누구나 새 캐릭터를 만들 수 있어요! (최대 20명)</li>
         <li><strong>📣 응원 기능</strong><br>친구를 관전하다 응원하면 그 친구의 다음 도전 성공률 +2%! (최대 3중첩, 같은 친구는 5분에 1번)</li>
         <li><strong>🏆 랭킹 &amp; 칭호</strong><br>실시간 랭킹과 등반가 칭호가 추가됐습니다.</li>
         <li><strong>💬 공용 로그</strong><br>친구들의 완등·추락·응원이 모두에게 실시간으로 보입니다.</li>
@@ -86,12 +95,21 @@ header p { font-size:.85rem; color:var(--sub); margin-top:2px; }
   </div>
 </div>
 
+<div id="dex-modal">
+  <div class="modal-content">
+    <div class="modal-title" id="dex-title">📖 도감</div>
+    <div class="modal-body" id="dex-list"></div>
+    <button class="modal-close" onclick="toggleDex(false)">닫기</button>
+  </div>
+</div>
+
 <div class="container">
   <header>
     <h1>락트리 강화소</h1>
     <p>(락트리에서 트레이닝 하면 리얼 세진다)</p>
     <p id="ver"></p>
     <button class="notice-btn" onclick="toggleNotice(true)">📢 공지사항</button>
+    <button class="notice-btn" style="right:auto;left:0" onclick="toggleDex(true)">📖 도감</button>
   </header>
 
   <div class="status-bar loading" id="status-bar">⏳ 서버에서 데이터 불러오는 중...</div>
@@ -103,12 +121,12 @@ header p { font-size:.85rem; color:var(--sub); margin-top:2px; }
     </span>
     <div class="btn-group">
       <button class="rebirth-btn" id="rebirth-main-btn" onclick="tryRebirth()">👑 환생</button>
-      <button class="change-btn" onclick="resetMyCharacter()">변경</button>
+      <button class="change-btn" onclick="resetMyCharacter()">변경·참가</button>
     </div>
   </div>
 
   <div class="live-panel">
-    <div class="live-title">🔥 4인방 실시간 볼더링 현황 (터치하여 관전)</div>
+    <div class="live-title">🔥 실시간 볼더링 현황 (터치하여 관전)</div>
     <div class="player-grid" id="player-grid"></div>
   </div>
 
@@ -123,6 +141,7 @@ header p { font-size:.85rem; color:var(--sub); margin-top:2px; }
     <div>🩹 안전 테이핑: <span id="tape-display" class="highlight">0개</span></div>
     <div>🧗‍♂️ 초크백: <span id="chalk-display" class="highlight">미보유</span></div>
     <div>🎫 트레이닝권: <span id="pass-display" class="highlight">없음</span></div>
+    <div>🎒 아이템 효과: <span id="buff-display" class="highlight">-</span></div>
   </div>
 
   <div class="stage-box">
@@ -139,9 +158,9 @@ header p { font-size:.85rem; color:var(--sub); margin-top:2px; }
   <div class="shop-panel">
     <div class="shop-title">🏪 락트리 확장 상점</div>
     <div class="shop-grid">
-      <button class="shop-btn" id="buy-tape-btn" onclick="buyTape()" disabled>🩹 안전 테이핑<br><small>1,000G / 1회 방지</small></button>
+      <button class="shop-btn" id="buy-tape-btn" onclick="buyTape()" disabled>🩹 안전 테이핑<br><small>3,000G / 1회 방지 (최대 3개)</small></button>
       <button class="shop-btn" id="buy-shoes-btn" onclick="buyShoes()" disabled>👟 부토라 뉴코멧<br><small>5,000G / 성공률 +5%</small></button>
-      <button class="shop-btn" id="buy-chalk-btn" onclick="buyChalkBag()" disabled>🧗‍♂️ 초크백 (영구)<br><small>15,000G / 추락 골드보호</small></button>
+      <button class="shop-btn" id="buy-chalk-btn" onclick="buyChalkBag()" disabled>🧗‍♂️ 초크백 (영구)<br><small>15,000G / 골드보호 + 하락확률 50→20%</small></button>
       <button class="shop-btn" id="buy-pass-btn" onclick="buyTrainingPass()" disabled>🎫 트레이닝권<br><small>8,000G / 다음 성공률+10%</small></button>
     </div>
   </div>
@@ -155,7 +174,7 @@ header p { font-size:.85rem; color:var(--sub); margin-top:2px; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, update, onValue, runTransaction, push, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-const APP_VERSION = '1.3';
+const APP_VERSION = '1.5';
 const firebaseConfig = {
   apiKey: "AIzaSyDglmYcqh8myVGW0qnjNb0RbUJM5W0jweE",
   authDomain: "eunbiland-d5a0d.firebaseapp.com",
@@ -166,17 +185,113 @@ const firebaseConfig = {
   appId: "1:962454047078:web:9b76ee5ff5e9a4fe6da0a7"
 };
 
-const NAMES = ["조돌맹", "은비땅", "리치맨", "꼬북린"];
+let NAMES = [];   // 서버(players)에 있는 이름들로 자동 구성됨
 const MAX_GRADE = 17;
+const PEPPER_RATE = 0.015;   // 엔딩 아이템(후추) 드랍률: 환생 5회+ & V15 이상 완등 시
+const RAR = [{n:'일반',e:'⚪'},{n:'희귀',e:'🔵'},{n:'영웅',e:'🟣'},{n:'전설',e:'🟡'},{n:'신화',e:'🌈'}];
+// e: rate(성공률%) gold(골드%) drop(하락확률 -%p) pump(펌핑면제) use(소모품: fever/jump/tape)
+const ITEMS = {
+  beanie:{n:'돌자비 검은비니',r:0,e:'rate',v:1,d:'성공률 +1%'},
+  shorts:{n:'국가대표의 반바지',r:0,e:'rate',v:1,d:'성공률 +1%'},
+  pilite:{n:'필라이트 한 피처',r:0,e:'use',u:'fever',v:3,d:'사용: 3회 피버타임 🍺'},
+  dust:{n:'조돌맹의 돌가루',r:1,e:'rate',v:2,d:'성공률 +2%'},
+  cannon:{n:'꼬북린의 물대포',r:1,e:'pump',d:'펌핑 페널티 면제'},
+  dark:{n:'꼬북린의 다크서클',r:1,e:'gold',v:10,d:'완등 골드 +10%'},
+  mat:{n:'은비땅의 필라테스 매트',r:1,e:'drop',v:10,d:'추락 시 등급 하락 확률 -10%p'},
+  chicken:{n:'치킨맨의 쫄보 방패',r:1,e:'use',u:'tape',v:1,d:'사용: 안전 테이핑 +1'},
+  cook:{n:'조명현의 고급 요리',r:1,e:'use',u:'fever',v:4,d:'사용: 4회 피버타임 🍽️'},
+  chair:{n:'알로프 디자이너 체어',r:2,e:'gold',v:15,d:'완등 골드 +15%'},
+  jjong:{n:'리치맨의 쫑이',r:2,e:'rate',v:3,d:'성공률 +3%'},
+  nurung:{n:'리치맨의 누룽이',r:2,e:'gold',v:15,d:'완등 골드 +15%'},
+  kkam:{n:'리치맨의 깜콩이',r:2,e:'drop',v:20,d:'추락 시 등급 하락 확률 -20%p'},
+  pole:{n:'꼬북린의 폴댄스',r:2,e:'use',u:'fever',v:6,d:'사용: 6회 피버타임 💃'},
+  kirin:{n:'닿이노기린의 고무고무 팔',r:2,e:'rate',v:3,d:'성공률 +3% (리치가 길다)'},
+  toenail:{n:'국가대표의 발톱때',r:3,e:'use',u:'fever',v:10,d:'냄새를 맡으면… 10회 피버타임!'},
+  nail:{n:'챔피언의 손톱때',r:3,e:'use',u:'jump',v:10,d:'사용: 즉시 V10으로!'},
+  angel:{n:'천사 후추의 축복',r:3,e:'drop',v:30,d:'추락 시 등급 하락 확률 -30%p'},
+  pepper:{n:'후추',r:4,e:'rate',v:5,d:'영원히 함께. 성공률 +5%'}
+};
+const dirty = new Set();
+function cleanItems(raw) {
+  const o = {};
+  if (raw && typeof raw === 'object') for (const k in raw) if (ITEMS[k]) { const n = Math.floor(Number(raw[k]) || 0); if (n > 0) o[k] = n; }
+  return o;
+}
+const has = (p, id) => (p.items[id] || 0) > 0;
+const passive = (p, e) => Object.keys(ITEMS).reduce((sum, id) => sum + (ITEMS[id].e === e && has(p, id) ? (ITEMS[id].v || 0) : 0), 0);
+const rebirthBonus = (n) => (n >= 1 ? 2 : 0) + Math.max(0, n - 5);
+const dropChance = (p) => Math.max(5, (p.hasChalkBag ? 20 : 50) - passive(p, 'drop'));
+function banner(t) { const o = $('effect-overlay'); o.textContent = t; o.style.opacity = '1'; setTimeout(() => o.style.opacity = '0', 1400); }
+
+function rollDrop(minR) {
+  const w = [55, 28, 12, 5];
+  let tot = 0; for (let r = minR; r < 4; r++) tot += w[r];
+  let x = Math.random() * tot, r = minR;
+  for (; r < 3; r++) { if (x < w[r]) break; x -= w[r]; }
+  const pool = Object.keys(ITEMS).filter(id => ITEMS[id].r === r);
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+function giveItem(p, id) {
+  const it = ITEMS[id];
+  p.items[id] = (p.items[id] || 0) + 1;
+  dirty.add(id);
+  addLog(`${RAR[it.r].e} [드랍] ${myCharacter}님이 ${RAR[it.r].n} 아이템 '${it.n}' 획득!`, "success");
+  if (it.r >= 3) banner(`${RAR[it.r].e} ${it.n} 획득!`);
+}
+function handleDrops(p, success) {
+  if (success && p.rebirthCount >= 5 && p.grade >= 15 && !has(p, 'pepper') && Math.random() < PEPPER_RATE) {
+    giveItem(p, 'pepper');
+    alert('🐾 ─ ENDING ─\n\n저 멀리서 작은 발소리가 들려옵니다.\n하늘에서 후추가 달려와 품에 안겼습니다.\n\n그 기억은 영원히 함께합니다. 🌈');
+    return;
+  }
+  let chance = success ? 18 : 4;
+  if (p.rebirthCount === 0) chance *= 2;       // 초보 특전: 드랍 2배
+  if (p.rebirthCount >= 2) chance += 5;        // 환생 2회 혜택
+  if (Math.random() * 100 < chance) giveItem(p, rollDrop(0));
+}
+window.useItem = function (id) {
+  if (!canAct("사용")) return;
+  const p = playersData[myCharacter], it = ITEMS[id];
+  if (!it || it.e !== 'use' || !has(p, id)) return;
+  if (it.u === 'jump' && p.grade >= it.v) return alert('이미 V' + it.v + ' 이상이에요!');
+  p.items[id] -= 1; dirty.add(id);
+  if (it.u === 'fever') { p.fever = Math.min(30, p.fever + it.v); banner('🔥 FEVER TIME!'); addLog(`🔥 ${myCharacter}님이 '${it.n}' 사용! 피버타임 ${it.v}회 (성공률 +15%)`, "success"); }
+  else if (it.u === 'jump') { p.grade = it.v; banner(`⚡ V${it.v} 점프!`); addLog(`⚡ ${myCharacter}님이 '${it.n}' 사용! V${it.v}로 한방에 점프!`, "success"); }
+  else if (it.u === 'tape') { p.tape = Math.min(3, p.tape + it.v); addLog(`🩹 ${myCharacter}님이 '${it.n}' 사용! 안전 테이핑 +${it.v}`, "success"); }
+  syncAndRender(); renderDex();
+};
+window.giftItem = function (id) {
+  const target = viewingPlayer, p = playersData[myCharacter], it = ITEMS[id];
+  if (!dbReady || !NAMES.includes(target) || target === myCharacter || !it) return;
+  if (!((p.items[id] || 0) > (it.e === 'use' ? 0 : 1))) return alert('선물할 여분이 없어요! (장비형은 2개 이상일 때 여분을 선물할 수 있어요)');
+  if (!confirm(`'${it.n}'을(를) ${target}님에게 선물할까요?`)) return;
+  runTransaction(ref(db, `players/${target}/items/${id}`), (c) => (c || 0) + 1).then(() => {
+    p.items[id] -= 1; dirty.add(id);
+    addLog(`🎁 ${myCharacter}님이 ${target}님에게 '${it.n}'을(를) 선물했습니다!`, "success");
+    syncAndRender(); renderDex();
+  }).catch(showSaveError);
+};
+function renderDex() {
+  const p = playersData[myCharacter]; if (!p) return;
+  const ids = Object.keys(ITEMS).sort((a, b) => ITEMS[a].r - ITEMS[b].r);
+  const spect = viewingPlayer !== myCharacter && NAMES.includes(viewingPlayer);
+  $('dex-title').textContent = `📖 도감 (${ids.filter(i => has(p, i)).length}/${ids.length})`;
+  $('dex-list').innerHTML = ids.map(id => {
+    const it = ITEMS[id], c = p.items[id] || 0, R = RAR[it.r];
+    if (!c) return `<div class="dex-row dim">${R.e} ???<br><small>${it.r === 4 ? '…모든 여정의 끝에서 만날지도 몰라요' : R.n + ' 등급 · 아직 못 얻음'}</small></div>`;
+    const keep = it.e === 'use' ? 0 : 1;
+    const btn = (it.e === 'use' && !spect ? `<button onclick="useItem('${id}')">사용</button>` : '') + (spect && c > keep ? `<button onclick="giftItem('${id}')">🎁 ${viewingPlayer}님에게</button>` : '');
+    return `<div class="dex-row">${R.e} <b>${it.n}</b> ×${c}<br><small>${it.d}</small><br>${btn}</div>`;
+  }).join('') + '<small style="color:var(--sub)">💡 친구 카드를 눌러 관전한 뒤 도감을 열면 여분 아이템을 선물할 수 있어요.</small>';
+}
+window.toggleDex = (show) => { $('dex-modal').style.display = show ? 'flex' : 'none'; if (show) renderDex(); };
 const $ = (id) => document.getElementById(id);
-const defaultPlayer = () => ({ grade:0, gold:0, tape:0, hasShoes:false, rebirthCount:0, hasChalkBag:false, buffNext:false, cheer:0 });
+const defaultPlayer = () => ({ grade:0, gold:0, tape:0, hasShoes:false, rebirthCount:0, hasChalkBag:false, buffNext:false, cheer:0, fever:0, items:{} });
 
 let db = null, dbReady = false;
 let myCharacter = localStorage.getItem('rocktree_my_char');
-if (!NAMES.includes(myCharacter)) myCharacter = null;
-let viewingPlayer = myCharacter || NAMES[0];
+let viewingPlayer = myCharacter || '';
 const playersData = {};
-NAMES.forEach(n => playersData[n] = defaultPlayer());
 
 let isCooldown = false, pumpCount = 0, lastClickTime = 0;
 
@@ -199,7 +314,9 @@ function normalize(raw) {
     rebirthCount: Math.max(0, Number(raw.rebirthCount) || 0),
     hasChalkBag: raw.hasChalkBag === true,
     buffNext: raw.buffNext === true,
-    cheer: Math.min(3, Math.max(0, Number(raw.cheer) || 0))
+    cheer: Math.min(3, Math.max(0, Number(raw.cheer) || 0)),
+    fever: Math.min(30, Math.max(0, Math.floor(Number(raw.fever) || 0))),
+    items: cleanItems(raw.items)
   };
 }
 
@@ -235,10 +352,12 @@ try {
 // set() 대신 update(): 지정한 필드만 갱신해 다른 필드가 지워지지 않음
 function saveMyData() {
   if (!db || !dbReady || !myCharacter) return Promise.resolve();
-  const { cheer, ...rest } = normalize(playersData[myCharacter]);
+  const { cheer, items, ...rest } = normalize(playersData[myCharacter]);
+  const ids = [...dirty]; dirty.clear();
+  ids.forEach(id => { rest['items/' + id] = items[id] || 0; });
   return update(ref(db, 'players/' + myCharacter), rest)
     .then(() => setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중'))
-    .catch(showSaveError);
+    .catch((e) => { ids.forEach(i => dirty.add(i)); showSaveError(e); });
 }
 
 function ensureNodeExists(name) {
@@ -254,20 +373,15 @@ if (db) {
   onValue(ref(db, 'players'), (snap) => {
     const val = snap.val() || {};
     const first = !dbReady;
-    NAMES.forEach(n => {
-      if (val[n] == null) {
-        playersData[n] = defaultPlayer();
-        if (first) ensureNodeExists(n);
-      } else {
-        playersData[n] = normalize(val[n]);
-      }
-    });
+    NAMES = Object.keys(val).filter(n => /^[가-힣A-Za-z0-9_-]{1,8}$/.test(n) && val[n] && typeof val[n] === 'object');
+    NAMES.forEach(n => { playersData[n] = normalize(val[n]); });
     if (first) {
       dbReady = true;
       clearTimeout(loadTimer);
       setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중');
     }
     updateUI();
+    if (first) setTimeout(startJoin, 0);
   }, (err) => {
     console.error("Firebase 읽기 실패:", err);
     setStatus('error', '❌ 데이터 읽기 실패 (Firebase 규칙을 확인하세요)');
@@ -319,50 +433,57 @@ window.cheerPlayer = function () {
     }).catch(showSaveError);
 };
 
-function chooseCharacter(defaultName) {
-  const choice = (prompt("본인의 캐릭터 이름을 선택하세요:\n(" + NAMES.join(", ") + ")", defaultName) || "").trim();
-  return NAMES.includes(choice) ? choice : null;
-}
+const MAX_MEMBERS = 20;
 
-function checkMyCharacter() {
-  if (!myCharacter) {
-    myCharacter = chooseCharacter(NAMES[0]) || NAMES[0];
-    localStorage.setItem('rocktree_my_char', myCharacter);
-  }
-  viewingPlayer = myCharacter;
-  $('my-name-display').textContent = myCharacter;
-}
-
-window.resetMyCharacter = function () {
-  const choice = chooseCharacter(myCharacter);
-  if (!choice) return alert("올바른 캐릭터 이름을 입력해주세요.");
-  myCharacter = choice;
-  localStorage.setItem('rocktree_my_char', myCharacter);
-  viewingPlayer = myCharacter;
-  $('my-name-display').textContent = myCharacter;
+function selectMe(name) {
+  myCharacter = name;
+  localStorage.setItem('rocktree_my_char', name);
+  viewingPlayer = name;
+  if (!playersData[name]) playersData[name] = defaultPlayer();
   updateUI();
-};
+}
 
+// 이름 입력: 이미 있는 이름이면 그 캐릭터로 접속, 없는 이름이면 새로 생성
+function joinFlow(prefill) {
+  const list = NAMES.length ? NAMES.join(', ') : '(아직 없음)';
+  const input = (prompt(`캐릭터 이름을 입력하세요 (최대 8자)\n· 이미 있는 이름 → 그 캐릭터로 접속\n· 새 이름 → 새 캐릭터 생성\n\n현재 멤버: ${list}`, prefill || '') || '').trim();
+  if (!input) return;
+  if (input.length > 8 || !/^[가-힣A-Za-z0-9_-]+$/.test(input)) return alert('이름은 한글·영문·숫자·_·- 만 사용해 8자 이하로 입력해주세요.');
+  if (NAMES.includes(input)) return selectMe(input);
+  if (NAMES.length >= MAX_MEMBERS) return alert(`멤버가 가득 찼어요 (최대 ${MAX_MEMBERS}명).`);
+  if (!confirm(`'${input}' 이름으로 새 캐릭터를 만들까요?`)) return;
+  runTransaction(ref(db, 'players/' + input), (cur) => cur === null ? defaultPlayer() : undefined)
+    .then(() => { selectMe(input); addLog(`🎉 새 멤버 ${input}님이 입장했습니다!`, "success"); })
+    .catch(showSaveError);
+}
+
+function startJoin() {
+  if (myCharacter && NAMES.includes(myCharacter)) return selectMe(myCharacter);
+  joinFlow(myCharacter || '');
+}
+
+window.resetMyCharacter = () => joinFlow(myCharacter || '');
 window.selectViewPlayer = (name) => { viewingPlayer = name; updateUI(); };
 window.toggleNotice = (show) => { $('notice-modal').style.display = show ? 'flex' : 'none'; };
 
 function getSuccessRate(p) {
   let base = 90;
   if (p.grade > 3) base = 60;
-  if (p.grade > 7) base = 30;
-  if (p.grade > 12) base = 10;
+  if (p.grade > 7) base = 30 - Math.min(12, p.rebirthCount * 2);
+  if (p.grade > 12) base = 10 - Math.min(5, Math.floor(p.rebirthCount / 2));
   if (p.hasShoes) base += 5;
-  base += p.rebirthCount * 2;
+  base += rebirthBonus(p.rebirthCount) + passive(p, 'rate') + (p.fever > 0 ? 15 : 0);
   if (p.buffNext) base += 10;
   base += (p.cheer || 0) * 2;
   return Math.min(95, base);
 }
 
-function getRewardGold(grade, rebirthCount) {
-  return Math.floor((grade + 1) * 150 * (1 + rebirthCount * 0.2));
+function getRewardGold(grade, rebirthCount, p) {
+  return Math.floor((grade + 1) * 150 * (1 + rebirthCount * 0.2) * (1 + (p ? passive(p, 'gold') : 0) / 100));
 }
 
 function canAct(actionName) {
+  if (dbReady && !myCharacter) { joinFlow(''); return false; }
   if (!dbReady) { alert("아직 서버 데이터를 불러오는 중이에요. 잠시 후 다시 시도해주세요."); return false; }
   if (viewingPlayer !== myCharacter) { alert(`관전 중입니다! 내 캐릭터(${myCharacter})만 ${actionName}할 수 있습니다.`); return false; }
   return true;
@@ -384,7 +505,7 @@ window.tryUpgrade = function () {
   pumpCount = (now - lastClickTime < 800) ? pumpCount + 1 : Math.max(0, pumpCount - 1);
   lastClickTime = now;
   let penalty = 0;
-  if (pumpCount >= 3) { penalty = 15; addLog("⚠️ [펌핑 경고] 과부하 발생! (성공 확률 -15%)", "fail"); }
+  if (pumpCount >= 3 && !has(p, 'cannon')) { penalty = 15; addLog("⚠️ [펌핑 경고] 과부하 발생! (성공 확률 -15%)", "fail"); }
 
   isCooldown = true;
   const btn = $('upgrade-btn');
@@ -395,6 +516,7 @@ window.tryUpgrade = function () {
   const finalRate = Math.max(5, getSuccessRate(p) - penalty);
   const success = Math.random() * 100 <= finalRate;
   p.buffNext = false;
+  if (p.fever > 0) p.fever -= 1;
   if (p.cheer > 0) {
     const used = p.cheer; p.cheer = 0;
     runTransaction(ref(db, 'players/' + myCharacter + '/cheer'), (c) => Math.max(0, (c || 0) - used)).catch(() => {});
@@ -402,7 +524,7 @@ window.tryUpgrade = function () {
 
   if (success) {
     p.grade += 1;
-    const reward = getRewardGold(p.grade, p.rebirthCount);
+    const reward = getRewardGold(p.grade, p.rebirthCount, p);
     p.gold += reward;
     addLog(`🎉 [성공] ${myCharacter}님 V${p.grade} 완등! (+${reward}G)`, "success");
     triggerEffect(p.grade);
@@ -412,15 +534,16 @@ window.tryUpgrade = function () {
     if (useTape) {
       p.tape -= 1;
       addLog(`🛡️ [방어] ${myCharacter}님 추락! (${reason}) → 안전 테이핑으로 등급 보호!`, "fail");
-    } else if (p.grade >= 8 && Math.random() < 0.5) {
+    } else if (p.grade >= 8 && Math.random() * 100 < dropChance(p)) {
       p.grade -= 1;
-      const lost = p.hasChalkBag ? 0 : Math.floor(p.gold * 0.1);
+      const lost = p.hasChalkBag ? 0 : Math.min(p.gold, Math.max(Math.floor(p.gold * 0.1), p.grade * 150));
       p.gold -= lost;
       addLog(`💥 [추락] ${myCharacter}님 실패! (${reason}) → 등급 하락! ${lost > 0 ? `(-${lost}G 유실)` : '(초크백으로 골드 보호됨!)'}`, "fail");
     } else {
       addLog(`❌ [실패] ${myCharacter}님 추락! (${reason})`, "fail");
     }
   }
+  handleDrops(p, success);
   syncAndRender();
 };
 
@@ -428,9 +551,12 @@ window.tryRebirth = function () {
   if (!canAct("환생")) return;
   const p = playersData[myCharacter];
   if (p.grade < MAX_GRADE) return alert("아직 V17을 달성하지 못했습니다!");
-  if (confirm("👑 [등반가 환생]\nV0로 초기화되지만 [영구 성공률 +2%]와 [골드 보상 +20%]를 얻습니다. (골드·아이템은 유지)\n환생하시겠습니까?")) {
+  if (confirm("👑 [등반가 환생]\nV0로 초기화되지만 [골드 보상 +20%]와 희귀 이상 아이템 1개를 받습니다. (골드·도감 유지)\n혜택: 1회 성공률+2% / 2회 드랍률+5%p / 3회 V3 시작 / 4회 테이핑+2 / 5회 엔딩 해금\n환생하시겠습니까?")) {
     p.rebirthCount += 1;
-    p.grade = 0;
+    p.grade = p.rebirthCount >= 3 ? 3 : 0;
+    if (p.rebirthCount >= 4) p.tape = Math.min(3, p.tape + 2);
+    giveItem(p, rollDrop(1));
+    if (p.rebirthCount === 5) addLog(`🐾 ${myCharacter}님 앞에 작은 발자국이 나타났습니다... (엔딩 콘텐츠 해금)`, "success");
     addLog(`👑 [환생 완료] ${myCharacter}님이 제${p.rebirthCount}차 환생에 성공했습니다!`, "success");
     syncAndRender();
   }
@@ -446,7 +572,7 @@ function buy(cost, apply, logMsg, blockedMsg, isBlocked) {
   addLog(`🛒 [상점] ${myCharacter}님 ${logMsg}`, "success");
   syncAndRender();
 }
-window.buyTape = () => buy(1000, p => p.tape += 1, "안전 테이핑 구매!");
+window.buyTape = () => buy(3000, p => p.tape += 1, "안전 테이핑 구매!", "테이핑은 최대 3개까지 보유할 수 있어요!", p => p.tape >= 3);
 window.buyShoes = () => buy(5000, p => p.hasShoes = true, "부토라 뉴코멧 장착! (성공률 +5%)", "이미 착용 중입니다!", p => p.hasShoes);
 window.buyChalkBag = () => buy(15000, p => p.hasChalkBag = true, "초크백 구매! (추락 시 골드 보호)", "이미 보유 중입니다!", p => p.hasChalkBag);
 window.buyTrainingPass = () => buy(8000, p => p.buffNext = true, "트레이닝권 사용! (다음 도전 +10%)", "이미 트레이닝 버프가 대기 중입니다!", p => p.buffNext);
@@ -461,23 +587,24 @@ function triggerEffect(grade) {
 }
 
 function updateUI() {
-  const p = playersData[viewingPlayer];
-  const me = playersData[myCharacter];
-  if (!p || !me) return;
+  const me = playersData[myCharacter] || defaultPlayer();
+  const p = playersData[viewingPlayer] || me;
+  $('my-name-display').textContent = myCharacter || '미설정';
   const isMe = viewingPlayer === myCharacter;
 
   $('current-user-label').textContent = `${viewingPlayer}님의 프로젝트 ${isMe ? '(내 캐릭터)' : '(👀 관전 중)'}`;
-  $('my-sub-info').textContent = `환생 ${me.rebirthCount}회 | 영구 보너스 +${me.rebirthCount * 2}%`;
+  $('my-sub-info').textContent = `환생 ${me.rebirthCount}회 | 영구 보너스 +${rebirthBonus(me.rebirthCount)}%`;
   $('rebirth-main-btn').style.display = (isMe && p.grade >= MAX_GRADE) ? "block" : "none";
 
   $('grade-display').textContent = `V${p.grade}`;
-  $('rate-display').textContent = `성공 확률: ${getSuccessRate(p)}%${p.buffNext ? ' (🎫 버프)' : ''}${p.cheer ? ` (📣 응원 +${p.cheer * 2}%)` : ''} | 완등 보상: +${getRewardGold(p.grade + 1, p.rebirthCount)}G`;
+  $('rate-display').textContent = `성공 확률: ${getSuccessRate(p)}%${p.buffNext ? ' (🎫 버프)' : ''}${p.cheer ? ` (📣 응원 +${p.cheer * 2}%)` : ''} | 완등 보상: +${getRewardGold(p.grade + 1, p.rebirthCount, p)}G`;
 
   $('gold-display').textContent = `${p.gold.toLocaleString()}G`;
   $('gear-display').textContent = p.hasShoes ? "👟 부토라 뉴코멧 (+5%)" : "기본 운동화";
   $('tape-display').textContent = `${p.tape}개`;
   $('chalk-display').textContent = p.hasChalkBag ? "🛡️ 보유중 (골드 보호)" : "미보유";
   $('pass-display').textContent = p.buffNext ? "🎫 대기중 (+10%)" : "없음";
+  $('buff-display').textContent = `성공률 +${passive(p, 'rate')}% · 골드 +${passive(p, 'gold')}%${p.fever > 0 ? ' · 🔥피버 ' + p.fever + '회' : ''}`;
 
   const btn = $('upgrade-btn');
   if (!dbReady) { btn.disabled = true; btn.textContent = "⏳ 데이터 불러오는 중..."; }
@@ -488,7 +615,7 @@ function updateUI() {
   $('cheer-btn').style.display = (dbReady && !isMe) ? 'block' : 'none';
   $('rank-list').innerHTML = [...NAMES].sort((a, b) => score(playersData[b]) - score(playersData[a])).map((n, i) => {
     const d = playersData[n];
-    return `<div class="rank-row"><span>${['🥇', '🥈', '🥉', '4️⃣'][i]} ${n}</span><span>V${d.grade} · 👑${d.rebirthCount}</span></div>`;
+    return `<div class="rank-row"><span>${['🥇', '🥈', '🥉'][i] || (i + 1) + '위'} ${n}</span><span>V${d.grade} · 👑${d.rebirthCount}</span></div>`;
   }).join('');
 
   const shopOn = dbReady && isMe;
@@ -505,7 +632,6 @@ function updateUI() {
 }
 
 $('ver').textContent = 'v' + APP_VERSION;
-checkMyCharacter();
 updateUI();
 if (localStorage.getItem('rocktree_seen_ver') !== APP_VERSION) {
   toggleNotice(true);
