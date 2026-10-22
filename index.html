@@ -78,18 +78,32 @@ button { border-radius:0 !important; border:3px solid #fff !important; box-shado
 button:active { transform:translate(2px,2px) !important; box-shadow:1px 1px 0 #0d0a1f !important; }
 header h1 { color:#ff9ec4; text-shadow:3px 3px 0 #0d0a1f; }
 .grade-badge { text-shadow:3px 3px 0 #0d0a1f; }
+#flash { position:fixed; inset:0; pointer-events:none; opacity:0; z-index:998; }
+#flash.go { animation:flk .8s ease-out; }
+@keyframes flk { 0% { opacity:.55; } 100% { opacity:0; } }
+#drop-toast { position:fixed; top:12px; left:50%; transform:translate(-50%,-170%); z-index:1001; min-width:230px; max-width:90%; text-align:center; background:#2a2350; border:3px solid #fff; box-shadow:4px 4px 0 #0d0a1f; padding:10px 14px; display:flex; flex-direction:column; gap:3px; transition:transform .3s; pointer-events:none; }
+#drop-toast.show { transform:translate(-50%,0); }
+#drop-toast small { color:#b8b0e0; font-size:.7rem; }
+#drop-toast.r1 { border-color:#4dabf7; } #drop-toast.r2 { border-color:#b197fc; }
+#drop-toast.r3 { border-color:#ffd700; box-shadow:0 0 18px #ffd700; } #drop-toast.r4 { border-color:#ff6bd6; box-shadow:0 0 22px #ff6bd6; }
+.dexmini { float:right; width:48px; height:48px; }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.0/dist/galmuri.css">
 </head>
 <body>
 <div id="effect-overlay"></div>
+<div id="flash"></div>
+<div id="drop-toast"></div>
 
 <div id="notice-modal">
   <div class="modal-content">
     <div class="modal-title">📢 락트리 강화소 패치노트</div>
     <div class="modal-body">
-      <p><strong>🔥 v1.6 업데이트 (v1.3~v1.5 포함)</strong></p>
+      <p><strong>🔥 v1.7 업데이트 (v1.3~v1.6 포함)</strong></p>
       <ul>
+        <li><strong>🧑‍🤝‍🧑 6인방 전용 캐릭터</strong><br>조돌맹·은비땅·리치맨·꼬북린·치킨맨·닿이노기린이 티셔츠 도트 그림 그대로 등장! 숨 쉬듯 움직여요.</li>
+        <li><strong>✨ 드랍 연출 &amp; 알림</strong><br>획득하면 팝업이 뜨고, 영웅 이상은 화면이 번쩍! 전설 이상은 모든 친구 화면에 알림이 떠요.</li>
+        <li><strong>👕 치장템 대폭 추가</strong><br>도감에서 미리보기를 보고 바로 착용할 수 있어요.</li>
         <li><strong>🧗 내 캐릭터 &amp; 클라이밍 월</strong><br>도트 캐릭터가 등급에 맞춰 벽을 올라갑니다! 친구 카드를 누르면 친구가 오르는 모습도 볼 수 있어요.</li>
         <li><strong>🎽 꾸미기</strong><br>모자·옷·소품·펫·배경 아이템이 드랍됩니다. 옷장에서 착용하면 친구들 화면에도 보여요. 쫑이·누룽이·깜콩이도 펫으로 따라다녀요!</li>
         <li><strong>🌞 출석 보너스</strong><br>매일 첫 접속에 골드와 아이템 1개! 연속 출석할수록 커지고, 7일마다 희귀 이상이 나옵니다.</li>
@@ -123,7 +137,7 @@ header h1 { color:#ff9ec4; text-shadow:3px 3px 0 #0d0a1f; }
 <div id="ward-modal">
   <div class="modal-content">
     <div class="modal-title">🎽 옷장</div>
-    <canvas id="prev" width="16" height="16" style="width:128px;height:128px;align-self:center"></canvas>
+    <canvas id="prev" width="48" height="48" style="width:128px;height:128px;align-self:center"></canvas>
     <div id="ward-tabs" style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center"></div>
     <div class="modal-body" id="ward-list"></div>
     <button class="modal-close" onclick="toggleWardrobe(false)">닫기</button>
@@ -169,6 +183,7 @@ header h1 { color:#ff9ec4; text-shadow:3px 3px 0 #0d0a1f; }
     <div>🧗‍♂️ 초크백: <span id="chalk-display" class="highlight">미보유</span></div>
     <div>🎫 트레이닝권: <span id="pass-display" class="highlight">없음</span></div>
     <div>🎒 아이템 효과: <span id="buff-display" class="highlight">-</span></div>
+    <div>🎁 드랍 확률: <span id="drop-display" class="highlight">-</span></div>
   </div>
 
   <div class="live-panel" style="text-align:center">
@@ -206,7 +221,7 @@ header h1 { color:#ff9ec4; text-shadow:3px 3px 0 #0d0a1f; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, update, onValue, runTransaction, push, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-const APP_VERSION = '1.6';
+const APP_VERSION = '1.7';
 const firebaseConfig = {
   apiKey: "AIzaSyDglmYcqh8myVGW0qnjNb0RbUJM5W0jweE",
   authDomain: "eunbiland-d5a0d.firebaseapp.com",
@@ -271,6 +286,29 @@ const COS = {
   wings:['천사 날개',3,'acc',[[1,9,3,3,'#fff'],[12,9,3,3,'#fff'],[2,8,1,1,'#fff'],[13,8,1,1,'#fff']]],
   rainbow:['무지개 하늘',3,'bg',[[0,0,16,3,'#ff6b6b'],[0,3,16,3,'#ffd43b'],[0,6,16,3,'#69db7c'],[0,9,16,3,'#4dabf7'],[0,12,16,4,'#b197fc']]]
 };
+Object.assign(COS, {
+  helmet:['클라이밍 헬멧',0,'hat',[[4,1,8,2,'#ffd43b'],[4,3,8,1,'#f59f00']]],
+  bunny:['토끼 귀',1,'hat',[[5,0,1,3,'#fff'],[10,0,1,3,'#fff'],[5,0,1,1,'#ffb3c6'],[10,0,1,1,'#ffb3c6']]],
+  cat:['고양이 귀',1,'hat',[[4,1,2,2,'#555'],[10,1,2,2,'#555'],[4,1,1,1,'#ffb3c6'],[11,1,1,1,'#ffb3c6']]],
+  ribbon:['핑크 리본',1,'hat',[[9,1,3,2,'#ff6b9d'],[8,2,1,1,'#ff6b9d'],[10,2,1,1,'#fff']]],
+  chef:['요리사 모자',2,'hat',[[5,0,6,2,'#fff'],[4,1,8,1,'#fff'],[4,2,8,1,'#eee']]],
+  halo:['천사 링',2,'hat',[[5,0,6,1,'#ffe066']]],
+  overalls:['멜빵바지',1,'top',[[5,9,6,4,'#4dabf7'],[5,9,1,2,'#339af0'],[10,9,1,2,'#339af0']]],
+  fire:['불꽃 티셔츠',2,'top',[[4,9,8,4,'#e03131'],[6,10,4,1,'#ffd43b'],[7,11,2,1,'#ffd43b']]],
+  armor:['황금 갑옷',3,'top',[[4,9,8,4,'#ffd700'],[6,10,4,2,'#f59f00'],[3,9,1,2,'#ffd700'],[12,9,1,2,'#ffd700']]],
+  mask:['마스크',0,'acc',[[5,8,6,1,'#fff'],[5,7,6,1,'#e9ecef']]],
+  bouquet:['꽃다발',1,'acc',[[11,11,3,3,'#ff6b9d'],[12,13,1,2,'#2f9e44']]],
+  guitar:['기타',2,'acc',[[11,8,2,6,'#a0522d'],[10,12,4,3,'#c68642'],[12,8,1,3,'#8d5524']]],
+  phones:['헤드폰',2,'acc',[[4,3,1,4,'#222'],[11,3,1,4,'#222'],[4,2,8,1,'#222']]],
+  medal:['금메달',3,'acc',[[7,10,2,1,'#e74c3c'],[7,11,2,2,'#ffd700']]],
+  dawn:['새벽 암장',0,'bg',[[0,0,16,16,'#a5d8ff'],[0,12,16,4,'#74c0fc']]],
+  beach:['해변',1,'bg',[[0,0,16,9,'#74c0fc'],[0,9,16,3,'#4dabf7'],[0,12,16,4,'#ffe8a3']]],
+  sakura:['벚꽃길',2,'bg',[[0,0,16,16,'#ffe3ec'],[0,12,16,4,'#d6336c'],[2,3,1,1,'#ff8fab'],[7,2,1,1,'#ff8fab'],[12,5,1,1,'#ff8fab'],[5,7,1,1,'#ff8fab']]],
+  space:['우주',3,'bg',[[0,0,16,16,'#050510'],[3,2,1,1,'#fff'],[11,3,1,1,'#fff'],[6,7,2,2,'#7950f2'],[12,9,1,1,'#ffd43b'],[0,13,16,3,'#212529']]],
+  chick:['병아리',1,'pet',[[0,13,3,3,'#ffd43b'],[0,13,1,1,'#fab005'],[1,14,1,1,'#111'],[0,15,1,1,'#fd7e14']]],
+  cat2:['알러지 안 나는 냥이',2,'pet',[[0,13,4,2,'#ced4da'],[3,11,3,3,'#ced4da'],[3,10,1,1,'#ced4da'],[5,10,1,1,'#ced4da'],[4,12,1,1,'#111'],[0,15,1,1,'#adb5bd'],[3,15,1,1,'#adb5bd']]],
+  turtle:['꼬북이',2,'pet',[[0,13,4,2,'#2f9e44'],[1,12,2,1,'#51cf66'],[3,13,2,2,'#8ce99a'],[4,14,1,1,'#111'],[0,15,1,1,'#2f9e44'],[3,15,1,1,'#2f9e44']]]
+});
 Object.keys(COS).forEach(k => { const [n, r, sl, a] = COS[k]; ITEMS[k] = { n, r, e:'cos', s:sl, a, d: SLOTN[sl] + ' 꾸미기 아이템 👕' }; });
 function cleanEq(raw) { const o = {}; if (raw && typeof raw === 'object') SLOTS.forEach(sl => { const id = raw[sl]; if (typeof id === 'string' && ITEMS[id] && ITEMS[id].s === sl) o[sl] = id; }); return o; }
 
@@ -284,6 +322,19 @@ function drawBg(c, ox, oy, sx, sy, p) { rects(c, ox, oy, sx, sy, slotArt(p, 'bg'
 function drawChar(c, ox, oy, sc, p, name, blink) {
   const h = hashName(name), hair = HAIR[h % 6], shirt = SHIRT[(h >> 3) % 6], ey = blink ? 1 : 2;
   const pet = slotArt(p, 'pet'); if (pet) rects(c, ox, oy, sc, sc, pet);
+  const im = sprImg[name], sd = SPR[name];
+  if (im && sd && im.complete && im.naturalWidth) {
+    const w = 16 * sc, k = sc / 3, t = Date.now() / 1000, [xc, yt, hw, hh] = sd.h;
+    const kk = Math.max(0.6, Math.min(1.4, hw / 24)), kv = Math.max(0.5, Math.min(1.4, hh / 21));
+    c.save(); c.translate(ox + w / 2, oy + w);
+    c.scale(1 + 0.02 * Math.sin(t * 4 + 1), 1 + 0.035 * Math.sin(t * 4)); c.rotate(Math.sin(t * 2) * 0.03);
+    c.imageSmoothingEnabled = false; c.drawImage(im, -w / 2, -w, w, w);
+    ['acc', 'hat'].forEach(sl => { const a = slotArt(p, sl); if (!a) return;
+      a.forEach(([x, y, rw, rh, col]) => { c.fillStyle = col;
+        if (y < 9) c.fillRect(-w / 2 + (xc + (x - 8) * 3 * kk) * k, -w + (yt + (y - 1) * 3 * kv) * k, rw * 3 * kk * k, rh * 3 * kv * k);
+        else c.fillRect(-w / 2 + x * sc, -w + y * sc, rw * sc, rh * sc); }); });
+    c.restore(); return;
+  }
   rects(c, ox, oy, sc, sc, [
     [5,4,6,5,'#ffd9b3'],[4,2,8,2,hair],[5,4,6,1,hair],[4,4,1,3,hair],[11,4,1,3,hair],
     [6,6,1,ey,'#2d1b0e'],[9,6,1,ey,'#2d1b0e'],[5,7,1,1,'#ff9eb5'],[10,7,1,1,'#ff9eb5'],[7,8,2,1,'#c0392b'],
@@ -292,13 +343,28 @@ function drawChar(c, ox, oy, sc, p, name, blink) {
   ['top','acc','hat'].forEach(sl => { const a = slotArt(p, sl); if (a) rects(c, ox, oy, sc, sc, a); });
 }
 
+// ── 이미지 캐릭터 (6인방): 목록에 없는 이름은 기본 도트 캐릭터 ──
+const SPR = {"조돌맹": {"h": [20.0, 6, 25, 13], "u": "data:image/png;base64,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"}, "은비땅": {"h": [18.5, 7, 18, 17], "u": "data:image/png;base64,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"}, "리치맨": {"h": [22.0, 6, 15, 15], "u": "data:image/png;base64,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"}, "꼬북린": {"h": [23.5, 16, 22, 11], "u": "data:image/png;base64,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"}, "치킨맨": {"h": [23.0, 6, 11, 13], "u": "data:image/png;base64,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"}, "닿이노기린": {"h": [21.5, 8, 10, 10], "u": "data:image/png;base64,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"}};
+const sprImg = {};
+Object.keys(SPR).forEach(n => { const i = new Image(); i.onload = () => { try { updateUI(); } catch (e) {} }; i.src = SPR[n].u; sprImg[n] = i; });
+let frameN = 0, wardOpen = false;
+function drawMinis() {
+  document.querySelectorAll('canvas.mini[data-n]').forEach(cv => { const n = cv.dataset.n, d = playersData[n]; if (!d) return; const c = cv.getContext('2d'); c.clearRect(0, 0, 48, 48); drawBg(c, 0, 0, 3, 3, d); drawChar(c, 0, 0, 3, d, n, false); });
+}
+function drawPrev() {
+  const p = playersData[myCharacter]; if (!p) return;
+  const c = $('prev').getContext('2d'); c.clearRect(0, 0, 48, 48); drawBg(c, 0, 0, 3, 3, p); drawChar(c, 0, 0, 3, p, myCharacter, false);
+}
+
 // ── 클라이밍 월 장면: 등급이 오를수록 캐릭터가 위로 올라감 ──
 const scCv = document.getElementById('scene'), scX = scCv.getContext('2d');
 let fx = { type: '', t: 0 };
-const holdPos = (i) => ({ x: 30 + ((i * 37) % 64), y: 150 - i * 7.6 });
+const holdPos = (i) => ({ x: 40 + ((i * 37) % 48), y: 150 - i * 5.9 });
 function sceneFrame() {
   const nm = playersData[viewingPlayer] ? viewingPlayer : myCharacter, p = playersData[nm];
   if (!p) return;
+  if ((frameN = (frameN + 1) % 3) === 0) drawMinis();
+  if ($('ward-modal').style.display === 'flex') drawPrev();
   const t = Date.now() / 1000;
   scX.clearRect(0, 0, 128, 160);
   drawBg(scX, 0, 0, 8, 10, p);
@@ -312,7 +378,7 @@ function sceneFrame() {
   if (fx.type && k >= 1) fx.type = '';
   if (fx.type === 'jump') dy -= Math.sin(k * Math.PI) * 10;
   if (fx.type === 'fall') dy += Math.sin(k * Math.PI) * 6;
-  drawChar(scX, Math.round(h.x - 6), Math.round(h.y - 14 + dy), 1, p, nm, (t % 4) < 0.15);
+  drawChar(scX, Math.round(h.x - 22), Math.round(h.y - 44 + dy), 3, p, nm, (t % 4) < 0.15);
 }
 setInterval(sceneFrame, 100);
 
@@ -324,11 +390,11 @@ window.equip = (sl, id) => {
   if (!canAct('꾸미기')) return;
   const p = playersData[myCharacter]; p.eq = { ...p.eq };
   if (id) p.eq[sl] = id; else delete p.eq[sl];
-  syncAndRender(); renderWardrobe();
+  syncAndRender(); renderWardrobe(); renderDex();
 };
 function renderWardrobe() {
   const p = playersData[myCharacter]; if (!p) return;
-  const c = $('prev').getContext('2d'); c.clearRect(0, 0, 16, 16); drawBg(c, 0, 0, 1, 1, p); drawChar(c, 0, 0, 1, p, myCharacter, false);
+  drawPrev();
   $('ward-tabs').innerHTML = SLOTS.map(sl => `<button class="change-btn" style="${sl === wardSlot ? 'background:#3742fa' : ''}" onclick="setSlot('${sl}')">${SLOTN[sl]}</button>`).join('');
   const ids = Object.keys(ITEMS).filter(id => ITEMS[id].s === wardSlot && has(p, id));
   const off = p.eq[wardSlot] ? `<div class="dex-row"><button onclick="equip('${wardSlot}','')">벗기</button></div>` : '';
@@ -356,6 +422,15 @@ const has = (p, id) => (p.items[id] || 0) > 0;
 const passive = (p, e) => Object.keys(ITEMS).reduce((sum, id) => sum + (ITEMS[id].e === e && has(p, id) ? (ITEMS[id].v || 0) : 0), 0);
 const rebirthBonus = (n) => (n >= 1 ? 2 : 0) + Math.max(0, n - 5);
 const dropChance = (p) => Math.max(5, (p.hasChalkBag ? 20 : 50) - passive(p, 'drop'));
+const seenLogs = new Set(); let logsReady = false;
+const dropBase = (p, success) => (success ? 18 : 4) * (p.rebirthCount === 0 ? 2 : 1) + (p.rebirthCount >= 2 ? 5 : 0);
+function flash(color) { const f = $('flash'); f.style.background = color; f.className = ''; void f.offsetWidth; f.className = 'go'; }
+function showDrop(id) {
+  const it = ITEMS[id], R = RAR[it.r], t = $('drop-toast');
+  t.className = 'show r' + it.r;
+  t.innerHTML = `<div>${R.e} NEW DROP!</div><b>${it.n}</b><small>${R.n} · ${it.d}</small>`;
+  clearTimeout(showDrop.h); showDrop.h = setTimeout(() => { t.className = ''; }, it.r >= 3 ? 4000 : 2600);
+}
 function banner(t) { const o = $('effect-overlay'); o.textContent = t; o.style.opacity = '1'; setTimeout(() => o.style.opacity = '0', 1400); }
 
 function rollDrop(minR) {
@@ -369,8 +444,11 @@ function rollDrop(minR) {
 function giveItem(p, id) {
   const it = ITEMS[id];
   p.items[id] = (p.items[id] || 0) + 1;
+  p.seen[id] = 1;
   dirty.add(id);
-  addLog(`${RAR[it.r].e} [드랍] ${myCharacter}님이 ${RAR[it.r].n} 아이템 '${it.n}' 획득!`, "success");
+  addLog(`${RAR[it.r].e} [드랍] ${myCharacter}님이 ${RAR[it.r].n} 아이템 '${it.n}' 획득!`, "success", it.r >= 3 ? `${RAR[it.r].e} ${myCharacter}님이 ${RAR[it.r].n} '${it.n}' 획득!!` : '');
+  showDrop(id);
+  if (it.r >= 2) flash(['', '', '#b197fc', '#ffd700', '#ff6bd6'][it.r]);
   if (it.r >= 3) banner(`${RAR[it.r].e} ${it.n} 획득!`);
 }
 function handleDrops(p, success) {
@@ -379,9 +457,7 @@ function handleDrops(p, success) {
     alert('🐾 ─ ENDING ─\n\n저 멀리서 작은 발소리가 들려옵니다.\n하늘에서 후추가 달려와 품에 안겼습니다.\n\n그 기억은 영원히 함께합니다. 🌈');
     return;
   }
-  let chance = success ? 18 : 4;
-  if (p.rebirthCount === 0) chance *= 2;       // 초보 특전: 드랍 2배
-  if (p.rebirthCount >= 2) chance += 5;        // 환생 2회 혜택
+  const chance = dropBase(p, success);
   if (Math.random() * 100 < chance) giveItem(p, rollDrop(0));
 }
 window.useItem = function (id) {
@@ -389,7 +465,7 @@ window.useItem = function (id) {
   const p = playersData[myCharacter], it = ITEMS[id];
   if (!it || it.e !== 'use' || !has(p, id)) return;
   if (it.u === 'jump' && p.grade >= it.v) return alert('이미 V' + it.v + ' 이상이에요!');
-  p.items[id] -= 1; dirty.add(id);
+  p.seen[id] = 1; p.items[id] -= 1; dirty.add(id);
   if (it.u === 'fever') { p.fever = Math.min(30, p.fever + it.v); banner('🔥 FEVER TIME!'); addLog(`🔥 ${myCharacter}님이 '${it.n}' 사용! 피버타임 ${it.v}회 (성공률 +15%)`, "success"); }
   else if (it.u === 'jump') { p.grade = it.v; banner(`⚡ V${it.v} 점프!`); addLog(`⚡ ${myCharacter}님이 '${it.n}' 사용! V${it.v}로 한방에 점프!`, "success"); }
   else if (it.u === 'tape') { p.tape = Math.min(3, p.tape + it.v); addLog(`🩹 ${myCharacter}님이 '${it.n}' 사용! 안전 테이핑 +${it.v}`, "success"); }
@@ -410,18 +486,23 @@ function renderDex() {
   const p = playersData[myCharacter]; if (!p) return;
   const ids = Object.keys(ITEMS).sort((a, b) => ITEMS[a].r - ITEMS[b].r);
   const spect = viewingPlayer !== myCharacter && NAMES.includes(viewingPlayer);
-  $('dex-title').textContent = `📖 도감 (${ids.filter(i => has(p, i)).length}/${ids.length})`;
+  $('dex-title').textContent = `📖 도감 (${ids.filter(i => p.seen[i] || has(p, i)).length}/${ids.length})`;
   $('dex-list').innerHTML = ids.map(id => {
     const it = ITEMS[id], c = p.items[id] || 0, R = RAR[it.r];
-    if (!c) return `<div class="dex-row dim">${R.e} ???<br><small>${it.r === 4 ? '…모든 여정의 끝에서 만날지도 몰라요' : R.n + ' 등급 · 아직 못 얻음'}</small></div>`;
+    if (!c && !p.seen[id]) return `<div class="dex-row dim">${R.e} ???<br><small>${it.r === 4 ? '…모든 여정의 끝에서 만날지도 몰라요' : R.n + ' 등급 · 아직 못 얻음'}</small></div>`;
     const keep = it.e === 'use' ? 0 : 1;
-    const btn = (it.e === 'use' && !spect ? `<button onclick="useItem('${id}')">사용</button>` : '') + (spect && c > keep ? `<button onclick="giftItem('${id}')">🎁 ${viewingPlayer}님에게</button>` : '');
-    return `<div class="dex-row">${R.e} <b>${it.n}</b> ×${c}<br><small>${it.d}</small><br>${btn}</div>`;
-  }).join('') + '<small style="color:var(--sub)">💡 친구 카드를 눌러 관전한 뒤 도감을 열면 여분 아이템을 선물할 수 있어요.</small>';
+    const wear = it.s && !spect && c > 0 ? (p.eq[it.s] === id ? '✅ 착용중 ' : `<button onclick="equip('${it.s}','${id}')">👕 착용</button>`) : '';
+    const btn = wear + (it.e === 'use' && !spect && c > 0 ? `<button onclick="useItem('${id}')">사용</button>` : '') + (spect && c > keep ? `<button onclick="giftItem('${id}')">🎁 ${viewingPlayer}님에게</button>` : '');
+    return `<div class="dex-row${c ? '' : ' dim'}">${R.e} ${it.s ? `<canvas class="mini dexmini" width="48" height="48" data-id="${id}"></canvas>` : ''}<b>${it.n}</b> ×${c}<br><small>${it.d}</small><br>${btn}</div>`;
+  }).join('') + '<small style="color:var(--sub)">💡 친구 카드를 눌러 관전한 뒤 도감을 열면 여분 아이템을 선물할 수 있어요.<br>🎲 등급 확률: ⚪55% 🔵28% 🟣12% 🟡5%</small>';
+  $('dex-list').querySelectorAll('canvas.dexmini').forEach(cv => {
+    const id = cv.dataset.id, it = ITEMS[id], c = cv.getContext('2d'), t = { ...p, eq: { [it.s]: id }, items: { ...p.items, [id]: 1 } };
+    drawBg(c, 0, 0, 3, 3, t); drawChar(c, 0, 0, 3, t, myCharacter, false);
+  });
 }
 window.toggleDex = (show) => { $('dex-modal').style.display = show ? 'flex' : 'none'; if (show) renderDex(); };
 const $ = (id) => document.getElementById(id);
-const defaultPlayer = () => ({ grade:0, gold:0, tape:0, hasShoes:false, rebirthCount:0, hasChalkBag:false, buffNext:false, cheer:0, fever:0, items:{}, eq:{}, daily:'', streak:0 });
+const defaultPlayer = () => ({ grade:0, gold:0, tape:0, hasShoes:false, rebirthCount:0, hasChalkBag:false, buffNext:false, cheer:0, fever:0, items:{}, eq:{}, daily:'', streak:0, seen:{} });
 
 let db = null, dbReady = false;
 let myCharacter = localStorage.getItem('rocktree_my_char');
@@ -453,6 +534,7 @@ function normalize(raw) {
     fever: Math.min(30, Math.max(0, Math.floor(Number(raw.fever) || 0))),
     items: cleanItems(raw.items),
     eq: cleanEq(raw.eq),
+    seen: cleanItems(raw.seen),
     daily: typeof raw.daily === 'string' ? raw.daily.slice(0, 10) : '',
     streak: Math.min(999, Math.max(0, Math.floor(Number(raw.streak) || 0)))
   };
@@ -464,14 +546,14 @@ function setStatus(type, msg) {
   bar.textContent = msg;
 }
 
-function addLog(text, type = "") {
+function addLog(text, type = "", b = "") {
   const box = $('log-box');
   const item = document.createElement('div');
   item.className = 'log-item ' + type;
   item.textContent = text;
   box.insertBefore(item, box.firstChild);
   while (box.children.length > 50) box.removeChild(box.lastChild);
-  if (db) push(ref(db, 'logs'), { m: text, y: type, t: Date.now() }).catch(() => {});
+  if (db) push(ref(db, 'logs'), { m: text, y: type, t: Date.now(), b: b, u: myCharacter || '' }).catch(() => {});
 }
 
 function showSaveError(err) {
@@ -490,7 +572,9 @@ try {
 // set() 대신 update(): 지정한 필드만 갱신해 다른 필드가 지워지지 않음
 function saveMyData() {
   if (!db || !dbReady || !myCharacter) return Promise.resolve();
-  const { cheer, items, ...rest } = normalize(playersData[myCharacter]);
+  const me0 = playersData[myCharacter];
+  Object.keys(me0.items).forEach(id => { if (me0.items[id] > 0) me0.seen[id] = 1; });
+  const { cheer, items, ...rest } = normalize(me0);
   const ids = [...dirty]; dirty.clear();
   ids.forEach(id => { rest['items/' + id] = items[id] || 0; });
   return update(ref(db, 'players/' + myCharacter), rest)
@@ -536,7 +620,11 @@ if (db) {
 if (db) {
   onValue(query(ref(db, 'logs'), limitToLast(30)), (snap) => {
     const arr = [];
-    snap.forEach(c => { arr.push(c.val()); });
+    snap.forEach(c => {
+      const v = c.val(); arr.push(v);
+      if (!seenLogs.has(c.key)) { seenLogs.add(c.key); if (logsReady && v.b && v.u !== myCharacter && Date.now() - (v.t || 0) < 15000) { banner(v.b); flash('#ffd700'); } }
+    });
+    logsReady = true;
     const box = $('log-box');
     box.innerHTML = '';
     arr.reverse().forEach(l => {
@@ -744,6 +832,7 @@ function updateUI() {
   $('tape-display').textContent = `${p.tape}개`;
   $('chalk-display').textContent = p.hasChalkBag ? "🛡️ 보유중 (골드 보호)" : "미보유";
   $('pass-display').textContent = p.buffNext ? "🎫 대기중 (+10%)" : "없음";
+  $('drop-display').textContent = `성공 ${dropBase(p, true)}% · 실패 ${dropBase(p, false)}%`;
   $('buff-display').textContent = `성공률 +${passive(p, 'rate')}% · 골드 +${passive(p, 'gold')}%${p.fever > 0 ? ' · 🔥피버 ' + p.fever + '회' : ''}`;
 
   const btn = $('upgrade-btn');
@@ -765,11 +854,11 @@ function updateUI() {
     const d = playersData[name];
     const crown = d.rebirthCount > 0 ? `👑${d.rebirthCount}` : '';
     return `<div class="player-card ${name === viewingPlayer ? 'active' : ''} ${name === myCharacter ? 'is-me' : ''}" onclick="selectViewPlayer('${name}')">
-      <canvas class="mini" width="16" height="16" data-n="${name}"></canvas><div class="card-top"><span>${crown} ${name} ${name === myCharacter ? '👤' : ''}</span><span style="color:#ffa502;font-weight:bold;">V${d.grade}</span></div>
+      <canvas class="mini" width="48" height="48" data-n="${name}"></canvas><div class="card-top"><span>${crown} ${name} ${name === myCharacter ? '👤' : ''}</span><span style="color:#ffa502;font-weight:bold;">V${d.grade}</span></div>
       <div class="card-sub">${getTitle(d)}</div><div class="card-sub">환생 ${d.rebirthCount}회 · ${d.gold.toLocaleString()}G</div>
     </div>`;
   }).join('');
-  document.querySelectorAll('canvas.mini').forEach(cv => { const n = cv.dataset.n, d = playersData[n]; if (!d) return; const c = cv.getContext('2d'); drawBg(c, 0, 0, 1, 1, d); drawChar(c, 0, 0, 1, d, n, false); });
+  drawMinis();
 }
 
 $('ver').textContent = 'v' + APP_VERSION;
