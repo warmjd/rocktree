@@ -101,6 +101,30 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
 .li.cheer { color:#ffd43b; }
 .chip2 { display:inline-block; margin:3px; padding:5px 8px; border-radius:8px; font-size:.72rem; background:rgba(0,0,0,.3); color:#7f8a9c; }
 .chip2.on { background:#3a3000; color:#ffe08a; border:1px solid #ffd43b; }
+.daybar { font-size:.74rem; color:#ffe08a; background:rgba(0,0,0,.28); border-radius:8px; padding:6px 8px; margin-bottom:8px; line-height:1.4; }
+.daybar.lt { background:#1b2a5c; color:#bcd0ff; }
+.titles { font-size:.74rem; color:#ffe08a; margin-top:8px; line-height:1.5; }
+#cd { position:fixed; inset:0; z-index:75; display:none; align-items:center; justify-content:center; font-size:8rem; font-weight:900; color:#ffd43b; background:rgba(0,0,0,.65); text-shadow:0 0 30px #ff6b6b; }
+#toast.link { pointer-events:auto; cursor:pointer; border-color:#ff4757; }
+.idea { display:flex; flex-direction:column; gap:6px; }
+.idea input,.idea select,#idea-text { padding:10px; border-radius:8px; border:1px solid #455a64; background:#121214; color:#fff; font-size:1rem; width:100%; }
+#idea-text { font-size:.74rem; }
+.gauge { position:absolute; inset:-14px; border-radius:50%; --p:0; background:conic-gradient(hsl(var(--h),95%,65%) calc(var(--p) * 1%),rgba(255,255,255,.07) 0); -webkit-mask:radial-gradient(circle,transparent 62%,#000 64%); mask:radial-gradient(circle,transparent 62%,#000 64%); pointer-events:none; }
+#fxitem { position:relative; display:inline-block; will-change:transform; }
+#crack { position:absolute; inset:0; width:100%; height:100%; opacity:0; pointer-events:none; }
+#fxitem.pop { animation:pops .7s; } @keyframes pops { 0% { transform:scale(.5); filter:brightness(3); } 40% { transform:scale(1.6); filter:brightness(2) drop-shadow(0 0 30px #ffd43b); } 100% { transform:scale(1); filter:none; } }
+#fxitem.slump { animation:slump 1s forwards; } @keyframes slump { to { transform:translateY(14px) scaleY(.82); filter:grayscale(1) brightness(.6); } }
+#fxitem.shatter { animation:shat 1s forwards; } @keyframes shat { to { transform:scale(.3) rotate(40deg) translateY(30px); opacity:0; filter:blur(3px) grayscale(1); } }
+#stage.blur { filter:blur(3px); }
+#podium { display:flex; align-items:flex-end; justify-content:center; gap:6px; min-height:210px; }
+.pcol { flex:1; display:flex; flex-direction:column; align-items:center; cursor:pointer; min-width:0; }
+.pcol.me .pname { color:#ffa502; }
+.pav { min-height:64px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; }
+.pav .av { height:52px; }
+.crown { font-size:1.2rem; animation:bob 1.4s infinite alternate; } @keyframes bob { to { transform:translateY(-4px); } }
+.pname { font-size:.78rem; font-weight:bold; margin-top:4px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .pg { font-size:.72rem; color:#ffd43b; min-height:1em; }
+.pblock { width:100%; display:flex; flex-direction:column; align-items:center; padding-top:6px; border-radius:8px 8px 0 0; color:#222; font-size:1.1rem; }
+.pblock b { font-size:1.6rem; } .pblock.r1 { height:110px; background:linear-gradient(#ffe066,#e0a100); } .pblock.r2 { height:80px; background:linear-gradient(#e8ecf1,#9aa6b8); } .pblock.r3 { height:60px; background:linear-gradient(#e7a36a,#a5602b); }
 </style>
 </head>
 <body>
@@ -111,17 +135,21 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
 <div class="ov" id="join"><div class="box"><h3>누구로 입장할까요?</h3><small>있는 캐릭터를 눌러 입장하거나, 새 이름을 만들어 주세요</small><div id="join-names"></div><input id="join-input" maxlength="8" placeholder="새 캐릭터 이름 (최대 8자)" autocomplete="off"><button class="small-btn" style="padding:11px;font-size:.95rem" onclick="createName()">✨ 새 캐릭터 만들기</button><div class="msg" id="join-msg"></div><button id="join-close" class="small-btn gray" onclick="closeJoin()">닫기</button></div></div>
 <div class="ov" id="pin"><div class="box"><h3 id="pin-title">비밀번호</h3><small id="pin-desc" style="white-space:pre-line"></small><input id="pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off"><div class="msg" id="pin-msg"></div><button class="small-btn" style="padding:11px;font-size:.95rem" onclick="submitPin()">확인</button><button class="small-btn gray" onclick="cancelPin()">취소</button></div></div>
 <div class="ov" id="resetov" style="background:rgba(60,0,0,.93)"><div class="box" style="border-color:#ff4757"><h3 style="color:#ff6b81">💀 태초마을로 귀환...</h3><div id="reset-msg" style="white-space:pre-line;text-align:center;line-height:1.6;font-size:.9rem"></div><button class="small-btn" style="padding:11px;background:#3742fa" onclick="openShare('reset')">📸 굴욕 카드 저장</button><button class="small-btn gray" onclick="closeReset()">…괜찮아, 다시 가보자</button></div></div>
+<div class="ov" id="evov"><div class="box"><h3 id="ev-title"></h3><small id="ev-desc"></small><button class="small-btn" id="ev-a" style="padding:12px;font-size:.9rem" onclick="pickEv(0)"></button><button class="small-btn" id="ev-b" style="padding:12px;font-size:.9rem;background:#3742fa" onclick="pickEv(1)"></button></div></div>
+<div id="cd"></div>
 <div class="ov" id="share"><div class="box"><h3>📸 자랑 카드</h3><img id="share-img" alt="자랑 카드"><small>이미지를 길게 눌러 저장하거나 아래 버튼으로 공유하세요</small><button class="small-btn" style="padding:11px;background:#3742fa" onclick="shareImg()">공유 / 저장</button><button class="small-btn gray" onclick="closeShare()">닫기</button></div></div>
 
 <div class="wrap">
-  <header><h1>락트리 강화소</h1><p>시즌 2 · 단순하지만 정말 어렵다</p></header>
+  <header style="position:relative"><button id="snd-btn" class="small-btn" style="position:absolute;right:0;top:0;background:#3a3f55" onclick="toggleSnd()">🔊</button><h1>락트리 강화소</h1><p>시즌 2 · 단순하지만 정말 어렵다</p></header>
   <div id="ended"></div>
+  <button id="report-btn" class="small-btn" style="display:none;width:100%;padding:11px;background:#3742fa" onclick="openReport()">📸 시즌 리포트 카드 저장</button>
   <div class="status loading" id="status">⏳ 서버에서 데이터 불러오는 중...</div>
 
   <div class="card me"><span>👤 내 캐릭터: <strong id="me-name">미설정</strong></span><button class="small-btn" onclick="openJoin()">변경·참가</button></div>
 
   <div class="card" id="stage">
-    <div id="icon">🧗</div>
+    <div id="daybar" class="daybar"></div><div id="ltbar" class="daybar lt" style="display:none"></div>
+    <div id="fxitem"><div id="gauge" class="gauge"></div><div id="icon">🧗</div><canvas id="crack"></canvas></div>
     <div id="grade">V0</div>
     <div id="route">-</div>
     <div id="story"></div>
@@ -130,25 +158,31 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
     <div class="energy"><div id="e-fill"></div></div>
     <div id="e-text"></div>
     <button id="go" onclick="tryUpgrade()" disabled>⏳ 불러오는 중...</button>
+    <button id="live-btn" class="small-btn" style="display:none;width:100%;margin-top:8px;padding:11px;background:#e03131" onclick="goLive()">🔴 생중계 도전 선언 (모두에게 알림!)</button>
     <div id="result"></div>
     <button id="share-btn" class="small-btn" style="width:100%;margin-top:8px;padding:11px;font-size:.9rem;display:none;background:#3742fa" onclick="openShare()">📸 자랑 카드 저장</button>
   </div>
 
   <div class="card" id="cheer" style="display:none"><div class="title">📣 <span id="cheer-to"></span>님에게 응원 · 조롱 보내기 <small style="color:#9aa6b8">(이펙트만! 게임에는 영향 없음)</small></div>
     <div class="ebtns"><button onclick="sendCheer('🔥')">🔥</button><button onclick="sendCheer('👏')">👏</button><button onclick="sendCheer('😂')">😂</button><button onclick="sendCheer('🫵')">🫵</button><button onclick="sendCheer('🪦')">🪦</button><button onclick="sendCheer('🤡')">🤡</button></div>
-    <div style="display:flex;gap:6px;margin-top:8px"><input id="cheer-msg" maxlength="30" placeholder="한 줄 메시지 (30자, 선택)" autocomplete="off"></div>
-    <div class="pre"><button onclick="preset('내 발 아래구나~')">내 발 아래구나~</button><button onclick="preset('밟고 간다 ㅋㅋ')">밟고 간다 ㅋㅋ</button><button onclick="preset('꽉 잡아!')">꽉 잡아!</button><button onclick="preset('할래말래 하지마')">할래말래 하지마</button></div></div>
-  <div class="card"><div class="title">🧗 실시간 등반 현황 (터치하면 관전)</div><div id="wall"></div></div>
+    <div style="display:flex;gap:6px;margin-top:8px"><input id="cheer-msg" maxlength="30" placeholder="한 줄 메시지 (30자)" autocomplete="off" onkeydown="if(event.key==='Enter')sendCheer('💬')"><button class="small-btn" style="padding:0 16px;font-size:.9rem;white-space:nowrap;background:#3742fa" onclick="sendCheer('💬')">💬 보내기</button></div>
+    <div class="pre"><button onclick="preset('내 발 아래구나~')">내 발 아래구나~</button><button onclick="preset('밟고 간다 ㅋㅋ')">밟고 간다 ㅋㅋ</button><button onclick="preset('꽉 잡아!')">꽉 잡아!</button><button onclick="preset('할래말래 하지마')">할래말래 하지마</button></div>
+    <button class="small-btn" style="margin-top:8px;padding:9px;background:#3742fa;width:100%" onclick="setRival()">🎯 라이벌로 지정하기</button></div>
+  <div class="card"><div class="title">🏅 실시간 시상대 (터치하면 관전)</div><div id="podium"></div></div>
+  <div class="card"><div class="title">🧗 실시간 등반 현황 (터치하면 관전)</div><div id="wall"></div><div id="titles" class="titles"></div></div>
   <div class="card"><div class="title">🔥 지금 오르는 사람들 (터치하여 관전)</div><div id="players"></div></div>
   <div class="card hall"><div class="title">🏆 명예의 전당</div><div id="hall"></div></div>
   <div class="card rules"><div class="title">📜 시즌2 규칙</div><ul>
     <li>도전은 ⚡체력을 1 씁니다. 체력은 20분마다 1씩 차고 최대 8입니다. 바쁜 날엔 모아 둔 체력으로 도전하세요.</li>
     <li>실패하면 그대로이거나, V10부터는 추락할 수 있어요. V14부터는 추락이 더 잦습니다.</li>
+    <li>🌙 매일 밤 9시~10시는 <b>락트리 타임</b>! 접속해서 체력 보너스를 받아가세요 (하루 1회). 요일마다 컨셉 데이도 바뀝니다.</li>
     <li>예상 못한 일이 가끔 일어납니다. 한 번에 두 칸을 오르기도, 두 칸을 잃기도 해요. V16부터는 실패하면 아주 가끔 <b>태초마을(V1)</b>로 돌아갈 수 있습니다 😈</li>
     <li>V17에 처음 오르는 사람이 나오면 <b>시즌이 종료</b>됩니다. 그 사람이 장경욱이 인정한 클라이머가 됩니다!</li>
     <li>내 캐릭터는 비밀번호(숫자 4자리)로 지켜집니다. V15부터는 도전 성공 때마다 강력한 연출이 터지고, 자랑 카드를 이미지로 저장할 수 있어요.</li></ul></div>
   <div class="card"><div class="title">🎖 업적 (선택한 캐릭터)</div><div id="ach"></div></div>
-  <div class="card" id="admin" style="display:none"><div class="title">🛠 운영자 (조돌맹 전용) · 캐릭터 삭제</div><div id="admin-list"></div></div>
+  <div class="card" id="admin" style="display:none"><div class="title">🛠 운영자 (조돌맹 전용) · 캐릭터 삭제</div><div id="admin-list"></div>
+    <div class="title" style="margin-top:12px">📥 레벨 이야기 제안함 (복사해서 클로드에게 붙여넣기)</div><textarea id="idea-text" readonly rows="5"></textarea><button class="small-btn" style="margin-top:6px;padding:9px" onclick="copyIdeas()">📋 전체 복사</button></div>
+  <div class="card"><div class="title">✍️ 레벨 이야기 제안 <small style="color:#9aa6b8">(다음 시즌에 반영될 수 있어요)</small></div><div class="idea"><select id="idea-lv"><option value="1">V1</option><option value="2">V2</option><option value="3">V3</option><option value="4">V4</option><option value="5">V5</option><option value="6">V6</option><option value="7">V7</option><option value="8">V8</option><option value="9">V9</option><option value="10">V10</option><option value="11">V11</option><option value="12">V12</option><option value="13">V13</option><option value="14">V14</option><option value="15">V15</option><option value="16">V16</option><option value="17">V17</option></select><input id="idea-n" maxlength="20" placeholder="레벨 이름 (예: 필라이트 한 피처)" autocomplete="off"><input id="idea-s" maxlength="60" placeholder="한 줄 이야기 (60자)" autocomplete="off"><button class="small-btn" style="padding:11px" onclick="sendIdea()">제안하기</button></div></div>
   <div class="card"><div class="title">💬 락트리 소식</div><div id="log"></div></div>
 </div>
 
@@ -204,14 +238,14 @@ const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt
 
 const $ = (id) => document.getElementById(id);
 const ls = { get: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
-const fresh = () => ({ season: 2, grade: 0, energy: MAXE, at: Date.now(), tries: 0, best: 0, cleared: 0, pin: '', ach: {} });
+const fresh = () => ({ season: 2, grade: 0, energy: MAXE, at: Date.now(), tries: 0, best: 0, cleared: 0, pin: '', ach: {}, rival: '', live: 0, ltDay: '', dKey: '', dFall: 0, dTries: 0, falls: 0 });
 const NAME_RE = /^[가-힣A-Za-z0-9_-]{1,8}$/;
 const num = (v, lo, hi, d) => { v = Number(v); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
 function norm(raw) {
   if (!raw || typeof raw !== 'object' || raw.season !== 2) return null;     // 시즌1 데이터는 초기화 대상
-  return { season: 2, grade: Math.floor(num(raw.grade, 0, 17, 0)), energy: Math.floor(num(raw.energy, 0, MAXE, MAXE)), at: num(raw.at, 0, 4e12, Date.now()), tries: Math.floor(num(raw.tries, 0, 1e9, 0)), best: Math.floor(num(raw.best, 0, 17, 0)), cleared: num(raw.cleared, 0, 4e12, 0), pin: typeof raw.pin === 'string' ? raw.pin.slice(0, 80) : '', ach: cleanAch(raw.ach) };
+  return { season: 2, grade: Math.floor(num(raw.grade, 0, 17, 0)), energy: Math.floor(num(raw.energy, 0, MAXE, MAXE)), at: num(raw.at, 0, 4e12, Date.now()), tries: Math.floor(num(raw.tries, 0, 1e9, 0)), best: Math.floor(num(raw.best, 0, 17, 0)), cleared: num(raw.cleared, 0, 4e12, 0), pin: typeof raw.pin === 'string' ? raw.pin.slice(0, 80) : '', ach: cleanAch(raw.ach), rival: NAME_RE.test(raw.rival) ? raw.rival : '', live: num(raw.live, 0, 4e12, 0), ltDay: typeof raw.ltDay === 'string' ? raw.ltDay.slice(0, 10) : '', dKey: typeof raw.dKey === 'string' ? raw.dKey.slice(0, 10) : '', dFall: Math.floor(num(raw.dFall, 0, 1e6, 0)), dTries: Math.floor(num(raw.dTries, 0, 1e6, 0)), falls: Math.floor(num(raw.falls, 0, 1e9, 0)) };
 }
-const pub = (p) => ({ season: 2, grade: p.grade, energy: p.energy, at: p.at, tries: p.tries, best: p.best, cleared: p.cleared });
+const pub = (p) => ({ season: 2, grade: p.grade, energy: p.energy, at: p.at, tries: p.tries, best: p.best, cleared: p.cleared, ltDay: p.ltDay, dKey: p.dKey, dFall: p.dFall, dTries: p.dTries, falls: p.falls });
 function refill(p) {
   const now = Date.now(), g = Math.floor((now - p.at) / REGEN);
   if (g > 0) { p.energy = Math.min(MAXE, p.energy + g); p.at = p.energy >= MAXE ? now : p.at + g * REGEN; }
@@ -230,7 +264,7 @@ let logsReady = false; const seenLogs = new Set();
 Object.keys(SPRITE).forEach(n => { const i = new Image(); i.src = SPRITE[n]; sprImg[n] = i; });
 
 function setStatus(t, m) { const b = $('status'); b.className = 'status ' + t; b.textContent = m; }
-function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('show'), 3200); }
+function toast(m, who) { const t = $('toast'); t.textContent = m; t.classList.add('show'); t.classList.toggle('link', !!who); t.onclick = who ? () => { selectView(who); t.classList.remove('show'); } : null; clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('show'), who ? 6000 : 3200); }
 function log(text, type = '', b = '', extra = null) {
   const d = document.createElement('div'); d.className = 'li ' + type; d.textContent = text; const box = $('log'); box.insertBefore(d, box.firstChild);
   if (db) push(ref(db, 'logs'), { m: text, y: type, t: Date.now(), s: 2, b, u: me || '', ...(extra || {}) }).catch(() => {});
@@ -254,10 +288,11 @@ if (db) {
     NAMES = Object.keys(val).filter(n => NAME_RE.test(n) && val[n] && typeof val[n] === 'object');
     NAMES.forEach(n => { const q = norm(val[n]); stale[n] = !q; if (!(n === me && !first && P[n] && Date.now() - (P[n]._t || 0) < 1500)) P[n] = q || fresh(); });
     if (first) { dbReady = true; clearTimeout(timer); setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중'); }
-    render();
+    rivalCheck(); render();
     if (first) setTimeout(startJoin, 0);
   }, () => setStatus('error', '❌ 데이터 읽기 실패 (Firebase 규칙을 확인하세요)'));
   onValue(ref(db, 'meta/ended'), (s) => { ended = s.val(); render(); }, () => {});
+  onValue(query(ref(db, 'ideas'), limitToLast(100)), (snap) => { ideas = []; snap.forEach(c => { ideas.push(c.val()); }); render(); }, () => {});
   onValue(ref(db, '.info/connected'), (s) => { if (dbReady) setStatus(s.val() ? 'ok' : 'loading', s.val() ? '✅ 서버와 연결됨 · 자동 저장 중' : '⚠️ 연결이 끊겼습니다. 재연결 중...'); });
   onValue(query(ref(db, 'logs'), limitToLast(30)), (snap) => {
     const arr = [];
@@ -276,7 +311,7 @@ const fxc = $('fx'), fxx = fxc.getContext('2d'); let parts = [];
 function sizeFx() { fxc.width = innerWidth; fxc.height = innerHeight; }
 sizeFx(); addEventListener('resize', sizeFx);
 function burst(x, y, n, cols) { for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, s = 2 + Math.random() * 6; parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 2, l: 60 + Math.random() * 40, c: cols[i % cols.length] }); } }
-function loop() { fxx.clearRect(0, 0, fxc.width, fxc.height); parts = parts.filter(q => q.l > 0 && q.y < fxc.height + 40); parts.forEach(q => { q.x += q.vx; q.y += q.vy; if (!q.e) q.vy += .12; q.l--; if (q.e) { fxx.globalAlpha = 1; fxx.font = '28px sans-serif'; fxx.fillText(q.e, q.x, q.y); } else { fxx.globalAlpha = Math.min(1, q.l / 30); fxx.fillStyle = q.c; fxx.fillRect(q.x, q.y, 5, 5); } }); fxx.globalAlpha = 1; requestAnimationFrame(loop); }
+function loop() { fxx.clearRect(0, 0, fxc.width, fxc.height); parts = parts.filter(q => q.l > 0 && q.y < fxc.height + 60); parts.forEach(q => { if (q.tx !== undefined) { q.x += (q.tx - q.x) * .12; q.y += (q.ty - q.y) * .12; } else { q.x += q.vx; q.y += q.vy; if (!q.e) q.vy += .12; } q.l--; if (q.e) { fxx.globalAlpha = 1; fxx.font = '28px sans-serif'; fxx.fillText(q.e, q.x, q.y); } else { fxx.globalAlpha = Math.min(1, q.l / 20); fxx.fillStyle = q.c; fxx.fillRect(q.x, q.y, 5, 5); } }); fxx.globalAlpha = 1; requestAnimationFrame(loop); }
 loop();
 function celebrate(g) {
   if (g < 15) return;
@@ -297,14 +332,17 @@ function rain(e) { for (let i = 0; i < 16; i++) parts.push({ x: Math.random() * 
 function incoming(v) {
   if (v.k === 'cheer') { if (v.to === me || v.to === view) { rain(v.e || '🔥'); if (v.to === me && v.c) toast(`${v.u}: ${v.c}`); } return; }
   if (v.k === 'reset') { rain('😂'); rain('🪦'); toast(v.b || '💀 태초마을 귀환!'); return; }
+  if (v.k === 'live') { toast(v.b, v.u); celebrate(15); return; }
+  if (v.k === 'rival') { if (v.to === me) toast(`🎯 ${v.u}님이 당신을 라이벌로 지정했습니다!`); return; }
   if (v.b) { toast(v.b); celebrate(15); }
 }
 let cheerAt = 0;
 window.sendCheer = function (e) {
   if (!dbReady || !me || view === me || !P[view]) return;
+  const c = $('cheer-msg').value.trim().slice(0, 30);
+  if (e === '💬' && !c) return toast('보낼 메시지를 적어주세요 ✍️');
   if (Date.now() - cheerAt < 3000) return toast('잠깐! 3초에 한 번만 보낼 수 있어요');
-  cheerAt = Date.now();
-  const c = $('cheer-msg').value.trim().slice(0, 30); $('cheer-msg').value = '';
+  cheerAt = Date.now(); $('cheer-msg').value = '';
   rain(e); log(`${e} ${me} → ${view}${c ? ': ' + c : ''}`, 'cheer', '', { k: 'cheer', to: view, e, c });
 };
 window.preset = (t) => { $('cheer-msg').value = t; };
@@ -326,6 +364,152 @@ function showReset() {
   document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 650);
 }
 window.closeReset = () => { $('resetov').style.display = 'none'; };
+
+// ── 요일 컨셉 · 락트리 타임 · 이벤트 · 생중계 · 라이벌 · 제안 ──
+const DAYS = [
+  { n: '🐶 응원견 데이', d: '이벤트 만남이 2배로 자주 나와요', em: 2 },
+  { n: '☁️ 머피의 날', d: '추락 확률 ×1.4 (머피의 법칙 업적 찬스!)', fm: 1.4 },
+  { n: '🍺 필라이트 데이', d: '2단계 상승·하락 확률이 모두 2배 (취기 아니고 기세!)', dm: 2, f2m: 2 },
+  { n: '🍰 은비랜드 데이', d: '2단계 상승 확률 2배! 같이 놀자~', dm: 2 },
+  { n: '🍳 고급 요리 데이', d: '추락 확률 ×0.5 (든든하게 먹고 가자)', fm: 0.5 },
+  { n: '🌙 불금 락트리 타임', d: '오늘 밤 9시 보너스 체력이 +5로 커져요', lt: 5 },
+  { n: '🚿 물대포 데이', d: '꼬북린의 물대포 점프 확률 3배', jm: 3 }
+];
+const dayInfo = () => DAYS[new Date().getDay()];
+const todayStr = () => new Date().toLocaleDateString('sv');
+const LT_HOUR = 21, ltOn = () => new Date().getHours() === LT_HOUR, ltBonus = () => dayInfo().lt || 3;
+let ideas = [], liveBusy = false, curEv = null, lastCmp;
+const EVENTS = [
+  { t: '꼬북린의 다이나믹 할래말래', d: '꼬북린이 속삭인다… 할래? 말래?', o: [{ l: '할래! (성공률 +25%, 실패하면 추락)', rate: 25, forceFall: 1 }, { l: '말래… (체력 소모 없이 넘기기)', skip: 1 }] },
+  { t: '리치맨의 필라이트 유혹', d: '리치맨이 한 모금을 권한다. 취기 아니고 기세!', o: [{ l: '한 모금! (성공률 +15%, 실패하면 추락)', rate: 15, forceFall: 1 }, { l: '참는다 (이번엔 추락 면제)', noFall: 1 }] },
+  { t: '조돌맹의 사진 요청', d: '조돌맹이 캐논 R7을 들었다. 자세 잡아줘!', o: [{ l: '포즈 잡기 (성공률 +20%, 체력 1 추가 소모)', rate: 20, cost: 1 }, { l: '그냥 오른다', rate: 0 }] },
+  { t: '닿이노기린의 팔', d: '닿이노기린이 긴 팔을 쭉 뻗어준다.', o: [{ l: '팔을 잡는다 (성공률 +12%)', rate: 12 }, { l: '내 힘으로 (추락 면제)', noFall: 1 }] },
+  { t: '치킨맨의 쫄보 모드', d: '치킨맨이 벌벌 떨며 쳐다본다…', o: [{ l: '용기를 낸다 (성공률 +18%, 실패하면 추락)', rate: 18, forceFall: 1 }, { l: '쫄아서 내려온다 (체력 소모 없음)', skip: 1 }] }
+];
+function openEvent() {
+  curEv = pick(EVENTS); $('ev-title').textContent = curEv.t; $('ev-desc').textContent = curEv.d;
+  $('ev-a').textContent = curEv.o[0].l; $('ev-b').textContent = curEv.o[1].l; $('evov').style.display = 'flex';
+}
+window.pickEv = function (i) {
+  const o = curEv.o[i]; $('evov').style.display = 'none';
+  if (o.skip) { const g = P[me].grade; setResult('fail', g, g, '망설이다 시간만 보냈다… (체력 소모 없음)'); log(`🤔 ${me}님이 「${curEv.t}」에서 물러났습니다`, 'fail'); return; }
+  tryUpgrade(o);
+};
+window.claimLT = function () {
+  if (!dbReady || !me || ended) return;
+  const p = P[me], t = todayStr(); if (!ltOn() || p.ltDay === t) return;
+  refill(p); p.energy = Math.min(MAXE, p.energy + ltBonus()); if (p.energy >= MAXE) p.at = Date.now(); p.ltDay = t;
+  toast(`🌙 락트리 타임 보너스! 체력 +${ltBonus()}`); log(`🌙 ${me}님이 락트리 타임 보너스를 받았습니다 (체력 +${ltBonus()})`, 'success'); render(); save();
+};
+function countdown(n, cb) { const c = $('cd'); c.style.display = 'flex'; let i = n; const step = () => { if (i < 0) { c.style.display = 'none'; cb(); return; } c.textContent = i > 0 ? String(i) : '🧗'; i--; setTimeout(step, 800); }; step(); }
+window.goLive = function () {
+  if (!dbReady || !me || view !== me || ended || liveBusy) return;
+  const p = P[me]; if (p.grade < 13 || p.grade >= 17) return;
+  refill(p); if (p.energy < 1) return toast('⚡ 체력이 없어요');
+  liveBusy = true; p.live = Date.now() + 25000; update(ref(db, 'players/' + me), { live: p.live }).catch(() => {});
+  log(`🔴 ${me}님이 V${p.grade}→V${p.grade + 1} 도전을 선언했습니다! 지금 모두 주목!`, 'success', `🔴 ${me}님이 V${p.grade + 1} 도전 중! (눌러서 보러가기)`, { k: 'live' });
+  countdown(3, () => { liveBusy = false; tryUpgrade({ live: 1 }); });
+};
+window.setRival = function () {
+  if (!me || view === me || !P[view] || !dbReady) return;
+  P[me].rival = view; lastCmp = undefined; update(ref(db, 'players/' + me), { rival: view }).catch(onErr);
+  log(`🎯 ${me}님이 ${view}님을 라이벌로 지정했습니다!`, 'success', '', { k: 'rival', to: view }); toast(`🎯 ${view}님을 라이벌로 지정했어요`); render();
+};
+function rivalCheck() {
+  const m = P[me]; if (!m || !m.rival || !P[m.rival]) { lastCmp = undefined; return; }
+  const c = Math.sign(m.grade - P[m.rival].grade);
+  if (lastCmp !== undefined && c !== lastCmp && c !== 0) toast(c < 0 ? `😤 ${m.rival}님이 나를 추월했다!` : `🏃 ${m.rival}님을 추월했다!`);
+  if (c !== 0 || lastCmp === undefined) lastCmp = c;
+}
+window.sendIdea = function () {
+  if (!db || !me) return toast('먼저 입장해 주세요');
+  const lv = Number($('idea-lv').value), n = $('idea-n').value.trim().slice(0, 20), s = $('idea-s').value.trim().slice(0, 60);
+  if (!n || !s) return toast('레벨 이름과 한 줄 이야기를 모두 적어주세요');
+  push(ref(db, 'ideas'), { lv, n, s, u: me, t: Date.now() }).then(() => { $('idea-n').value = ''; $('idea-s').value = ''; toast('✍️ 제안 완료! 다음 시즌에 반영될 수 있어요'); }).catch(() => toast('❌ 저장 실패 (Firebase 규칙에 ideas를 추가해야 해요)'));
+};
+window.copyIdeas = function () { const t = $('idea-text'); t.select(); try { navigator.clipboard.writeText(t.value).then(() => toast('📋 복사됨! 대화창에 붙여넣어 주세요')); } catch (e) { toast('텍스트를 길게 눌러 복사하세요'); } };
+window.openReport = function () {
+  if (!ended) return;
+  const c = document.createElement('canvas'); c.width = 720; c.height = 960; const x = c.getContext('2d');
+  const bg = x.createLinearGradient(0, 0, 0, 960); bg.addColorStop(0, '#3a2a00'); bg.addColorStop(1, '#120c00'); x.fillStyle = bg; x.fillRect(0, 0, 720, 960);
+  x.strokeStyle = '#ffd43b'; x.lineWidth = 10; x.strokeRect(20, 20, 680, 920);
+  x.textAlign = 'center'; x.fillStyle = '#ffd43b'; x.font = 'bold 46px sans-serif'; x.fillText('🏆 락트리 시즌2 리포트', 360, 110);
+  const fk = [...NAMES].sort((a, b) => P[b].falls - P[a].falls)[0], tour = NAMES.filter(n => P[n].ach.reset), total = NAMES.reduce((s, n) => s + P[n].tries, 0);
+  const lines = [['장경욱이 인정한 클라이머', `${ended.name} (${ended.tries}번 만에 완등)`], ['참가자', `${NAMES.length}명 · 총 도전 ${total}번`], ['가장 많이 추락한 사람', fk && P[fk].falls ? `${fk} (${P[fk].falls}회)` : '-'], ['🏘️ 태초마을 관광객', tour.join(', ') || '아무도 없음']];
+  lines.forEach((l, i) => { x.fillStyle = '#ffe08a'; x.font = 'bold 30px sans-serif'; x.fillText(l[0], 360, 230 + i * 150); x.fillStyle = '#fff'; x.font = 'bold 40px sans-serif'; x.fillText(l[1].slice(0, 22), 360, 285 + i * 150); });
+  x.fillStyle = '#8f9bb0'; x.font = '24px sans-serif'; x.fillText(new Date(ended.at || Date.now()).toLocaleDateString('ko-KR') + ' · ' + location.host, 360, 900);
+  shareCv = c; $('share-img').src = c.toDataURL('image/png'); $('share').style.display = 'flex';
+};
+
+// ── 강화 연출 (수상한 전당포 스타일): IDLE → CHARGING → RESULT_SUCCESS / RESULT_FAIL ──
+const CHARGE_MS = 1800;
+let charging = false;
+const Snd = (() => {
+  let ac = null, master = null, bg = null, mode = ls.get('rocktree_snd') || '1';   // 0 무음 · 1 효과음 · 2 효과음+BGM
+  const ctx = () => { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); master = ac.createGain(); master.gain.value = .6; master.connect(ac.destination); } catch (e) { ac = null; } } if (ac && ac.state === 'suspended') ac.resume(); return ac; };
+  const tone = (type, f0, f1, dur, vol, delay = 0) => { const a = mode !== '0' && ctx(); if (!a) return; const t = a.currentTime + delay, o = a.createOscillator(), g = a.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(1, f1), t + dur); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + dur); o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + .05); };
+  const noise = (dur, vol, delay = 0, hp = 0) => { const a = mode !== '0' && ctx(); if (!a) return; const n = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n); const s = a.createBufferSource(), g = a.createGain(), f = a.createBiquadFilter(), t = a.currentTime + delay; s.buffer = buf; f.type = hp ? 'highpass' : 'lowpass'; f.frequency.value = hp || 900; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur); s.connect(f); f.connect(g); g.connect(master); s.start(t); };
+  return {
+    get mode() { return mode; },
+    click() { tone('sine', 160, 45, .18, .9); noise(.08, .35); tone('square', 90, 60, .12, .25); },
+    riser(ms) { const a = mode !== '0' && ctx(); if (!a) return; const t = a.currentTime, d = ms / 1000, o = a.createOscillator(), o2 = a.createOscillator(), lfo = a.createOscillator(), lg = a.createGain(), g = a.createGain(); o.type = 'sawtooth'; o2.type = 'sine'; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(880, t + d); o2.frequency.setValueAtTime(55, t); o2.frequency.exponentialRampToValueAtTime(440, t + d); lfo.frequency.setValueAtTime(4, t); lfo.frequency.linearRampToValueAtTime(26, t + d); lg.gain.value = .2; lfo.connect(lg); lg.connect(g.gain); g.gain.setValueAtTime(.05, t); g.gain.linearRampToValueAtTime(.45, t + d); g.gain.linearRampToValueAtTime(.0001, t + d + .08); o.connect(g); o2.connect(g); g.connect(master); [o, o2, lfo].forEach(x => { x.start(t); x.stop(t + d + .1); }); },
+    success() { [523, 659, 784, 1047].forEach((f, i) => tone('square', f, f, .22, .26, i * .09)); tone('triangle', 1568, 1568, .7, .3, .4); tone('sine', 2093, 2093, .9, .18, .45); noise(.5, .12, .35, 5000); },
+    fail() { tone('sawtooth', 320, 60, .55, .45); tone('square', 180, 40, .6, .3, .05); noise(.55, .5); [0, .12, .24].forEach((d, i) => tone('sine', 140 - i * 25, 60, .14, .4, .55 + d)); },
+    bgm(start) {
+      const a = ctx(); if (!a) return;
+      if (!start || mode !== '2') { if (bg) { const old = bg; bg = null; old.g.gain.setTargetAtTime(0, a.currentTime, .2); setTimeout(() => { old.os.forEach(o => { try { o.stop(); } catch (e) {} }); clearInterval(old.iv); }, 700); } return; }
+      if (bg) return;
+      const g = a.createGain(), f = a.createBiquadFilter(), ch = [[220, 261.6, 329.6], [174.6, 220, 261.6], [261.6, 329.6, 392], [196, 246.9, 293.7]]; g.gain.value = 0; f.type = 'lowpass'; f.frequency.value = 900; f.connect(g); g.connect(master);
+      const os = ch[0].map(fr => { const o = a.createOscillator(); o.type = 'triangle'; o.frequency.value = fr; o.connect(f); o.start(); return o; }); let k = 0;
+      const iv = setInterval(() => { k = (k + 1) % 4; os.forEach((o, i) => o.frequency.setTargetAtTime(ch[k][i], a.currentTime, .4)); }, 3500);
+      g.gain.setTargetAtTime(.07, a.currentTime, .6); bg = { g, os, iv };
+    },
+    duck(d) { if (!bg || !ac) return; const t = ac.currentTime; bg.g.gain.setTargetAtTime(d ? .012 : .07, t, .25); bg.os.forEach(o => o.detune.setTargetAtTime(d ? -1200 : 0, t, .3)); },
+    cycle() { mode = mode === '0' ? '1' : (mode === '1' ? '2' : '0'); ls.set('rocktree_snd', mode); this.bgm(mode === '2'); return mode; }
+  };
+})();
+const Fx = {
+  state: 'IDLE', hooks: { IDLE: [], CHARGING: [], RESULT_SUCCESS: [], RESULT_FAIL: [] },
+  on(s, f) { this.hooks[s].push(f); }, set(s) { this.state = s; this.hooks[s].forEach(f => f()); }
+};
+Fx.on('CHARGING', () => { Snd.duck(true); Snd.click(); Snd.riser(CHARGE_MS); });       // 사운드 훅: BGM 다운 + 클릭 + 상승음
+Fx.on('RESULT_SUCCESS', () => { Snd.duck(false); Snd.success(); });
+Fx.on('RESULT_FAIL', () => { Snd.duck(false); Snd.fail(); });
+window.toggleSnd = function () { const m = Snd.cycle(); $('snd-btn').textContent = m === '0' ? '🔇' : (m === '1' ? '🔊' : '🎶'); toast(m === '0' ? '🔇 소리 끔' : (m === '1' ? '🔊 효과음 켬' : '🎶 효과음 + 배경음 켬')); };
+function flashColor(c) { const f = $('flash'); f.style.background = c; f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); }
+function itemCenter() { const r = $('fxitem').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }
+function charge(cb) {
+  if (charging) return;
+  charging = true; Snd.bgm(true); Fx.set('CHARGING');
+  const item = $('fxitem'), t0 = performance.now(); $('go').disabled = true;
+  const step = (now) => {
+    const t = Math.min(1, (now - t0) / CHARGE_MS), amp = 1 + 15 * t * t, fr = 14 + 46 * t;
+    const dx = Math.sin(now / 1000 * fr * 6.283) * amp, dy = Math.cos(now / 1000 * fr * 5.1) * amp * .6;
+    item.style.transform = `translate(${dx}px,${dy}px) scale(${1 - .1 * t}) rotate(${dx * .4}deg)`;
+    item.style.filter = `drop-shadow(0 0 ${4 + 26 * t}px hsl(var(--h),95%,${55 + t * 20}%)) brightness(${1 + t * .6})`;
+    $('gauge').style.setProperty('--p', t * 100);
+    const [cx, cy] = itemCenter();
+    if (Math.random() < .35 + t * .6) { const a = Math.random() * 6.283, d = 110 + Math.random() * 90; parts.push({ x: cx + Math.cos(a) * d, y: cy + Math.sin(a) * d, tx: cx, ty: cy, l: 26, c: Math.random() < .5 ? '#ffd43b' : '#ffffff' }); }
+    if (t < 1) { requestAnimationFrame(step); return; }
+    item.style.transform = ''; item.style.filter = ''; $('gauge').style.setProperty('--p', 0); charging = false;
+    cb();
+    if (Fx.state === 'CHARGING') { Snd.duck(false); Fx.set('IDLE'); }
+  };
+  requestAnimationFrame(step);
+}
+function crack() { const cv = $('crack'); cv.width = 120; cv.height = 120; const c = cv.getContext('2d'); c.clearRect(0, 0, 120, 120); c.strokeStyle = '#ff4757'; c.lineWidth = 3; for (let k = 0; k < 5; k++) { let x = 60, y = 60; c.beginPath(); c.moveTo(x, y); for (let i = 0; i < 5; i++) { x += (Math.random() - .5) * 55; y += (Math.random() - .5) * 55; c.lineTo(x, y); } c.stroke(); } cv.style.opacity = 1; }
+function fxResult(ok, kind) {
+  const item = $('fxitem'), [cx, cy] = itemCenter();
+  if (ok) {
+    Fx.set('RESULT_SUCCESS'); flashColor('#fff7c2'); $('stage').classList.add('blur'); setTimeout(() => $('stage').classList.remove('blur'), 200);
+    item.classList.add('pop'); burst(cx, cy, 90, ['#ffd43b', '#ffffff', '#ff6b9d', '#4dabf7', '#69db7c']);
+  } else {
+    Fx.set('RESULT_FAIL'); flashColor('#ff2b2b'); document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 650);
+    if (kind === 'fail') item.classList.add('slump');
+    else { crack(); setTimeout(() => { item.classList.add('shatter'); burst(cx, cy, 60, ['#ff4757', '#c0392b', '#ffffff', '#7f1d1d']); }, 320); }
+  }
+  setTimeout(() => { item.classList.remove('pop', 'slump', 'shatter'); $('crack').style.opacity = 0; Fx.set('IDLE'); }, 1500);
+}
 
 // ── 참가 / 비밀번호 ──
 let pinCtx = null;
@@ -385,26 +569,33 @@ window.adminDel = (n) => {
 
 // ── 도전 ──
 function pop(g) { const s = $('stage'); s.classList.remove('pop'); void s.offsetWidth; s.classList.add('pop'); celebrate(g); }
-window.tryUpgrade = function () {
+window.tryUpgrade = function (mods) {
+  if (liveBusy && !(mods && mods.live)) return;
   if (!dbReady || !me || view !== me) return;
   if (ended) return toast('🔒 시즌이 종료되었어요');
   const p = P[me]; if (p.grade >= 17) return;
   refill(p);
   if (p.energy < 1) return toast('⚡ 체력이 없어요! 충전되면 다시 도전하세요');
+  const D = dayInfo();
+  if (!mods && p.grade >= 1 && Math.random() < 0.07 * (D.em || 1)) return openEvent();
+  mods = mods || {};
+  if (!mods._charged && !mods.live) return charge(() => tryUpgrade({ ...mods, _charged: 1 }));
   if (p.energy >= MAXE) p.at = Date.now();
-  p.energy--; p.tries++; p._t = Date.now();
+  p.energy = Math.max(0, p.energy - 1 - (mods.cost || 0)); p.tries++; p._t = Date.now();
+  const tk = todayStr(); if (p.dKey !== tk) { p.dKey = tk; p.dFall = 0; p.dTries = 0; } p.dTries++;
   const g = p.grade; let to = g, kind = 'fail', msg = pick(FAIL), b = '';
   if (g === 14 && Math.random() < EGG) { to = 16; kind = 'egg'; msg = '(나.. 조돌맹..) 조돌맹 빙의했더니 안되던게 뚫렸다!'; award(p, 'egg'); b = `👻 ${me}님이 조돌맹에 빙의해 V14→V16 순간이동!`; }
-  else if (Math.random() * 100 < RATE[g]) {
+  else if (Math.random() * 100 < Math.min(95, RATE[g] + (mods.rate || 0))) {
     to = g + 1; kind = 'win'; msg = pick(WIN);
-    if (g >= 1 && g <= 4 && Math.random() < JACK) { to = 5; kind = 'jump'; msg = '꼬북린의 물대포를 타고 높이 올라갑니다!! 🚿'; award(p, 'jump'); b = `🚿 ${me}님이 물대포를 타고 V${g}→V5 승천!`; }
-    else if (g >= 1 && g <= 10 && Math.random() < DBL) { to = g + 2; kind = 'double'; msg = pick(DBLMSG); award(p, 'dbl'); }
-  } else if (g === 16 && Math.random() < RESET) { to = 1; kind = 'reset'; msg = '정상 코앞에서 발이 미끄러졌다… 그대로 태초마을까지 굴러 내려갔다!'; award(p, 'reset'); b = `💀 ${me}님이 V16에서 태초마을(V1)로 귀환…! 다 같이 위로(?)해 주세요`; }
-  else if (g > 0 && Math.random() < fall(g)) {
-    if (g >= 11 && g <= 14 && Math.random() < 0.35) { const f = pick(F2); to = Math.max(0, g - 2); kind = 'fall2'; msg = f[0]; award(p, f[1]); }
+    if (g >= 1 && g <= 4 && Math.random() < JACK * (D.jm || 1)) { to = 5; kind = 'jump'; msg = '꼬북린의 물대포를 타고 높이 올라갑니다!! 🚿'; award(p, 'jump'); b = `🚿 ${me}님이 물대포를 타고 V${g}→V5 승천!`; }
+    else if (g >= 1 && g <= 10 && Math.random() < DBL * (D.dm || 1)) { to = g + 2; kind = 'double'; msg = pick(DBLMSG); award(p, 'dbl'); }
+  } else if (g === 16 && !mods.noFall && Math.random() < RESET) { to = 1; kind = 'reset'; msg = '정상 코앞에서 발이 미끄러졌다… 그대로 태초마을까지 굴러 내려갔다!'; award(p, 'reset'); b = `💀 ${me}님이 V16에서 태초마을(V1)로 귀환…! 다 같이 위로(?)해 주세요`; }
+  else if (g > 0 && !mods.noFall && (mods.forceFall || Math.random() < Math.min(0.9, fall(g) * (D.fm || 1)))) {
+    if (g >= 11 && g <= 14 && Math.random() < Math.min(0.8, 0.35 * (D.f2m || 1))) { const f = pick(F2); to = Math.max(0, g - 2); kind = 'fall2'; msg = f[0]; award(p, f[1]); }
     else { to = g - 1; kind = 'fall'; }
   }
   p.grade = to; p.best = Math.max(p.best, to);
+  if (to < g) { p.falls++; p.dFall++; }
   if (to >= 10) award(p, 'first10');
   if (to >= 16) award(p, 'v16');
   const adv = to > g;
@@ -413,6 +604,7 @@ window.tryUpgrade = function () {
   if (adv) pop(to);
   else if (to < g) { const s = $('stage'); s.classList.remove('hit'); void s.offsetWidth; s.classList.add('hit'); }
   if (kind === 'reset') showReset();
+  fxResult(adv, kind);
   const endNow = to === 17;
   if (endNow) {
     p.cleared = Date.now();
@@ -420,7 +612,7 @@ window.tryUpgrade = function () {
     $('end-text').textContent = `${me}님, 장경욱이 인정한 클라이머! 🏅\n장경욱이 지켜보다 엄지를 척 들었습니다 👍\n총 ${p.tries}번의 도전 끝에 정상에 섰고,\n락트리 시즌2는 이제 종료됩니다.`;
     $('ending').style.display = 'flex';
   }
-  render();
+  rivalCheck(); render();
   if (endNow) {
     const up = {}; Object.entries(pub(p)).forEach(([k, v]) => { up['players/' + me + '/' + k] = v; });
     achQ.forEach(id => { up['players/' + me + '/ach/' + id] = p.ach[id]; }); achQ.clear();
@@ -445,7 +637,8 @@ function renderWall() {
     el.classList.toggle('mine', n === me); el.classList.toggle('view', n === view);
     if (prevG[n] !== g) { const d = g - prevG[n]; el.classList.remove('up', 'down'); void el.offsetWidth; el.classList.add(d > 0 ? 'up' : 'down'); el.querySelector('.mv').textContent = d > 0 ? `⬆+${d}` : `⬇${d}`; clearTimeout(el._t); el._t = setTimeout(() => { el.classList.remove('up', 'down'); el.querySelector('.mv').textContent = ''; }, 3000); prevG[n] = g; }
     el.querySelector('small').textContent = n + (P[n].ach.reset ? '🏘️' : '') + (P[n].cleared ? '🏆' : '');
-    el.querySelector('.tg').textContent = n === me ? '나' : (mg === null ? '' : (g > mg ? '👆위' : (g < mg ? '👇발아래' : '🤝')));
+    const rv = P[me] && P[me].rival;
+    el.querySelector('.tg').textContent = Date.now() < (P[n].live || 0) ? '🔴LIVE' : (n === me ? '나' : ((n === rv ? '🎯' : '') + (mg === null ? '' : (g > mg ? '👆위' : (g < mg ? '👇발아래' : '🤝')))));
   });
 }
 function renderStage() {
@@ -453,11 +646,19 @@ function renderStage() {
   refill(p);
   document.documentElement.style.setProperty('--h', 250 - g * 13);
   $('stage').classList.toggle('hot', g >= 15);
+  const D = dayInfo(); $('daybar').textContent = `📅 오늘은 ${D.n} — ${D.d}`;
+  const lt = $('ltbar'), canLT = dbReady && me && P[me] && ltOn() && !ended && P[me].ltDay !== todayStr();
+  lt.style.display = ltOn() && !ended ? 'block' : 'none';
+  lt.innerHTML = canLT ? `🌙 락트리 타임! 오늘 한 번 <button class="small-btn" style="margin-left:6px;padding:5px 10px" onclick="claimLT()">체력 +${ltBonus()} 받기</button>` : '🌙 락트리 타임 진행 중 (오늘 보너스는 이미 받았어요)';
+  $('live-btn').style.display = dbReady && mine && g >= 13 && g < 17 && !ended && p.energy >= 1 && !liveBusy ? 'block' : 'none';
   $('me-name').textContent = me || '미설정';
-  $('icon').textContent = ICON[g]; $('grade').textContent = 'V' + g;
+  const sp = SPRITE[sk(view)], ik = sp ? 'S' + view : 'E' + ICON[g];
+  if ($('icon').dataset.k !== ik) { $('icon').dataset.k = ik; $('icon').innerHTML = sp ? `<img src="${sp}" alt="" style="height:88px;image-rendering:pixelated">` : ICON[g]; }
+  $('grade').textContent = 'V' + g;
   $('route').textContent = `${view || '-'}님 · 「${LV[g][0]}」${mine ? '' : ' (👀 관전 중)'}`;
   $('story').textContent = LV[g][1];
-  $('rate').textContent = g >= 17 ? '🏆 정복 완료' : `성공 확률 ${RATE[g]}%${fall(g) ? ` · 실패 시 추락 ${Math.round(fall(g) * 100)}%` : ''}`;
+  const fl = fall(g) * (dayInfo().fm || 1);
+  $('rate').textContent = g >= 17 ? '🏆 정복 완료' : `성공 확률 ${RATE[g]}%${fl ? ` · 실패 시 추락 ${Math.round(fl * 100)}%` : ''}`;
   $('next').textContent = g >= 17 ? '' : `다음 V${g + 1}: 「${LV[g + 1][0]}」`;
   $('e-fill').style.width = (p.energy / MAXE * 100) + '%';
   const ms = Math.max(0, p.at + REGEN - Date.now());
@@ -466,6 +667,7 @@ function renderStage() {
   if (!dbReady) { go.disabled = true; go.textContent = '⏳ 불러오는 중...'; }
   else if (!mine) { go.disabled = true; go.textContent = '👀 관전 중 (조작 불가)'; }
   else if (g >= 17) { go.disabled = true; go.textContent = '🏆 완등 완료!'; }
+  else if (charging) { go.disabled = true; go.textContent = '⚡ 기를 모으는 중...'; }
   else if (ended) { go.disabled = true; go.textContent = '🔒 시즌 종료'; }
   else if (p.energy < 1) { go.disabled = true; go.textContent = '⚡ 체력 충전 중...'; }
   else { go.disabled = false; go.textContent = '🧗 도전하기! (⚡-1)'; }
@@ -473,7 +675,14 @@ function renderStage() {
   $('cheer').style.display = dbReady && me && view && view !== me && P[view] ? 'block' : 'none';
   $('cheer-to').textContent = view;
 }
+function podImg(n) { const k = sk(n), s = k && SPRITE[k]; return s ? `<img class="av" src="${s}" alt="">` : `<span class="av dot" style="background:hsl(${hueOf(n)},60%,45%)">${n[0]}</span>`; }
+function renderPodium() {
+  const rk = [...NAMES].sort((a, b) => P[b].grade - P[a].grade || P[b].best - P[a].best || P[a].tries - P[b].tries).slice(0, 3);
+  const slot = (n, r) => `<div class="pcol ${n && n === me ? 'me' : ''}" ${n ? `onclick="selectView('${n}')"` : ''}><div class="pav">${n && r === 1 ? '<div class="crown">👑</div>' : ''}${n ? podImg(n) : ''}</div><div class="pname">${n || '—'}</div><div class="pg">${n ? 'V' + P[n].grade : ''}</div><div class="pblock r${r}"><span>${['', '🥇', '🥈', '🥉'][r]}</span><b>${r}</b></div></div>`;
+  $('podium').innerHTML = slot(rk[1], 2) + slot(rk[0], 1) + slot(rk[2], 3);
+}
 function renderLists() {
+  renderPodium();
   renderWall();
   $('players').innerHTML = [...NAMES].sort((a, b) => P[b].grade - P[a].grade || P[b].best - P[a].best).map(n => {
     const q = P[n];
@@ -482,16 +691,22 @@ function renderLists() {
   const done = NAMES.filter(n => P[n].cleared).sort((a, b) => P[a].cleared - P[b].cleared);
   const top3 = [...NAMES].sort((x, y) => P[y].grade - P[x].grade || P[y].best - P[x].best).slice(0, 3).map((n, i) => `${['🥇', '🥈', '🥉'][i]} ${n} V${P[n].grade}`).join(' · ');
   $('hall').innerHTML = SEASON1.map(t => `<div>${t}</div>`).join('') + (ended && Array.isArray(ended.rank) ? `<div style="margin-top:6px;color:#ffe08a">🏆 시즌2 기록 — ${esc(ended.name)} 완등 (${esc(ended.tries)}번 도전)</div>` + ended.rank.map((r, i) => `<div>${i + 1}위 ${esc(r[0])} · V${esc(r[1])} · ${esc(r[2])}번</div>`).join('') : `<div style="color:#9aa6b8;margin-top:6px">시즌2 진행 중 — ${top3 || '참가자 없음'}</div>`);
+  const tk = todayStr(), td = NAMES.filter(n => P[n].dKey === tk), top = (f) => td.reduce((a, n) => (!a || f(P[n]) > f(P[a]) ? n : a), null);
+  const tf = top(q => q.dFall), tt = top(q => q.dTries), tp = [...NAMES].sort((x, y) => P[y].grade - P[x].grade)[0];
+  $('titles').textContent = [tp ? `👑 오늘의 정상 ${tp}(V${P[tp].grade})` : '', tf && P[tf].dFall ? `☁️ 오늘의 머피 ${tf}(추락 ${P[tf].dFall}회)` : '', tt && P[tt].dTries ? `💪 오늘의 노력왕 ${tt}(${P[tt].dTries}회)` : ''].filter(Boolean).join(' · ') || '오늘 첫 도전자를 기다리는 중!';
   const av = (P[view] || P[me] || fresh()).ach;
   $('ach').innerHTML = Object.keys(ACH).map(k => `<span class="chip2 ${av[k] ? 'on' : ''}">${av[k] ? ACH[k][0] + ' ' + ACH[k][1] : '🔒 ???'}</span>`).join('');
-  const e = $('ended'); e.style.display = ended ? 'block' : 'none';
+  const e = $('ended'); e.style.display = ended ? 'block' : 'none'; $('report-btn').style.display = ended ? 'block' : 'none';
   if (ended) e.textContent = `🔒 시즌2 종료! ${ended.name}님이 ${ended.tries}번 만에 V17 완등 — 장경욱이 인정한 클라이머 🏅`;
   $('admin').style.display = me === ADMIN ? 'block' : 'none';
+  if (me === ADMIN) $('idea-text').value = ideas.map(i => `V${i.lv} | ${i.n} | ${i.s} | by ${i.u}`).join('\n');
   if (me === ADMIN) $('admin-list').innerHTML = NAMES.filter(n => n !== ADMIN).map(n => `<div class="arow"><span>${n} · V${P[n].grade} · ${P[n].tries}회${P[n].pin ? '' : ' · 🔓'}</span><span><button class="small-btn" style="background:#3742fa" onclick="adminReset('${n}')">비번초기화</button> <button class="small-btn" onclick="adminDel('${n}')">삭제</button></span></div>`).join('') || '<small>삭제할 캐릭터가 없어요</small>';
 }
 function render() { renderStage(); renderLists(); }
 window.selectView = (n) => { view = n; render(); };
 setInterval(() => { if (dbReady) renderStage(); }, 1000);
+addEventListener('pointerdown', () => { if (Snd.mode === '2') Snd.bgm(true); }, { once: true });
+setInterval(() => { if (dbReady) renderWall(); }, 3000);
 render();
 
 // ── 자랑 카드 (이미지 저장) ──
