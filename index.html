@@ -52,17 +52,48 @@ header p { font-size:.8rem; color:#b8c0cc; margin-top:2px; }
 #toast.show { transform:translate(-50%,0); }
 #ending { position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:60; display:none; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:30px; gap:14px; }
 #ending h2 { font-size:2rem; color:#ffd43b; } #ending p { line-height:1.6; font-size:.95rem; }
+#fx { position:fixed; inset:0; pointer-events:none; z-index:55; }
+#flash { position:fixed; inset:0; pointer-events:none; opacity:0; z-index:54; background:#ffd43b; }
+#flash.go { animation:fl .9s ease-out; } @keyframes fl { 0% { opacity:.6; } 100% { opacity:0; } }
+body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translate(0); } 20% { transform:translate(-6px,3px); } 40% { transform:translate(6px,-3px); } 60% { transform:translate(-4px,-2px); } 80% { transform:translate(4px,2px); } }
+#stage.hot { animation:glow 2s infinite alternate; } @keyframes glow { from { box-shadow:0 0 10px hsl(var(--h),95%,60%); } to { box-shadow:0 0 34px hsl(var(--h),95%,65%); } }
+#ended { display:none; background:#4a3b00; border:2px solid #ffd43b; border-radius:12px; padding:10px; text-align:center; font-weight:bold; color:#ffe08a; font-size:.85rem; line-height:1.4; }
+.ov { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:70; display:none; justify-content:center; align-items:center; padding:20px; }
+.box { background:#1e1e24; border:2px solid #ffa502; border-radius:14px; width:100%; max-width:380px; padding:18px; display:flex; flex-direction:column; gap:10px; max-height:90vh; overflow-y:auto; }
+.box h3 { color:#ffa502; text-align:center; } .box small { color:#b8c0cc; text-align:center; line-height:1.4; }
+.box input { width:100%; padding:11px; border-radius:8px; border:1px solid #455a64; background:#121214; color:#fff; font-size:1rem; text-align:center; }
+.msg { color:#ff6b81; font-size:.78rem; min-height:1em; text-align:center; }
+#join-names { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+.jn { background:#2f3542; color:#fff; border:1px solid #455a64; border-radius:8px; padding:8px 12px; font-size:.85rem; }
+.gray { background:#57606f !important; }
+#wall { display:flex; flex-direction:column; gap:3px; }
+.wrow { display:flex; align-items:center; gap:8px; min-height:42px; padding:3px 8px; border-radius:8px; background:hsl(calc(250 - var(--g) * 13),35%,16%); }
+.wrow.me { box-shadow:inset 0 0 0 2px #ffa502; }
+.wl { width:38px; font-size:.72rem; font-weight:bold; color:#cbd5e1; }
+.wa { display:flex; flex-wrap:wrap; gap:6px; align-items:flex-end; }
+.wp { display:flex; flex-direction:column; align-items:center; cursor:pointer; }
+.wp small { font-size:.58rem; color:#e2e8f0; }
+.av { width:30px; height:30px; object-fit:contain; image-rendering:pixelated; }
+.dot { display:inline-flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold; font-size:.8rem; color:#fff; }
+#share-img { width:100%; border-radius:10px; }
+.arow { display:flex; justify-content:space-between; align-items:center; font-size:.8rem; padding:4px 0; }
 </style>
 </head>
 <body>
 <div id="toast"></div>
 <div id="ending"><h2>🏆 V17 완등!</h2><p id="end-text"></p><button class="small-btn" style="padding:12px 24px;font-size:1rem" onclick="document.getElementById('ending').style.display='none'">확인</button></div>
 
+<canvas id="fx"></canvas><div id="flash"></div>
+<div class="ov" id="join"><div class="box"><h3>누구로 입장할까요?</h3><small>있는 캐릭터를 눌러 입장하거나, 새 이름을 만들어 주세요</small><div id="join-names"></div><input id="join-input" maxlength="8" placeholder="새 캐릭터 이름 (최대 8자)" autocomplete="off"><button class="small-btn" style="padding:11px;font-size:.95rem" onclick="createName()">✨ 새 캐릭터 만들기</button><div class="msg" id="join-msg"></div><button id="join-close" class="small-btn gray" onclick="closeJoin()">닫기</button></div></div>
+<div class="ov" id="pin"><div class="box"><h3 id="pin-title">비밀번호</h3><small id="pin-desc" style="white-space:pre-line"></small><input id="pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off"><div class="msg" id="pin-msg"></div><button class="small-btn" style="padding:11px;font-size:.95rem" onclick="submitPin()">확인</button><button class="small-btn gray" onclick="cancelPin()">취소</button></div></div>
+<div class="ov" id="share"><div class="box"><h3>📸 자랑 카드</h3><img id="share-img" alt="자랑 카드"><small>이미지를 길게 눌러 저장하거나 아래 버튼으로 공유하세요</small><button class="small-btn" style="padding:11px;background:#3742fa" onclick="shareImg()">공유 / 저장</button><button class="small-btn gray" onclick="closeShare()">닫기</button></div></div>
+
 <div class="wrap">
   <header><h1>락트리 강화소</h1><p>시즌 2 · 단순하지만 정말 어렵다</p></header>
+  <div id="ended"></div>
   <div class="status loading" id="status">⏳ 서버에서 데이터 불러오는 중...</div>
 
-  <div class="card me"><span>👤 내 캐릭터: <strong id="me-name">미설정</strong></span><button class="small-btn" onclick="joinFlow(me||'')">변경·참가</button></div>
+  <div class="card me"><span>👤 내 캐릭터: <strong id="me-name">미설정</strong></span><button class="small-btn" onclick="openJoin()">변경·참가</button></div>
 
   <div class="card" id="stage">
     <div id="icon">🧗</div>
@@ -74,21 +105,24 @@ header p { font-size:.8rem; color:#b8c0cc; margin-top:2px; }
     <div class="energy"><div id="e-fill"></div></div>
     <div id="e-text"></div>
     <button id="go" onclick="tryUpgrade()" disabled>⏳ 불러오는 중...</button>
+    <button id="share-btn" class="small-btn" style="width:100%;margin-top:8px;padding:11px;font-size:.9rem;display:none;background:#3742fa" onclick="openShare()">📸 자랑 카드 저장</button>
   </div>
 
-  <div class="card"><div class="title">🧗 등반 기록 (V1 → V17)</div><div id="ladder"></div></div>
+  <div class="card"><div class="title">🧗 실시간 등반 현황 (터치하면 관전)</div><div id="wall"></div></div>
   <div class="card"><div class="title">🔥 지금 오르는 사람들 (터치하여 관전)</div><div id="players"></div></div>
   <div class="card hall"><div class="title">🏆 명예의 전당</div><div id="hall"></div></div>
   <div class="card rules"><div class="title">📜 시즌2 규칙</div><ul>
     <li>도전은 ⚡체력을 1 씁니다. 체력은 20분마다 1씩 차고 최대 8입니다. 바쁜 날엔 모아 둔 체력으로 도전하세요.</li>
     <li>실패하면 그대로이거나, V10부터는 추락할 수 있어요. V14부터는 추락이 더 잦습니다.</li>
-    <li>V17에 먼저 오르는 사람이 명예의 전당에 올라갑니다. 평균 500번쯤 걸리는 길입니다.</li></ul></div>
+    <li>V17에 처음 오르는 사람이 나오면 <b>시즌이 종료</b>됩니다. 그 사람이 장경욱이 인정한 클라이머가 됩니다!</li>
+    <li>내 캐릭터는 비밀번호(숫자 4자리)로 지켜집니다. V15부터는 도전 성공 때마다 강력한 연출이 터지고, 자랑 카드를 이미지로 저장할 수 있어요.</li></ul></div>
+  <div class="card" id="admin" style="display:none"><div class="title">🛠 운영자 (조돌맹 전용) · 캐릭터 삭제</div><div id="admin-list"></div></div>
   <div class="card"><div class="title">💬 락트리 소식</div><div id="log"></div></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set, update, onValue, push, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, set, update, remove, onValue, push, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDglmYcqh8myVGW0qnjNb0RbUJM5W0jweE",
@@ -100,11 +134,10 @@ const firebaseConfig = {
   appId: "1:962454047078:web:9b76ee5ff5e9a4fe6da0a7"
 };
 
-// ── 난이도 (평균 약 490번 시도 → 하루 24번이면 약 20일) ──
-const MAXE = 8, REGEN = 20 * 60 * 1000;
+const ADMIN = '조돌맹';                       // 운영자(캐릭터 삭제 가능)
+const MAXE = 8, REGEN = 20 * 60 * 1000;       // 체력: 최대 8, 20분마다 +1
 const RATE = [92, 88, 84, 78, 70, 64, 58, 52, 46, 40, 34, 28, 22, 17, 13, 10, 8];   // V(g)→V(g+1) 성공률 %
 const fall = (g) => g >= 14 ? 0.3 : (g >= 10 ? 0.15 : 0);                           // 실패 시 추락 확률
-// 레벨마다 달라지는 이야기: [이름, 설명]
 const LV = [
   ['락트리 입장', '신발 끈부터 묶자. 아직 아무것도 모른다'],
   ['돌자비 검은비니', '비니를 눌러쓰고 첫 스타트 홀드를 잡았다'],
@@ -123,29 +156,39 @@ const LV = [
   ['셔터 속 순간', '조돌맹이 캐논 R7으로 이 장면을 남긴다'],
   ['하늘의 응원', '천사 후추가 위에서 내려다보고 있다 🐾'],
   ['마지막 한 수', '팔이 떨린다. 모두가 숨을 죽인다'],
-  ['락트리 완등!', '전설이 되었다. 락트리의 하늘이 열린다']
+  ['장경욱이 인정한 클라이머', '장경욱이 지켜보다 엄지를 척 들었다 👍 락트리의 하늘이 열린다']
 ];
 const ICON = ['🧗','🧢','🍺','🐔','🍖','🗣️','🦒','🍳','🌙','🪑','🤸','💃','🩹','🐶','📷','😇','😤','👑'];
-const FAIL = ['핑거 슬립 발생!', '오버행에서 코어 힘이 풀렸다!', '다이노 뛰다가 매트 구석으로!', '크림프 잡았는데 손톱이 깼다!', '힐훅 걸다가 바지가 찢어졌다!', '필라이트 생각에 집중력이 흩어졌다!'];
+const FAIL = ['핑거 슬립 발생!', '오버행에서 코어 힘이 풀렸다!', '다이노 뛰다가 매트 구석으로!', '크림프 잡았는데 손톱이 깼다!', '힐훅 걸다가 바지가 찢어졌다!', '필라이트 생각에 집중력이 흩어졌다!', '꼬북린의 다이노 할래말래… 고민하다 타이밍을 놓쳤다!'];
 const SEASON1 = ['🥇 은비땅 — 시즌1 V17 최초 완등', '🥈 리치맨 — 시즌1 V16 (아쉽다!)'];
+const SPRITE = {"조돌맹": "data:image/png;base64,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", "은비땅": "data:image/png;base64,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", "리치맨": "data:image/png;base64,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", "꼬북린": "data:image/png;base64,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", "치킨맨": "data:image/png;base64,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", "닿이노기린": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAGhUlEQVR42u2Yf3BU1RXHP/e9t/uSTTa/NpufgKQJiSQQQiLQNsjgYKIy1loKpVOnM2WYoa0zmVKkKNXitLVTJ1BLR8toK9WpxYqFSsdRWu04CZqiiPxSKomFhISEkJBddrN5+/O92z+itLjBTJiku9Ph/PXmnvv2nc/93nPu3gPX7bpdt+v2f2ePbWiQnzw/+cCtciq/pUxk8rMPr5I7f/iVcQMa6Om9/BwKGSQFwMbb5spM7wB6fy+bb6+Jg/jZt5fIPY/cIQGqqtJZ//UyueOhGplXnArAlqbV8rEt35p0NcREJm+9p14GjAg/fundMd/b9p3Py4rqFBZXG8TMGBDjfL9Cd2cudTfdwchwgD+3HWPTtpdEQrbQD3a1iVDF0qv6nTM0Ftf6sduGsRSBTbcoKTKYmW5wtPUQe/a2TGrwANpEX3A4nFf1pSp+VBEhamk80NxL01o35fkqJ/v9rH5kt5iKHJgwgLSsMcff2HWzrC31IGMGQuh8b20BhXlhYlGBbtOSowoBWMQDvPzMnVKRUVRiCGFHEZLS/AB6TNJ3xqKj3TNlABNeGsuMLyQFLo1CVyHd5xWyHCoXPhrAHInh80fIyM8hYhrJA2CaZtzY08/3kpXlYlqmnYDXw+bftIvmNeXyrsYMTh++gH9ISR6AaDQaN/bUC/Fl9YYyN06nhZCgCCvxObDhu9+U9635kty2datYt27tuAdS7+Eh2t88xxdWlFBem514gILCGfR1dbNsXqnMyXaNnys2k+JqN92nvAyeG0n8FuoeGMJ0l1I0LYXOrrPjzq/78nQyCzy8/dQAfq8z8Qo88cSToqiomOLiYnbvHv9Q6js9jOFXESmCmIwlxzmwffvjorboBH/5deO4OdDznsHJ1n4a7pnOrFpH8hxkxHzMKzfH/2FNYkux0XvKx2DnSPIAHDnkIRqMsfP+6s9UobLRxYLlbnqOXyLqtyUPwKMvdIgTHRFqatI+c57hjxEMmDgL0pEikkRbCDh21Ed2ls6O++ZfVYXONh/tB4aY15BL3eL85DmJAX6665/ic3mqrJyWevWbkipxuu1c6htG8YnkUgBgzS/fF7mF6TQ3zR5ThdnL8qhsdNHfESAyaHLvklKZVAAAHX1BVt5VPKZvZDDEhQ6DzPx00ENk5ugkHcCKjQdF9GKEfY8ujFvdnmN+Tu734p5pp36lizJXOPkAAF7dP8icG+z8bmPtlRCKihECIziCPSNMphpiwy3lMukAvv/7D8XLf/VQvyiD55oqJcDmb8yWN1bFmLssHRlTGfFaTCvXmZkRZd2SskmFmLTysG97vZw3w2L/3kEcszNYeadgsHOEg3sG0NNs1C3PYcQrOPKOn+6AnQf/cGZSvj1pt+2717eJV3feIksqHKQWO8AaQEgFYdoJ+wThYJAMNyysd3BrfhblmZo80yMIozEYivH4a+0ioQp8Ys331slFC2zUVg9gRTTaD0WwpQiKyuy0PX8Rwjol9WlEoiZDp0xCw5BdkcOBsyYP//aE+J/nwKdt0473RDgaRFoWQgszc66GGbHwXxBkudOwp4AjQ6Nsfg5zGvLQnGEKSqLMykvwFvpU9wikACG52BWm+x0T3RGlbkUemh7D1w9vPdNDWl4qN909nWgYIn0X2fS1Wtn84hGRUAUAvF4VadkAQVGZk/xZCvllKaNdJRP6T3uJGHbOnw0xdM6g9bkz+D0QlhY/aloqEw6w+v6jov24EyuSTsBQqLwth5IvZvPuKx7ef2OIqiW5zGlwUH5zFmqKHUWTKHb41Z+OiVjQJOEAALv2+Gh5XaHtb1ECXp1/fQhHe3ScaXl0HjHwnFN4vTXEqfYAy9eWUDZntFHw86ffFF9dVCETDjC3OIuW1gB7D/rwDGgceGuILftOi4UPHhfz138k/viPGA/t7hKWZsO0K/y9pes/lz4jmHgFAmGDgkyVF9/uF44MGyU3XtmZ0DWdbatr5P6WYTzeVKoqcy/7glIkHkDXFSxrtIvX3m+SnnPltfIXr3wgdJskW1VpPWzQuKrosu+1D86KhAO4StJJ+bj/ZZoCVY2PyZ6u4spWWfeTw8KyX1v7ccoa93q2gttyfPzHVGOM+BE6CHVUJfMaW0dTpoBiBz1lNGpN04jI+LWypWpIbTSEYERJLgX83lRiodFqaAQdSBm/RQZ9KpeCo7lxyZNGUtnSUvflWr6qboZctaAorrYvLc//rzmF13RP+DckKnm4k7kkGgAAAABJRU5ErkJggg=="};
 
 const $ = (id) => document.getElementById(id);
-const fresh = () => ({ season: 2, grade: 0, energy: MAXE, at: Date.now(), tries: 0, best: 0, cleared: 0 });
+const ls = { get: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
+const fresh = () => ({ season: 2, grade: 0, energy: MAXE, at: Date.now(), tries: 0, best: 0, cleared: 0, pin: '' });
 const NAME_RE = /^[가-힣A-Za-z0-9_-]{1,8}$/;
 const num = (v, lo, hi, d) => { v = Number(v); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
 function norm(raw) {
   if (!raw || typeof raw !== 'object' || raw.season !== 2) return null;     // 시즌1 데이터는 초기화 대상
-  return { season: 2, grade: Math.floor(num(raw.grade, 0, 17, 0)), energy: Math.floor(num(raw.energy, 0, MAXE, MAXE)), at: num(raw.at, 0, 4e12, Date.now()), tries: Math.floor(num(raw.tries, 0, 1e9, 0)), best: Math.floor(num(raw.best, 0, 17, 0)), cleared: num(raw.cleared, 0, 4e12, 0) };
+  return { season: 2, grade: Math.floor(num(raw.grade, 0, 17, 0)), energy: Math.floor(num(raw.energy, 0, MAXE, MAXE)), at: num(raw.at, 0, 4e12, Date.now()), tries: Math.floor(num(raw.tries, 0, 1e9, 0)), best: Math.floor(num(raw.best, 0, 17, 0)), cleared: num(raw.cleared, 0, 4e12, 0), pin: typeof raw.pin === 'string' ? raw.pin.slice(0, 80) : '' };
 }
+const pub = (p) => ({ season: 2, grade: p.grade, energy: p.energy, at: p.at, tries: p.tries, best: p.best, cleared: p.cleared });
 function refill(p) {
   const now = Date.now(), g = Math.floor((now - p.at) / REGEN);
   if (g > 0) { p.energy = Math.min(MAXE, p.energy + g); p.at = p.energy >= MAXE ? now : p.at + g * REGEN; }
   if (p.energy >= MAXE) p.at = Math.min(p.at, Date.now());
 }
+const hueOf = (n) => [...n].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7) % 360;
+async function hashPin(n, pin) {
+  const s = n + '|' + pin + '|rocktree2';
+  try { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join(''); }
+  catch (e) { let h = 5381; for (const c of s) h = ((h << 5) + h + c.charCodeAt(0)) >>> 0; return 'f' + h; }
+}
 
-let db = null, dbReady = false, NAMES = [], me = localStorage.getItem('rocktree_my_char') || null, view = me || '';
-const P = {}, stale = {};
+let db = null, dbReady = false, NAMES = [], me = ls.get('rocktree_my_char') || null, view = me || '', ended = null;
+const P = {}, stale = {}, sprImg = {};
 let logsReady = false; const seenLogs = new Set();
+Object.keys(SPRITE).forEach(n => { const i = new Image(); i.src = SPRITE[n]; sprImg[n] = i; });
 
 function setStatus(t, m) { const b = $('status'); b.className = 'status ' + t; b.textContent = m; }
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('show'), 3200); }
@@ -158,9 +201,10 @@ const onErr = (e) => { console.error(e); setStatus('error', '❌ 서버 저장 �
 try { db = getDatabase(initializeApp(firebaseConfig)); } catch (e) { setStatus('error', '❌ Firebase 초기화 실패'); }
 
 function save(reset) {
-  if (!db || !dbReady || !me) return Promise.resolve();
-  const p = P[me], d = { season: 2, grade: p.grade, energy: p.energy, at: p.at, tries: p.tries, best: p.best, cleared: p.cleared }, r = ref(db, 'players/' + me);
-  return (reset ? set(r, d) : update(r, d)).then(() => setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중')).catch(onErr);
+  if (!db || !dbReady || !me || ended) return Promise.resolve(false);
+  const p = P[me], r = ref(db, 'players/' + me), d = pub(p);
+  if (reset && p.pin) d.pin = p.pin;
+  return (reset ? set(r, d) : update(r, d)).then(() => { setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중'); return true; }).catch(e => { onErr(e); return false; });
 }
 
 if (db) {
@@ -173,12 +217,13 @@ if (db) {
     render();
     if (first) setTimeout(startJoin, 0);
   }, () => setStatus('error', '❌ 데이터 읽기 실패 (Firebase 규칙을 확인하세요)'));
+  onValue(ref(db, 'meta/ended'), (s) => { ended = s.val(); render(); }, () => {});
   onValue(ref(db, '.info/connected'), (s) => { if (dbReady) setStatus(s.val() ? 'ok' : 'loading', s.val() ? '✅ 서버와 연결됨 · 자동 저장 중' : '⚠️ 연결이 끊겼습니다. 재연결 중...'); });
   onValue(query(ref(db, 'logs'), limitToLast(30)), (snap) => {
     const arr = [];
     snap.forEach(c => {
       const v = c.val(); if (!v || v.s !== 2) return; arr.push(v);
-      if (!seenLogs.has(c.key)) { seenLogs.add(c.key); if (logsReady && v.b && v.u !== me && Date.now() - (v.t || 0) < 15000) toast(v.b); }
+      if (!seenLogs.has(c.key)) { seenLogs.add(c.key); if (logsReady && v.b && v.u !== me && Date.now() - (v.t || 0) < 15000) { toast(v.b); celebrate(15); } }
     });
     logsReady = true;
     const box = $('log'); box.innerHTML = '';
@@ -186,59 +231,122 @@ if (db) {
   });
 }
 
-// ── 참가 ──
-function selectMe(name) {
-  me = name; localStorage.setItem('rocktree_my_char', name); view = name;
-  if (!P[name] || stale[name]) { P[name] = fresh(); stale[name] = false; save(true); }   // 시즌1 → 시즌2 초기화
-  render();
+// ── 이펙트 (V15부터 강력) ──
+const fxc = $('fx'), fxx = fxc.getContext('2d'); let parts = [];
+function sizeFx() { fxc.width = innerWidth; fxc.height = innerHeight; }
+sizeFx(); addEventListener('resize', sizeFx);
+function burst(x, y, n, cols) { for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, s = 2 + Math.random() * 6; parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 2, l: 60 + Math.random() * 40, c: cols[i % cols.length] }); } }
+function loop() { fxx.clearRect(0, 0, fxc.width, fxc.height); parts = parts.filter(q => q.l > 0); parts.forEach(q => { q.x += q.vx; q.y += q.vy; q.vy += .12; q.l--; fxx.globalAlpha = Math.min(1, q.l / 30); fxx.fillStyle = q.c; fxx.fillRect(q.x, q.y, 5, 5); }); fxx.globalAlpha = 1; requestAnimationFrame(loop); }
+loop();
+function celebrate(g) {
+  if (g < 15) return;
+  const cols = ['#ffd43b', '#ff6b9d', '#4dabf7', '#69db7c', '#ffffff'], rounds = g === 17 ? 9 : (g === 16 ? 6 : 4);
+  for (let i = 0; i < rounds; i++) setTimeout(() => burst(innerWidth * (.15 + Math.random() * .7), innerHeight * (.15 + Math.random() * .4), g === 17 ? 80 : 50, cols), i * 330);
+  const f = $('flash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+  document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 650);
+  try { navigator.vibrate && navigator.vibrate([90, 50, 90, 50, 160]); } catch (e) {}
 }
-window.joinFlow = function (prefill) {
-  const input = (prompt(`캐릭터 이름을 입력하세요 (최대 8자)\n· 있는 이름 → 그 캐릭터로 접속\n· 새 이름 → 새로 생성\n\n현재 멤버: ${NAMES.join(', ') || '(없음)'}`, prefill || '') || '').trim();
-  if (!input) return;
-  if (!NAME_RE.test(input)) return alert('이름은 한글·영문·숫자·_·- 만 사용해 8자 이하로 입력해주세요.');
-  if (NAMES.includes(input)) return selectMe(input);
-  if (NAMES.length >= 20) return alert('멤버가 가득 찼어요 (최대 20명).');
-  if (!confirm(`'${input}' 이름으로 새 캐릭터를 만들까요?`)) return;
-  P[input] = fresh(); stale[input] = false; me = input; localStorage.setItem('rocktree_my_char', input); view = input;
-  save(true).then(() => log(`🎉 새 멤버 ${input}님이 입장했습니다!`, 'success'));
-  render();
+
+// ── 참가 / 비밀번호 ──
+let pinCtx = null;
+function selectMe(name) { me = name; ls.set('rocktree_my_char', name); view = name; render(); }
+function claim(n, h) {
+  const isNew = !NAMES.includes(n), wasStale = stale[n] || isNew;
+  if (wasStale) P[n] = fresh();
+  P[n].pin = h; stale[n] = false; if (isNew) NAMES.push(n);
+  ls.set('rocktree_tok_' + n, h); selectMe(n);
+  if (!db) return;
+  const r = ref(db, 'players/' + n);
+  (wasStale ? set(r, { ...pub(P[n]), pin: h }) : update(r, { pin: h })).then(() => { setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중'); if (isNew) log(`🎉 새 멤버 ${n}님이 입장했습니다!`, 'success'); }).catch(onErr);
+}
+function askPin(n, mode, ok, extra) {
+  pinCtx = { n, mode, ok };
+  $('pin-title').textContent = mode === 'set' ? `「${n}」 비밀번호 만들기` : `「${n}」 비밀번호 입력`;
+  $('pin-desc').textContent = (mode === 'set' ? '숫자 4자리를 정하세요. 이 캐릭터의 열쇠가 됩니다. 먼저 정한 사람이 주인이 돼요.' : '숫자 4자리를 입력하세요.') + (extra ? `\n(${extra})` : '');
+  $('pin-input').value = ''; $('pin-msg').textContent = ''; $('pin').style.display = 'flex';
+  setTimeout(() => { try { $('pin-input').focus(); } catch (e) {} }, 60);
+}
+window.submitPin = async function () {
+  if (!pinCtx) return;
+  const { n, mode, ok } = pinCtx, v = $('pin-input').value.trim();
+  if (!/^\d{4}$/.test(v)) { $('pin-msg').textContent = '숫자 4자리를 입력해주세요.'; return; }
+  const h = await hashPin(n, v);
+  if (mode === 'check' && h !== P[n].pin) { $('pin-msg').textContent = '비밀번호가 달라요.'; return; }
+  $('pin').style.display = 'none'; pinCtx = null; ok(h);
 };
-function startJoin() { if (me && NAMES.includes(me)) selectMe(me); else joinFlow(me || ''); }
+window.cancelPin = function () { $('pin').style.display = 'none'; pinCtx = null; if (!me || !NAMES.includes(me)) openJoin(); };
+function renderJoin(msg) {
+  $('join-names').innerHTML = NAMES.map(n => `<button class="jn" onclick="pickName('${n}')">${n}${stale[n] ? '' : ' · V' + P[n].grade}</button>`).join('') || '<small>아직 멤버가 없어요</small>';
+  $('join-msg').textContent = msg || '';
+  $('join-close').style.display = me && NAMES.includes(me) ? 'block' : 'none';
+}
+window.openJoin = () => { renderJoin(); $('join').style.display = 'flex'; };
+window.closeJoin = () => { $('join').style.display = 'none'; };
+window.pickName = (n) => {
+  closeJoin();
+  if (!P[n].pin) askPin(n, 'set', (h) => claim(n, h));
+  else askPin(n, 'check', (h) => { ls.set('rocktree_tok_' + n, h); selectMe(n); });
+};
+window.createName = () => {
+  const v = $('join-input').value.trim();
+  if (!NAME_RE.test(v)) return renderJoin('이름은 한글·영문·숫자·_·- 만, 8자 이하로 입력해주세요.');
+  if (NAMES.includes(v)) return renderJoin('이미 있는 이름이에요. 위 목록에서 눌러 입장하세요.');
+  if (NAMES.length >= 20) return renderJoin('멤버가 가득 찼어요 (최대 20명).');
+  closeJoin(); askPin(v, 'set', (h) => claim(v, h));
+};
+function startJoin() {
+  if (me && NAMES.includes(me)) { const q = P[me]; if (q.pin && ls.get('rocktree_tok_' + me) === q.pin) return selectMe(me); return window.pickName(me); }
+  openJoin();
+}
+window.adminDel = (n) => {
+  if (me !== ADMIN || n === ADMIN) return;
+  askPin(ADMIN, 'check', () => remove(ref(db, 'players/' + n)).then(() => log(`🧹 운영자가 '${n}' 캐릭터를 삭제했습니다.`, 'fail')).catch(onErr), `'${n}' 삭제`);
+};
 
 // ── 도전 ──
-function pop(g) { const s = $('stage'); s.classList.remove('pop'); void s.offsetWidth; s.classList.add('pop'); toast(`V${g} 「${LV[g][0]}」 — ${LV[g][1]}`); }
+function pop(g) { const s = $('stage'); s.classList.remove('pop'); void s.offsetWidth; s.classList.add('pop'); toast(`V${g} 「${LV[g][0]}」 — ${LV[g][1]}`); celebrate(g); }
 window.tryUpgrade = function () {
   if (!dbReady || !me || view !== me) return;
+  if (ended) return toast('🔒 시즌이 종료되었어요');
   const p = P[me]; if (p.grade >= 17) return;
   refill(p);
   if (p.energy < 1) return toast('⚡ 체력이 없어요! 충전되면 다시 도전하세요');
   if (p.energy >= MAXE) p.at = Date.now();
   p.energy--; p.tries++; p._t = Date.now();
-  const g = p.grade;
+  const g = p.grade; let endNow = false;
   if (Math.random() * 100 < RATE[g]) {
     p.grade++; p.best = Math.max(p.best, p.grade); const n = p.grade;
     log(`🎉 ${me}님 V${n} 「${LV[n][0]}」 돌파!`, 'success', n >= 13 && n < 17 ? `🔥 ${me}님이 V${n} 돌파!` : '');
     pop(n);
     if (n === 17) {
-      p.cleared = Date.now();
-      log(`🏆 ${me}님이 V17 완등! 락트리 정복!!`, 'success', `🏆 ${me}님이 V17 완등!!!`);
-      $('end-text').textContent = `${me}님, 락트리 정복!\n총 ${p.tries}번의 도전 끝에 마침내 정상에 섰습니다.\n전설은 명예의 전당에 영원히 남습니다.`;
-      $('end-text').style.whiteSpace = 'pre-line'; $('ending').style.display = 'flex';
+      endNow = true; p.cleared = Date.now();
+      log(`🏆 ${me}님이 V17 완등! 장경욱이 인정한 클라이머!!`, 'success', `🏆 ${me}님이 V17 완등!!! 시즌 종료!`);
+      $('end-text').textContent = `${me}님, 장경욱이 인정한 클라이머! 🏅\n장경욱이 지켜보다 엄지를 척 들었습니다 👍\n총 ${p.tries}번의 도전 끝에 정상에 섰고,\n락트리 시즌2는 이제 종료됩니다.`;
+      $('ending').style.display = 'flex';
     }
   } else {
     const why = FAIL[Math.floor(Math.random() * FAIL.length)];
     if (g > 0 && Math.random() < fall(g)) { p.grade--; log(`💥 ${me}님 추락! ${why} → V${p.grade}로 내려갔다`, 'fail'); }
     else log(`❌ ${me}님 실패! ${why}`, 'fail');
   }
-  render(); save();
+  render();
+  if (endNow) {
+    const up = {}; Object.entries(pub(p)).forEach(([k, v]) => { up['players/' + me + '/' + k] = v; });
+    const e = { name: me, at: Date.now(), tries: p.tries }; up['meta/ended'] = e; ended = e; render();
+    update(ref(db), up).catch(err => { ended = null; onErr(err); toast('다른 사람이 먼저 완등했을 수 있어요!'); render(); });
+  } else save();
 };
 
 // ── 화면 ──
-function render() {
+function avatar(n) {
+  const s = SPRITE[n], tag = `<small>${n}</small>`;
+  return `<div class="wp" onclick="selectView('${n}')">${s ? `<img class="av" src="${s}" alt="${n}">` : `<span class="av dot" style="background:hsl(${hueOf(n)},60%,45%)">${n[0]}</span>`}${tag}</div>`;
+}
+function renderStage() {
   const p = P[view] || P[me] || fresh(), mine = view === me, g = p.grade;
-  if (!P[view] && !P[me]) { /* 아직 데이터 없음 */ }
   refill(p);
   document.documentElement.style.setProperty('--h', 250 - g * 13);
+  $('stage').classList.toggle('hot', g >= 15);
   $('me-name').textContent = me || '미설정';
   $('icon').textContent = ICON[g]; $('grade').textContent = 'V' + g;
   $('route').textContent = `${view || '-'}님 · 「${LV[g][0]}」${mine ? '' : ' (👀 관전 중)'}`;
@@ -246,25 +354,66 @@ function render() {
   $('rate').textContent = g >= 17 ? '🏆 정복 완료' : `성공 확률 ${RATE[g]}%${fall(g) ? ` · 실패 시 추락 ${Math.round(fall(g) * 100)}%` : ''}`;
   $('next').textContent = g >= 17 ? '' : `다음 V${g + 1}: 「${LV[g + 1][0]}」`;
   $('e-fill').style.width = (p.energy / MAXE * 100) + '%';
-  const ms = p.at + REGEN - Date.now();
-  $('e-text').textContent = `⚡ 체력 ${p.energy}/${MAXE}${p.energy < MAXE ? ` · 다음 충전 ${Math.floor(Math.max(0, ms) / 60000)}:${String(Math.floor(Math.max(0, ms) / 1000) % 60).padStart(2, '0')}` : ' (가득)'}`;
+  const ms = Math.max(0, p.at + REGEN - Date.now());
+  $('e-text').textContent = `⚡ 체력 ${p.energy}/${MAXE}${p.energy < MAXE ? ` · 다음 충전 ${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}` : ' (가득)'}`;
   const go = $('go');
   if (!dbReady) { go.disabled = true; go.textContent = '⏳ 불러오는 중...'; }
   else if (!mine) { go.disabled = true; go.textContent = '👀 관전 중 (조작 불가)'; }
   else if (g >= 17) { go.disabled = true; go.textContent = '🏆 완등 완료!'; }
+  else if (ended) { go.disabled = true; go.textContent = '🔒 시즌 종료'; }
   else if (p.energy < 1) { go.disabled = true; go.textContent = '⚡ 체력 충전 중...'; }
   else { go.disabled = false; go.textContent = '🧗 도전하기! (⚡-1)'; }
-  $('ladder').innerHTML = Array.from({ length: 17 }, (_, i) => `<div class="chip ${g >= i + 1 ? 'done' : ''} ${g === i + 1 ? 'cur' : ''}">V${i + 1}</div>`).join('');
+  $('share-btn').style.display = me && P[me] ? 'block' : 'none';
+}
+function renderLists() {
+  $('wall').innerHTML = Array.from({ length: 18 }, (_, i) => 17 - i).map(g => {
+    const here = NAMES.filter(n => P[n].grade === g);
+    return `<div class="wrow ${here.includes(me) ? 'me' : ''}" style="--g:${g}"><span class="wl">${g ? 'V' + g : 'START'}</span><div class="wa">${here.map(avatar).join('')}</div></div>`;
+  }).join('');
   $('players').innerHTML = [...NAMES].sort((a, b) => P[b].grade - P[a].grade || P[b].best - P[a].best).map(n => {
     const q = P[n];
     return `<div class="pl ${n === view ? 'view' : ''} ${n === me ? 'mine' : ''}" onclick="selectView('${n}')"><div class="top"><span>${q.cleared ? '🏆' : ''}${n}</span><span>V${q.grade}</span></div><div class="bar"><i style="width:${q.grade / 17 * 100}%"></i></div><small>시도 ${q.tries} · 최고 V${q.best}</small></div>`;
   }).join('');
   const done = NAMES.filter(n => P[n].cleared).sort((a, b) => P[a].cleared - P[b].cleared);
   $('hall').innerHTML = SEASON1.map(t => `<div>${t}</div>`).join('') + (done.length ? done.map((n, i) => `<div>🏆 ${n} — 시즌2 ${i + 1}번째 완등 (${new Date(P[n].cleared).toLocaleDateString('ko-KR')}, ${P[n].tries}번 도전)</div>`).join('') : '<div style="color:#9aa6b8">시즌2 완등자: 아직 없음. 첫 번째 전설이 되어보세요!</div>');
+  const e = $('ended'); e.style.display = ended ? 'block' : 'none';
+  if (ended) e.textContent = `🔒 시즌2 종료! ${ended.name}님이 ${ended.tries}번 만에 V17 완등 — 장경욱이 인정한 클라이머 🏅`;
+  $('admin').style.display = me === ADMIN ? 'block' : 'none';
+  if (me === ADMIN) $('admin-list').innerHTML = NAMES.filter(n => n !== ADMIN).map(n => `<div class="arow"><span>${n} · V${P[n].grade} · ${P[n].tries}회</span><button class="small-btn" onclick="adminDel('${n}')">삭제</button></div>`).join('') || '<small>삭제할 캐릭터가 없어요</small>';
 }
+function render() { renderStage(); renderLists(); }
 window.selectView = (n) => { view = n; render(); };
-setInterval(() => { if (dbReady) render(); }, 1000);
+setInterval(() => { if (dbReady) renderStage(); }, 1000);
 render();
+
+// ── 자랑 카드 (이미지 저장) ──
+let shareCv = null;
+window.openShare = function () {
+  const n = me || view, p = P[n]; if (!p) return;
+  const g = p.grade, h = 250 - g * 13, c = document.createElement('canvas'); c.width = 720; c.height = 960; const x = c.getContext('2d');
+  const bg = x.createLinearGradient(0, 0, 0, 960); bg.addColorStop(0, `hsl(${h},50%,24%)`); bg.addColorStop(1, `hsl(${h + 30},55%,8%)`); x.fillStyle = bg; x.fillRect(0, 0, 720, 960);
+  x.strokeStyle = `hsl(${h},90%,65%)`; x.lineWidth = 10; x.strokeRect(20, 20, 680, 920);
+  x.textAlign = 'center'; x.fillStyle = '#fff'; x.font = 'bold 40px sans-serif'; x.fillText('락트리 강화소 · 시즌2', 360, 100);
+  const im = sprImg[n];
+  if (im && im.complete && im.naturalWidth) { x.imageSmoothingEnabled = false; x.drawImage(im, 180, 150, 360, 360); } else { x.font = '220px sans-serif'; x.fillText(ICON[g], 360, 400); }
+  x.fillStyle = `hsl(${h},95%,72%)`; x.font = 'bold 170px sans-serif'; x.fillText('V' + g, 360, 680);
+  x.fillStyle = '#fff'; x.font = 'bold 46px sans-serif'; x.fillText(`${n} · 「${LV[g][0]}」`, 360, 750);
+  x.fillStyle = '#d0d7e2'; x.font = '30px sans-serif'; (LV[g][1].match(/.{1,17}/g) || []).slice(0, 2).forEach((t, i) => x.fillText(t, 360, 805 + i * 40));
+  x.fillStyle = '#ffd43b'; x.font = 'bold 32px sans-serif';
+  x.fillText(ended && ended.name === n ? '🏆 시즌2 최초 완등 · 장경욱이 인정한 클라이머' : `도전 ${p.tries}번 · 최고 V${p.best}`, 360, 895);
+  x.fillStyle = '#8f9bb0'; x.font = '24px sans-serif'; x.fillText(new Date().toLocaleDateString('ko-KR') + ' · ' + location.host, 360, 930);
+  shareCv = c; $('share-img').src = c.toDataURL('image/png'); $('share').style.display = 'flex';
+};
+window.closeShare = () => { $('share').style.display = 'none'; };
+window.shareImg = function () {
+  if (!shareCv) return;
+  shareCv.toBlob(b => {
+    const f = new File([b], 'rocktree.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: '락트리 강화소' }).catch(() => {});
+    else toast('이미지를 길게 눌러서 저장하세요 📸');
+  });
+};
+
 </script>
 </body>
 </html>
