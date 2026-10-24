@@ -251,14 +251,14 @@ const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt
 
 const $ = (id) => document.getElementById(id);
 const ls = { get: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
-const fresh = () => ({ season: 3, grade: 0, energy: MAXE, at: Date.now(), tries: 0, best: 0, cleared: 0, pin: '', ach: {}, rival: '', live: 0, ltDay: '', dKey: '', dFall: 0, dTries: 0, falls: 0, ck: 0, blAt: 0, bl: null, dc: '', gift: '' });
+const fresh = () => ({ season: 4, grade: 0, energy: MAXE, at: Date.now(), tries: 0, best: 0, cleared: 0, pin: '', ach: {}, rival: '', live: 0, ltDay: '', dKey: '', dFall: 0, dTries: 0, falls: 0, ck: 0, blAt: 0, bl: null, dc: '', gift: '' });
 const NAME_RE = /^[가-힣A-Za-z0-9_-]{1,8}$/;
 const num = (v, lo, hi, d) => { v = Number(v); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
 function norm(raw) {
-  if (!raw || typeof raw !== 'object' || raw.season !== 3) return null;     // 시즌1 데이터는 초기화 대상
-  return { season: 3, grade: Math.floor(num(raw.grade, 0, 17, 0)), energy: Math.floor(num(raw.energy, 0, MAXE, MAXE)), at: num(raw.at, 0, 4e12, Date.now()), tries: Math.floor(num(raw.tries, 0, 1e9, 0)), best: Math.floor(num(raw.best, 0, 17, 0)), cleared: num(raw.cleared, 0, 4e12, 0), pin: typeof raw.pin === 'string' ? raw.pin.slice(0, 80) : '', ach: cleanAch(raw.ach), rival: NAME_RE.test(raw.rival) ? raw.rival : '', live: num(raw.live, 0, 4e12, 0), ltDay: typeof raw.ltDay === 'string' ? raw.ltDay.slice(0, 10) : '', dKey: typeof raw.dKey === 'string' ? raw.dKey.slice(0, 10) : '', dFall: Math.floor(num(raw.dFall, 0, 1e6, 0)), dTries: Math.floor(num(raw.dTries, 0, 1e6, 0)), falls: Math.floor(num(raw.falls, 0, 1e9, 0)), ck: Math.floor(num(raw.ck, 0, 99, 0)), blAt: num(raw.blAt, 0, 4e12, 0), dc: typeof raw.dc === 'string' ? raw.dc.slice(0, 10) : '', gift: typeof raw.gift === 'string' ? raw.gift.slice(0, 20) : '', bl: (raw.bl && typeof raw.bl === 'object' && NAME_RE.test(raw.bl.by)) ? { by: raw.bl.by, at: num(raw.bl.at, 0, 4e12, 0) } : null };
+  if (!raw || typeof raw !== 'object' || raw.season !== 4) return null;     // 시즌1 데이터는 초기화 대상
+  return { season: 4, grade: Math.floor(num(raw.grade, 0, 17, 0)), energy: Math.floor(num(raw.energy, 0, MAXE, MAXE)), at: num(raw.at, 0, 4e12, Date.now()), tries: Math.floor(num(raw.tries, 0, 1e9, 0)), best: Math.floor(num(raw.best, 0, 17, 0)), cleared: num(raw.cleared, 0, 4e12, 0), pin: typeof raw.pin === 'string' ? raw.pin.slice(0, 80) : '', ach: cleanAch(raw.ach), rival: NAME_RE.test(raw.rival) ? raw.rival : '', live: num(raw.live, 0, 4e12, 0), ltDay: typeof raw.ltDay === 'string' ? raw.ltDay.slice(0, 10) : '', dKey: typeof raw.dKey === 'string' ? raw.dKey.slice(0, 10) : '', dFall: Math.floor(num(raw.dFall, 0, 1e6, 0)), dTries: Math.floor(num(raw.dTries, 0, 1e6, 0)), falls: Math.floor(num(raw.falls, 0, 1e9, 0)), ck: Math.floor(num(raw.ck, 0, 99, 0)), blAt: num(raw.blAt, 0, 4e12, 0), dc: typeof raw.dc === 'string' ? raw.dc.slice(0, 10) : '', gift: typeof raw.gift === 'string' ? raw.gift.slice(0, 20) : '', bl: (raw.bl && typeof raw.bl === 'object' && NAME_RE.test(raw.bl.by)) ? { by: raw.bl.by, at: num(raw.bl.at, 0, 4e12, 0) } : null };
 }
-const pub = (p) => ({ season: 3, grade: p.grade, energy: p.energy, at: p.at, tries: p.tries, best: p.best, cleared: p.cleared, ltDay: p.ltDay, dKey: p.dKey, dFall: p.dFall, dTries: p.dTries, falls: p.falls, ck: p.ck, blAt: p.blAt, dc: p.dc, gift: p.gift });
+const pub = (p) => ({ season: 4, grade: p.grade, energy: p.energy, at: p.at, tries: p.tries, best: p.best, cleared: p.cleared, ltDay: p.ltDay, dKey: p.dKey, dFall: p.dFall, dTries: p.dTries, falls: p.falls, ck: p.ck, blAt: p.blAt, dc: p.dc, gift: p.gift });
 function refill(p) {
   const now = Date.now(), g = Math.floor((now - p.at) / REGEN);
   if (g > 0) { p.energy = Math.min(MAXE, p.energy + g); p.at = p.energy >= MAXE ? now : p.at + g * REGEN; }
@@ -268,7 +268,7 @@ const belayOn = (p) => !!(p && p.bl && p.bl.at > Date.now());
 const bonusOf = (p, extra) => { const ck = Math.min(CHALK_MAX, p.ck * CHALK_STEP), bl = belayOn(p) ? BEL_BONUS : 0, w = wind(); return { ck, bl, w, ex: extra || 0, total: ck + bl + w + (extra || 0) }; };
 const hueOf = (n) => [...n].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7) % 360;
 async function hashPin(n, pin) {
-  const s = n + '|' + pin + '|rocktree3';
+  const s = n + '|' + pin + '|rocktree4';
   try { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join(''); }
   catch (e) { let h = 5381; for (const c of s) h = ((h << 5) + h + c.charCodeAt(0)) >>> 0; return 'f' + h; }
 }
@@ -282,7 +282,7 @@ function setStatus(t, m) { const b = $('status'); b.className = 'status ' + t; b
 function toast(m, who) { const t = $('toast'); t.textContent = m; t.classList.add('show'); t.classList.toggle('link', !!who); t.onclick = who ? () => { selectView(who); t.classList.remove('show'); } : null; clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('show'), who ? 6000 : 3200); }
 function log(text, type = '', b = '', extra = null) {
   const d = document.createElement('div'); d.className = 'li ' + type; d.textContent = text; const box = $('log'); box.insertBefore(d, box.firstChild);
-  if (db) push(ref(db, 's3/logs'), { m: text, y: type, t: Date.now(), s: 3, b, u: me || '', ...(extra || {}) }).catch(() => {});
+  if (db) push(ref(db, 's4/logs'), { m: text, y: type, t: Date.now(), s: 4, b, u: me || '', ...(extra || {}) }).catch(() => {});
 }
 const onErr = (e) => { console.error(e); setStatus('error', '❌ 서버 저장 실패: 네트워크/규칙을 확인하세요.'); };
 
@@ -290,7 +290,7 @@ try { db = getDatabase(initializeApp(firebaseConfig)); } catch (e) { setStatus('
 
 function save(reset) {
   if (!db || !dbReady || !me || ended) return Promise.resolve(false);
-  const p = P[me], r = ref(db, 's3/players/' + me), d = pub(p);
+  const p = P[me], r = ref(db, 's4/players/' + me), d = pub(p);
   if (reset) { if (p.pin) d.pin = p.pin; if (Object.keys(p.ach).length) d.ach = p.ach; } else achQ.forEach(id => { d['ach/' + id] = p.ach[id]; });
   achQ.clear();
   return (reset ? set(r, d) : update(r, d)).then(() => { setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중'); return true; }).catch(e => { onErr(e); return false; });
@@ -298,7 +298,7 @@ function save(reset) {
 
 if (db) {
   const timer = setTimeout(() => { if (!dbReady) setStatus('error', '❌ 서버 응답이 없습니다. (Firebase 규칙/네트워크 확인)'); }, 8000);
-  onValue(ref(db, 's3/players'), (snap) => {
+  onValue(ref(db, 's4/players'), (snap) => {
     const val = snap.val() || {}, first = !dbReady;
     NAMES = Object.keys(val).filter(n => NAME_RE.test(n) && val[n] && typeof val[n] === 'object');
     NAMES.forEach(n => { const q = norm(val[n]); stale[n] = !q; if (!(n === me && !first && P[n] && Date.now() - (P[n]._t || 0) < 1500)) P[n] = q || fresh(); });
@@ -306,13 +306,13 @@ if (db) {
     rivalCheck(); render(); checkGift();
     if (first) setTimeout(startJoin, 0);
   }, () => setStatus('error', '❌ 데이터 읽기 실패 (Firebase 규칙을 확인하세요)'));
-  onValue(ref(db, 's3/meta/ended'), (s) => { ended = s.val(); render(); }, () => {});
-  onValue(query(ref(db, 's3/ideas'), limitToLast(100)), (snap) => { ideas = []; snap.forEach(c => { ideas.push(c.val()); }); render(); }, () => {});
+  onValue(ref(db, 's4/meta/ended'), (s) => { ended = s.val(); render(); }, () => {});
+  onValue(query(ref(db, 's4/ideas'), limitToLast(100)), (snap) => { ideas = []; snap.forEach(c => { ideas.push(c.val()); }); render(); }, () => {});
   onValue(ref(db, '.info/connected'), (s) => { if (dbReady) setStatus(s.val() ? 'ok' : 'loading', s.val() ? '✅ 서버와 연결됨 · 자동 저장 중' : '⚠️ 연결이 끊겼습니다. 재연결 중...'); });
-  onValue(query(ref(db, 's3/logs'), limitToLast(30)), (snap) => {
+  onValue(query(ref(db, 's4/logs'), limitToLast(30)), (snap) => {
     const arr = [];
     snap.forEach(c => {
-      const v = c.val(); if (!v || v.s !== 3) return; arr.push(v);
+      const v = c.val(); if (!v || v.s !== 4) return; arr.push(v);
       if (!seenLogs.has(c.key)) { seenLogs.add(c.key); if (logsReady && v.u !== me && Date.now() - (v.t || 0) < 15000) incoming(v); }
     });
     logsReady = true;
@@ -371,7 +371,7 @@ window.belay = function () {
   if (left > 0) return toast(`🪢 확보는 ${Math.ceil(left / 60000)}분 뒤에 다시 설 수 있어요`);
   if (belayOn(t)) return toast(`🪢 ${view}님은 이미 ${t.bl.by}님이 확보 중이에요`);
   t.bl = { by: me, at: Date.now() + BEL_TTL };
-  update(ref(db, 's3/players/' + view), { bl: t.bl }).catch(onErr);
+  update(ref(db, 's4/players/' + view), { bl: t.bl }).catch(onErr);
   p.blAt = Date.now(); p.energy = Math.min(MAXE, p.energy + 1); if (p.energy >= MAXE) p.at = Date.now(); p._t = Date.now();
   award(p, 'belay'); toast(`🪢 ${view}님의 확보자가 됐어요! (내 체력 +1)`); rain('🪢');
   log(`🪢 ${me}님이 ${view}님의 확보를 섰습니다 (+${BEL_BONUS}%p)`, 'success', '', { k: 'belay', to: view });
@@ -387,7 +387,7 @@ window.reqBelay = function () {
 };
 window.adminReset = (n) => {
   if (me !== ADMIN || n === ADMIN) return;
-  askPin(ADMIN, 'check', () => update(ref(db, 's3/players/' + n), { pin: null }).then(() => { toast(`'${n}' 비밀번호를 초기화했어요. 새로 설정할 수 있어요.`); log(`🔑 운영자가 '${n}' 비밀번호를 초기화했습니다.`, 'fail'); }).catch(onErr), `'${n}' 비밀번호 초기화`);
+  askPin(ADMIN, 'check', () => update(ref(db, 's4/players/' + n), { pin: null }).then(() => { toast(`'${n}' 비밀번호를 초기화했어요. 새로 설정할 수 있어요.`); log(`🔑 운영자가 '${n}' 비밀번호를 초기화했습니다.`, 'fail'); }).catch(onErr), `'${n}' 비밀번호 초기화`);
 };
 function setResult(kind, from, to, msg, extra) {
   const r = $('result'), icon = { win: '✅', double: '⚡', jump: '🚿', egg: '👻', fail: '❌', fall: '💥', fall2: '💥💥', reset: '💀' }[kind];
@@ -451,13 +451,13 @@ window.goLive = function () {
   if (!dbReady || !me || view !== me || ended || liveBusy) return;
   const p = P[me]; if (p.grade < 13 || p.grade >= 17) return;
   refill(p); if (p.energy < 1) return toast('⚡ 체력이 없어요');
-  liveBusy = true; p.live = Date.now() + 25000; update(ref(db, 's3/players/' + me), { live: p.live }).catch(() => {});
+  liveBusy = true; p.live = Date.now() + 25000; update(ref(db, 's4/players/' + me), { live: p.live }).catch(() => {});
   log(`🔴 ${me}님이 V${p.grade}→V${p.grade + 1} 도전을 선언했습니다! 지금 모두 주목!`, 'success', `🔴 ${me}님이 V${p.grade + 1} 도전 중! (눌러서 보러가기)`, { k: 'live' });
   countdown(3, () => { liveBusy = false; tryUpgrade({ live: 1 }); });
 };
 window.setRival = function () {
   if (!me || view === me || !P[view] || !dbReady) return;
-  P[me].rival = view; lastCmp = undefined; update(ref(db, 's3/players/' + me), { rival: view }).catch(onErr);
+  P[me].rival = view; lastCmp = undefined; update(ref(db, 's4/players/' + me), { rival: view }).catch(onErr);
   log(`🎯 ${me}님이 ${view}님을 라이벌로 지정했습니다!`, 'success', '', { k: 'rival', to: view }); toast(`🎯 ${view}님을 라이벌로 지정했어요`); render();
 };
 function rivalCheck() {
@@ -470,7 +470,7 @@ window.sendIdea = function () {
   if (!db || !me) return toast('먼저 입장해 주세요');
   const lv = Number($('idea-lv').value), n = $('idea-n').value.trim().slice(0, 20), s = $('idea-s').value.trim().slice(0, 60);
   if (!n || !s) return toast('레벨 이름과 한 줄 이야기를 모두 적어주세요');
-  push(ref(db, 's3/ideas'), { lv, n, s, u: me, t: Date.now() }).then(() => { $('idea-n').value = ''; $('idea-s').value = ''; toast('✍️ 제안 완료! 다음 시즌에 반영될 수 있어요'); }).catch(() => toast('❌ 저장 실패 (Firebase 규칙에 ideas를 추가해야 해요)'));
+  push(ref(db, 's4/ideas'), { lv, n, s, u: me, t: Date.now() }).then(() => { $('idea-n').value = ''; $('idea-s').value = ''; toast('✍️ 제안 완료! 다음 시즌에 반영될 수 있어요'); }).catch(() => toast('❌ 저장 실패 (Firebase 규칙에 ideas를 추가해야 해요)'));
 };
 window.copyIdeas = function () { const t = $('idea-text'); t.select(); try { navigator.clipboard.writeText(t.value).then(() => toast('📋 복사됨! 대화창에 붙여넣어 주세요')); } catch (e) { toast('텍스트를 길게 눌러 복사하세요'); } };
 window.openReport = function () {
@@ -571,9 +571,9 @@ function claim(n, h) {
   const isNew = !NAMES.includes(n), wasStale = stale[n] || isNew;
   if (wasStale) P[n] = fresh();
   P[n].pin = h; stale[n] = false; if (isNew) NAMES.push(n);
-  ls.set('rocktree3_tok_' + n, h); selectMe(n);
+  ls.set('rocktree4_tok_' + n, h); selectMe(n);
   if (!db) return;
-  const r = ref(db, 's3/players/' + n);
+  const r = ref(db, 's4/players/' + n);
   (wasStale ? set(r, { ...pub(P[n]), pin: h }) : update(r, { pin: h })).then(() => { setStatus('ok', '✅ 서버와 연결됨 · 자동 저장 중'); if (isNew) log(`🎉 새 멤버 ${n}님이 입장했습니다!`, 'success'); }).catch(onErr);
 }
 function askPin(n, mode, ok, extra) {
@@ -602,7 +602,7 @@ window.closeJoin = () => { $('join').style.display = 'none'; };
 window.pickName = (n) => {
   closeJoin();
   if (!P[n].pin) askPin(n, 'set', (h) => claim(n, h));
-  else askPin(n, 'check', (h) => { ls.set('rocktree3_tok_' + n, h); selectMe(n); });
+  else askPin(n, 'check', (h) => { ls.set('rocktree4_tok_' + n, h); selectMe(n); });
 };
 window.createName = () => {
   const v = $('join-input').value.trim();
@@ -612,12 +612,12 @@ window.createName = () => {
   closeJoin(); askPin(v, 'set', (h) => claim(v, h));
 };
 function startJoin() {
-  if (me && NAMES.includes(me)) { const q = P[me]; if (q.pin && ls.get('rocktree3_tok_' + me) === q.pin) return selectMe(me); return window.pickName(me); }
+  if (me && NAMES.includes(me)) { const q = P[me]; if (q.pin && ls.get('rocktree4_tok_' + me) === q.pin) return selectMe(me); return window.pickName(me); }
   openJoin();
 }
 window.adminDel = (n) => {
   if (me !== ADMIN || n === ADMIN) return;
-  askPin(ADMIN, 'check', () => remove(ref(db, 's3/players/' + n)).then(() => log(`🧹 운영자가 '${n}' 캐릭터를 삭제했습니다.`, 'fail')).catch(onErr), `'${n}' 삭제`);
+  askPin(ADMIN, 'check', () => remove(ref(db, 's4/players/' + n)).then(() => log(`🧹 운영자가 '${n}' 캐릭터를 삭제했습니다.`, 'fail')).catch(onErr), `'${n}' 삭제`);
 };
 
 // ── 도전 ──
@@ -654,7 +654,7 @@ window.tryUpgrade = function (mods) {
   p.grade = to; p.best = Math.max(p.best, to);
   if (to > g) p.ck = 0; else if (kind === 'reset') p.ck = 0; else p.ck++;
   if (p.ck >= 6) award(p, 'chalk');
-  if (usedBelay) { p.bl = null; update(ref(db, 's3/players/' + me), { bl: null }).catch(() => {}); }
+  if (usedBelay) { p.bl = null; update(ref(db, 's4/players/' + me), { bl: null }).catch(() => {}); }
   if (g === 16 && to === 16) award(p, 'summit');
   if (to > g && CAMPS.includes(to) && g < to) { award(p, 'camp'); setTimeout(() => toast(`⛺ V${to} 캠프 도착! 이제 V${to} 아래로는 떨어지지 않아요`), 900); }
   if (to < g) { p.falls++; p.dFall++; }
@@ -677,10 +677,10 @@ window.tryUpgrade = function (mods) {
   }
   rivalCheck(); render();
   if (endNow) {
-    const up = {}; Object.entries(pub(p)).forEach(([k, v]) => { up['s3/players/' + me + '/' + k] = v; });
-    achQ.forEach(id => { up['s3/players/' + me + '/ach/' + id] = p.ach[id]; }); achQ.clear();
+    const up = {}; Object.entries(pub(p)).forEach(([k, v]) => { up['s4/players/' + me + '/' + k] = v; });
+    achQ.forEach(id => { up['s4/players/' + me + '/ach/' + id] = p.ach[id]; }); achQ.clear();
     const rank = [...NAMES].sort((x, y) => P[y].grade - P[x].grade || P[y].tries - P[x].tries).slice(0, 10).map(n => [n, P[n].grade, P[n].tries]);
-    const e = { name: me, at: Date.now(), tries: p.tries, rank }; up['s3/meta/ended'] = e; ended = e; render();
+    const e = { name: me, at: Date.now(), tries: p.tries, rank }; up['s4/meta/ended'] = e; ended = e; render();
     update(ref(db), up).catch(err => { ended = null; onErr(err); toast('다른 사람이 먼저 완등했을 수 있어요!'); render(); });
   } else save();
 };
