@@ -148,7 +148,7 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
   <div class="card me"><span>👤 내 캐릭터: <strong id="me-name">미설정</strong></span><button class="small-btn" onclick="openJoin()">변경·참가</button></div>
 
   <div class="card" id="stage">
-    <div id="daybar" class="daybar"></div><div id="ltbar" class="daybar lt" style="display:none"></div>
+    <div id="daybar" class="daybar"></div><div id="ltbar" class="daybar lt" style="display:none"></div><div id="dbar" class="daybar" style="display:none;background:#123d2a;color:#b8f5d0"></div>
     <div id="fxitem"><div id="gauge" class="gauge"></div><div id="icon">🧗</div><canvas id="crack"></canvas></div>
     <div id="grade">V0</div>
     <div id="route">-</div>
@@ -175,7 +175,7 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
   <div class="card"><div class="title">🔥 지금 오르는 사람들 (터치하여 관전)</div><div id="players"></div></div>
   <div class="card hall"><div class="title">🏆 명예의 전당</div><div id="hall"></div></div>
   <div class="card rules"><div class="title">📜 시즌4 규칙 · 크럭스 정복전</div><ul>
-    <li>도전은 ⚡체력 1을 씁니다. 체력은 30분마다 1씩 차고 최대 8입니다.</li>
+    <li>도전은 ⚡체력 1을 씁니다. 체력은 20분마다 1씩 차고 최대 10입니다. 체력을 얻는 길: 🎁 매일 출석 보너스 +2 · 🌙 락트리 타임 보너스 · 🪢 확보 서기 +1 · 🍀 도전에 성공하면 25% 확률로 +1 환급!</li>
     <li>⛺ <b>캠프</b>는 V4·V8·V12·V15! 한 번 도착하면 그 아래로는 절대 떨어지지 않아요. 대신 캠프 사이 구간은 성공 확률이 낮고 추락이 잦습니다.</li>
     <li>🧂 <b>초크 스택</b>: 연속으로 실패할수록 다음 도전 성공률이 오릅니다 (최대 +8%p). 성공하거나 추락하면 초기화됩니다.</li>
     <li>🪢 <b>확보</b>: 다른 사람의 캐릭터를 관전하고 「확보 서주기」를 누르면 그 사람 성공률이 6시간 동안 +8%p! 확보를 선 사람도 체력 +1 (1시간에 1회). 🔒 <b>V16→V17은 확보자가 있어야만 도전할 수 있어요.</b> 혼자서는 정상에 설 수 없습니다.</li>
@@ -206,7 +206,8 @@ const firebaseConfig = {
 };
 
 const ADMIN = '조돌맹';                       // 운영자(캐릭터 삭제 가능)
-const MAXE = 8, REGEN = 30 * 60 * 1000;       // 체력: 최대 8, 30분마다 +1
+const MAXE = 10, REGEN = 20 * 60 * 1000;      // 체력: 최대 10, 20분마다 +1
+const DAILY_E = 2, REFUND = 0.25;             // 🎁 출석 보너스 체력 +2 (하루 1회) · 🍀 성공 시 25% 확률로 체력 +1 환급
 const SEASON_START = new Date('2026-10-24T00:00:00+09:00').getTime();   // 시즌4 시작일 (순풍 계산용)
 const CAMPS = [4, 8, 12, 15];                 // ⛺ 캠프: 이 단계 아래로는 추락하지 않음
 const floorOf = (g) => CAMPS.filter(c => c <= g).pop() || 0;
@@ -250,14 +251,14 @@ const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt
 
 const $ = (id) => document.getElementById(id);
 const ls = { get: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
-const fresh = () => ({ season: 4, grade: 0, energy: MAXE, at: Date.now(), tries: 0, best: 0, cleared: 0, pin: '', ach: {}, rival: '', live: 0, ltDay: '', dKey: '', dFall: 0, dTries: 0, falls: 0, ck: 0, blAt: 0, bl: null });
+const fresh = () => ({ season: 4, grade: 0, energy: MAXE, at: Date.now(), tries: 0, best: 0, cleared: 0, pin: '', ach: {}, rival: '', live: 0, ltDay: '', dKey: '', dFall: 0, dTries: 0, falls: 0, ck: 0, blAt: 0, bl: null, dc: '' });
 const NAME_RE = /^[가-힣A-Za-z0-9_-]{1,8}$/;
 const num = (v, lo, hi, d) => { v = Number(v); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
 function norm(raw) {
   if (!raw || typeof raw !== 'object' || raw.season !== 4) return null;     // 시즌1 데이터는 초기화 대상
-  return { season: 4, grade: Math.floor(num(raw.grade, 0, 17, 0)), energy: Math.floor(num(raw.energy, 0, MAXE, MAXE)), at: num(raw.at, 0, 4e12, Date.now()), tries: Math.floor(num(raw.tries, 0, 1e9, 0)), best: Math.floor(num(raw.best, 0, 17, 0)), cleared: num(raw.cleared, 0, 4e12, 0), pin: typeof raw.pin === 'string' ? raw.pin.slice(0, 80) : '', ach: cleanAch(raw.ach), rival: NAME_RE.test(raw.rival) ? raw.rival : '', live: num(raw.live, 0, 4e12, 0), ltDay: typeof raw.ltDay === 'string' ? raw.ltDay.slice(0, 10) : '', dKey: typeof raw.dKey === 'string' ? raw.dKey.slice(0, 10) : '', dFall: Math.floor(num(raw.dFall, 0, 1e6, 0)), dTries: Math.floor(num(raw.dTries, 0, 1e6, 0)), falls: Math.floor(num(raw.falls, 0, 1e9, 0)), ck: Math.floor(num(raw.ck, 0, 99, 0)), blAt: num(raw.blAt, 0, 4e12, 0), bl: (raw.bl && typeof raw.bl === 'object' && NAME_RE.test(raw.bl.by)) ? { by: raw.bl.by, at: num(raw.bl.at, 0, 4e12, 0) } : null };
+  return { season: 4, grade: Math.floor(num(raw.grade, 0, 17, 0)), energy: Math.floor(num(raw.energy, 0, MAXE, MAXE)), at: num(raw.at, 0, 4e12, Date.now()), tries: Math.floor(num(raw.tries, 0, 1e9, 0)), best: Math.floor(num(raw.best, 0, 17, 0)), cleared: num(raw.cleared, 0, 4e12, 0), pin: typeof raw.pin === 'string' ? raw.pin.slice(0, 80) : '', ach: cleanAch(raw.ach), rival: NAME_RE.test(raw.rival) ? raw.rival : '', live: num(raw.live, 0, 4e12, 0), ltDay: typeof raw.ltDay === 'string' ? raw.ltDay.slice(0, 10) : '', dKey: typeof raw.dKey === 'string' ? raw.dKey.slice(0, 10) : '', dFall: Math.floor(num(raw.dFall, 0, 1e6, 0)), dTries: Math.floor(num(raw.dTries, 0, 1e6, 0)), falls: Math.floor(num(raw.falls, 0, 1e9, 0)), ck: Math.floor(num(raw.ck, 0, 99, 0)), blAt: num(raw.blAt, 0, 4e12, 0), dc: typeof raw.dc === 'string' ? raw.dc.slice(0, 10) : '', bl: (raw.bl && typeof raw.bl === 'object' && NAME_RE.test(raw.bl.by)) ? { by: raw.bl.by, at: num(raw.bl.at, 0, 4e12, 0) } : null };
 }
-const pub = (p) => ({ season: 4, grade: p.grade, energy: p.energy, at: p.at, tries: p.tries, best: p.best, cleared: p.cleared, ltDay: p.ltDay, dKey: p.dKey, dFall: p.dFall, dTries: p.dTries, falls: p.falls, ck: p.ck, blAt: p.blAt });
+const pub = (p) => ({ season: 4, grade: p.grade, energy: p.energy, at: p.at, tries: p.tries, best: p.best, cleared: p.cleared, ltDay: p.ltDay, dKey: p.dKey, dFall: p.dFall, dTries: p.dTries, falls: p.falls, ck: p.ck, blAt: p.blAt, dc: p.dc });
 function refill(p) {
   const now = Date.now(), g = Math.floor((now - p.at) / REGEN);
   if (g > 0) { p.energy = Math.min(MAXE, p.energy + g); p.at = p.energy >= MAXE ? now : p.at + g * REGEN; }
@@ -432,6 +433,12 @@ window.pickEv = function (i) {
   const o = curEv.o[i]; $('evov').style.display = 'none';
   if (o.skip) { const g = P[me].grade; setResult('fail', g, g, '망설이다 시간만 보냈다… (체력 소모 없음)'); log(`🤔 ${me}님이 「${curEv.t}」에서 물러났습니다`, 'fail'); return; }
   tryUpgrade(o);
+};
+window.claimDaily = function () {
+  if (!dbReady || !me || ended) return;
+  const p = P[me], t = todayStr(); if (p.dc === t) return;
+  refill(p); p.energy = Math.min(MAXE, p.energy + DAILY_E); if (p.energy >= MAXE) p.at = Date.now(); p.dc = t; p._t = Date.now();
+  toast(`🎁 출석 보너스! 체력 +${DAILY_E}`); log(`🎁 ${me}님이 출석 보너스를 받았습니다 (체력 +${DAILY_E})`, 'success'); render(); save();
 };
 window.claimLT = function () {
   if (!dbReady || !me || ended) return;
@@ -648,6 +655,7 @@ window.tryUpgrade = function (mods) {
   const adv = to > g;
   setResult(kind, g, to, msg, adv && LV[to] ? `「${LV[to][0]}」 ${LV[to][1]}` : (kind === 'reset' ? '🏘️ 업적 달성: 태초마을 관광객' : ''));
   log(`${adv ? '🎉' : '💥'} ${me}님 V${g}→V${to}: ${msg}${usedBelay ? ' 🪢' : ''}`, adv ? 'success' : 'fail', b || (adv && to >= 13 && to < 17 ? `🔥 ${me}님이 V${to} 돌파!` : ''), kind === 'reset' ? { k: 'reset' } : null);
+  if (adv && to < 17 && Math.random() < REFUND) { p.energy = Math.min(MAXE, p.energy + 1); setTimeout(() => toast('🍀 기분 좋은 성공! 체력 +1 환급'), 1600); }
   if (adv) pop(to);
   else if (to < g) { const s = $('stage'); s.classList.remove('hit'); void s.offsetWidth; s.classList.add('hit'); }
   if (kind === 'reset') showReset();
@@ -697,6 +705,9 @@ function renderStage() {
   const lt = $('ltbar'), canLT = dbReady && me && P[me] && ltOn() && !ended && P[me].ltDay !== todayStr();
   lt.style.display = ltOn() && !ended ? 'block' : 'none';
   lt.innerHTML = canLT ? `🌙 락트리 타임! 오늘 한 번 <button class="small-btn" style="margin-left:6px;padding:5px 10px" onclick="claimLT()">체력 +${ltBonus()} 받기</button>` : '🌙 락트리 타임 진행 중 (오늘 보너스는 이미 받았어요)';
+  const dbr = $('dbar'), canD = dbReady && me && P[me] && !ended && P[me].dc !== todayStr();
+  dbr.style.display = canD ? 'block' : 'none';
+  dbr.innerHTML = canD ? `🎁 오늘의 출석 보너스! <button class="small-btn" style="margin-left:6px;padding:5px 10px;background:#2f9e44" onclick="claimDaily()">체력 +${DAILY_E} 받기</button>` : '';
   $('live-btn').style.display = dbReady && mine && g >= 13 && g < 17 && !ended && p.energy >= 1 && !liveBusy ? 'block' : 'none';
   $('me-name').textContent = me || '미설정';
   const sp = SPRITE[sk(view)], ik = sp ? 'S' + view : 'E' + ICON[g];
