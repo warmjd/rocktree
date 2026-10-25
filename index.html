@@ -167,6 +167,10 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
 #bas-box .bag-it { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 8px; margin-bottom:5px; background:#33281e; border-radius:9px; }
 #bas-box .bag-it button { padding:7px 12px; background:#2f9e44; flex-shrink:0; }
 #bas-box .dots { letter-spacing:2px; font-size:.95rem; }
+#egg { position:fixed; inset:0; z-index:9500; display:none; align-items:center; justify-content:center; flex-direction:column; text-align:center; padding:24px; background:radial-gradient(ellipse at center,#4a3a10 0%,#1a1306 70%,#000 100%); color:#ffe9a8; }
+#egg.on { display:flex; animation:eggin .8s; } @keyframes eggin { from { opacity:0; transform:scale(1.2); } to { opacity:1; transform:scale(1); } }
+#egg .moai { font-size:5.5rem; filter:drop-shadow(0 0 28px #ffd43b); animation:bob 1.2s infinite alternate; }
+#egg h2 { font-size:1.5rem; margin:10px 0 6px; } #egg .it { margin:6px 0; font-size:1.05rem; font-weight:800; } #egg .tap { margin-top:18px; font-size:.8rem; color:#b79a55; }
 </style>
 </head>
 <body>
@@ -182,7 +186,7 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
 <div class="ov" id="share"><div class="box"><h3>📸 자랑 카드</h3><img id="share-img" alt="자랑 카드"><small>이미지를 길게 눌러 저장하거나 아래 버튼으로 공유하세요</small><button class="small-btn" style="padding:11px;background:#3742fa" onclick="shareImg()">공유 / 저장</button><button class="small-btn gray" onclick="closeShare()">닫기</button></div></div>
 
 <div class="wrap">
-  <header style="position:relative"><button id="snd-btn" class="small-btn" style="position:absolute;right:0;top:0;background:#3a3f55" onclick="toggleSnd()">🔊</button><h1>락트리 강화소</h1><p>시즌 4 · 크럭스 정복전 — 한 달의 대장정</p></header>
+  <header style="position:relative"><button id="snd-btn" class="small-btn" style="position:absolute;right:0;top:0;background:#3a3f55" onclick="toggleSnd()">🔊</button><h1>락트리 강화소</h1><p>시즌 3 · 크럭스 정복전 — 한 달의 대장정</p></header>
   <div id="ended"></div>
   <button id="report-btn" class="small-btn" style="display:none;width:100%;padding:11px;background:#3742fa" onclick="openReport()">📸 시즌 리포트 카드 저장</button>
   <div class="status loading" id="status">⏳ 서버에서 데이터 불러오는 중...</div>
@@ -222,7 +226,8 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
     <li>🎁 매일 출석 +2 · 🌙 밤 9시 락트리 타임 보너스 · 🍀 성공하면 가끔 +1.</li>
     <li>🆘 꼴찌는 매일 출석 때 ❤️결정 +4, 현무암 +1을 받고 성공률도 올라요.</li>
     <li>🪨 실패 10번마다 현무암 1개 → 조돌맹에게 감정받으면 ❤️결정(1~10)! 🎒 가방에서 사용. 아주 가끔 🧂초크 가루·🛡️낙하 방지 매트도 나와요.</li>
-    <li>🍃 시즌 3주차부터 순풍이 불어요. V17에 처음 오르면 시즌 종료!</li></ul></div>
+    <li>🍃 시즌 3주차부터 순풍이 불어요. V17에 처음 오르면 시즌 종료!</li>
+    <li style="color:#b79a55">🗿 오래된 전설: 역사를 순서대로 짚고, 지금을 부른 뒤, 정상을 밟아라. (소리쳐 부를 땐 네 자리 숫자로)</li></ul></div>
   <div class="card"><div class="title">🎖 업적 (선택한 캐릭터)</div><div id="ach"></div></div>
   <div class="card" id="admin" style="display:none"><div class="title">🛠 운영자 (조돌맹 전용) · 캐릭터 삭제</div><div id="admin-list"></div>
     <div class="title" style="margin-top:12px">📥 레벨 이야기 제안함 (복사해서 클로드에게 붙여넣기)</div><textarea id="idea-text" readonly rows="5"></textarea><button class="small-btn" style="margin-top:6px;padding:9px" onclick="copyIdeas()">📋 전체 복사</button></div>
@@ -243,6 +248,7 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
   </div>
   <div id="bs-box"><div id="bs-name"></div><div id="bs-text"></div><div id="bs-tap"></div><div id="bs-choices"></div></div>
 </div>
+<div id="egg" onclick="this.classList.remove('on')"><div class="moai">🗿</div><h2>전설의 비밀을 풀었다!</h2><div style="font-size:.9rem;color:#d9c07a">조돌맹이 바위 뒤에서 조용히 엄지를 들었다…<br>(이 선물은 평생 단 한 번뿐!)</div><div style="margin-top:14px"><div class="it">🛡️ 낙하 방지 매트 ×1</div><div class="it">🧂 초크 가루 ×1</div><div class="it">❤️ 체력 결정 +30 <span style="font-size:.8rem;color:#d9c07a">(10짜리 3개)</span></div></div><div class="tap">🎒 가방에 들어갔어요 · 탭하여 닫기</div></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, set, update, remove, onValue, push, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -304,14 +310,14 @@ const $ = (id) => document.getElementById(id);
 const ls = { get: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
 const cleanBag = (b) => (Array.isArray(b) ? b : (b && typeof b === 'object' ? Object.values(b) : [])).map(v => Math.floor(Number(v))).filter(v => v >= 1 && v <= 10).slice(0, 30);
 const cleanItm = (o, mx) => { const f = (v) => Math.max(0, Math.min(mx, Math.floor(Number(v)) || 0)); return { c: f(o && o.c), m: f(o && o.m) }; };
-const fresh = () => ({ season: 4, grade: 0, energy: MAXE, at: Date.now(), tries: 0, best: 0, cleared: 0, pin: '', ach: {}, rival: '', live: 0, ltDay: '', dKey: '', dFall: 0, dTries: 0, falls: 0, ck: 0, blAt: 0, bl: null, dc: '', gift: '', bas: 0, fl: 0, bag: [], mig: '', comp: '', itm: { c: 0, m: 0 }, buf: { c: 0, m: 0 } });
+const fresh = () => ({ season: 4, grade: 0, energy: MAXE, at: Date.now(), tries: 0, best: 0, cleared: 0, pin: '', ach: {}, rival: '', live: 0, ltDay: '', dKey: '', dFall: 0, dTries: 0, falls: 0, ck: 0, blAt: 0, bl: null, dc: '', gift: '', bas: 0, fl: 0, bag: [], mig: '', comp: '', eg: '', itm: { c: 0, m: 0 }, buf: { c: 0, m: 0 } });
 const NAME_RE = /^[가-힣A-Za-z0-9_-]{1,8}$/;
 const num = (v, lo, hi, d) => { v = Number(v); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
 function norm(raw) {
   if (!raw || typeof raw !== 'object' || raw.season !== 4) return null;     // 시즌1 데이터는 초기화 대상
-  return { season: 4, grade: Math.floor(num(raw.grade, 0, 17, 0)), energy: Math.floor(num(raw.energy, 0, 40, MAXE)), at: num(raw.at, 0, 4e12, Date.now()), tries: Math.floor(num(raw.tries, 0, 1e9, 0)), best: Math.floor(num(raw.best, 0, 17, 0)), cleared: num(raw.cleared, 0, 4e12, 0), pin: typeof raw.pin === 'string' ? raw.pin.slice(0, 80) : '', ach: cleanAch(raw.ach), rival: NAME_RE.test(raw.rival) ? raw.rival : '', live: num(raw.live, 0, 4e12, 0), ltDay: typeof raw.ltDay === 'string' ? raw.ltDay.slice(0, 10) : '', dKey: typeof raw.dKey === 'string' ? raw.dKey.slice(0, 10) : '', dFall: Math.floor(num(raw.dFall, 0, 1e6, 0)), dTries: Math.floor(num(raw.dTries, 0, 1e6, 0)), falls: Math.floor(num(raw.falls, 0, 1e9, 0)), ck: Math.floor(num(raw.ck, 0, 99, 0)), blAt: num(raw.blAt, 0, 4e12, 0), dc: typeof raw.dc === 'string' ? raw.dc.slice(0, 10) : '', gift: typeof raw.gift === 'string' ? raw.gift.slice(0, 20) : '', bas: Math.floor(num(raw.bas, 0, 99, 0)), fl: Math.floor(num(raw.fl, 0, 1e6, 0)), bag: cleanBag(raw.bag), mig: typeof raw.mig === 'string' ? raw.mig.slice(0, 12) : '', comp: typeof raw.comp === 'string' ? raw.comp.slice(0, 12) : '', itm: cleanItm(raw.itm, 5), buf: cleanItm(raw.buf, 1), bl: (raw.bl && typeof raw.bl === 'object' && NAME_RE.test(raw.bl.by)) ? { by: raw.bl.by, at: num(raw.bl.at, 0, 4e12, 0) } : null };
+  return { season: 4, grade: Math.floor(num(raw.grade, 0, 17, 0)), energy: Math.floor(num(raw.energy, 0, 40, MAXE)), at: num(raw.at, 0, 4e12, Date.now()), tries: Math.floor(num(raw.tries, 0, 1e9, 0)), best: Math.floor(num(raw.best, 0, 17, 0)), cleared: num(raw.cleared, 0, 4e12, 0), pin: typeof raw.pin === 'string' ? raw.pin.slice(0, 80) : '', ach: cleanAch(raw.ach), rival: NAME_RE.test(raw.rival) ? raw.rival : '', live: num(raw.live, 0, 4e12, 0), ltDay: typeof raw.ltDay === 'string' ? raw.ltDay.slice(0, 10) : '', dKey: typeof raw.dKey === 'string' ? raw.dKey.slice(0, 10) : '', dFall: Math.floor(num(raw.dFall, 0, 1e6, 0)), dTries: Math.floor(num(raw.dTries, 0, 1e6, 0)), falls: Math.floor(num(raw.falls, 0, 1e9, 0)), ck: Math.floor(num(raw.ck, 0, 99, 0)), blAt: num(raw.blAt, 0, 4e12, 0), dc: typeof raw.dc === 'string' ? raw.dc.slice(0, 10) : '', gift: typeof raw.gift === 'string' ? raw.gift.slice(0, 20) : '', bas: Math.floor(num(raw.bas, 0, 99, 0)), fl: Math.floor(num(raw.fl, 0, 1e6, 0)), bag: cleanBag(raw.bag), mig: typeof raw.mig === 'string' ? raw.mig.slice(0, 12) : '', comp: typeof raw.comp === 'string' ? raw.comp.slice(0, 12) : '', eg: typeof raw.eg === 'string' ? raw.eg.slice(0, 8) : '', itm: cleanItm(raw.itm, 5), buf: cleanItm(raw.buf, 1), bl: (raw.bl && typeof raw.bl === 'object' && NAME_RE.test(raw.bl.by)) ? { by: raw.bl.by, at: num(raw.bl.at, 0, 4e12, 0) } : null };
 }
-const pub = (p) => ({ season: 4, grade: p.grade, energy: p.energy, at: p.at, tries: p.tries, best: p.best, cleared: p.cleared, ltDay: p.ltDay, dKey: p.dKey, dFall: p.dFall, dTries: p.dTries, falls: p.falls, ck: p.ck, blAt: p.blAt, dc: p.dc, gift: p.gift, bas: p.bas, fl: p.fl, bag: p.bag, mig: p.mig, comp: p.comp, itm: p.itm, buf: p.buf });
+const pub = (p) => ({ season: 4, grade: p.grade, energy: p.energy, at: p.at, tries: p.tries, best: p.best, cleared: p.cleared, ltDay: p.ltDay, dKey: p.dKey, dFall: p.dFall, dTries: p.dTries, falls: p.falls, ck: p.ck, blAt: p.blAt, dc: p.dc, gift: p.gift, bas: p.bas, fl: p.fl, bag: p.bag, mig: p.mig, comp: p.comp, eg: p.eg, itm: p.itm, buf: p.buf });
 function refill(p) {
   const now = Date.now();
   if (p.energy >= MAXE) { p.at = now; return; }        // 가득(또는 초과)이면 자연충전 정지
@@ -399,7 +405,7 @@ function celebrate(g) {
 }
 
 // ── 업적 · 응원 · 운영자 ──
-const ACH = { first10:['🧗','V10 돌파'], v16:['😱','V16 입성'], reset:['🏘️','태초마을 관광객'], jump:['🚿','물대포 승천'], egg:['👻','조돌맹 빙의'], murphy:['☁️','머피의 피해자'], quake:['🌋','땅울림 생존자'], furn:['🪑','가구 붕괴 생존자'], dbl:['⚡','2단계 점프'], camp:['⛺','캠프 입성'], belay:['🪢','든든한 확보자'], chalk:['🧂','초크 장인'], summit:['🌤️','정상 직전 V16 확보'], basalt:['🪨','현무암 감정 의뢰인'], bas10:['💎','현무암 대박 (체력 10)'], rare:['✨','희귀 아이템 발견'] };
+const ACH = { first10:['🧗','V10 돌파'], v16:['😱','V16 입성'], reset:['🏘️','태초마을 관광객'], jump:['🚿','물대포 승천'], egg:['👻','조돌맹 빙의'], murphy:['☁️','머피의 피해자'], quake:['🌋','땅울림 생존자'], furn:['🪑','가구 붕괴 생존자'], dbl:['⚡','2단계 점프'], camp:['⛺','캠프 입성'], belay:['🪢','든든한 확보자'], chalk:['🧂','초크 장인'], summit:['🌤️','정상 직전 V16 확보'], basalt:['🪨','현무암 감정 의뢰인'], bas10:['💎','현무암 대박 (체력 10)'], rare:['✨','희귀 아이템 발견'], legend:['🗿','전설의 비밀을 푼 자'] };
 const achQ = new Set();
 function cleanAch(raw) { const o = {}; if (raw && typeof raw === 'object') Object.keys(ACH).forEach(k => { if (raw[k]) o[k] = Number(raw[k]) || 1; }); return o; }
 function award(p, id) { if (p.ach[id]) return; p.ach[id] = Date.now(); achQ.add(id); setTimeout(() => toast(`🎖 업적 달성! ${ACH[id][0]} ${ACH[id][1]}`), 1400); }
@@ -414,6 +420,7 @@ function incoming(v) {
 }
 let cheerAt = 0;
 window.sendCheer = function (e) {
+  if ($('cheer-msg').value.trim() === '0317') { $('cheer-msg').value = ''; return eggFire(); }
   if (!dbReady || !me || view === me || !P[view]) return;
   const c = $('cheer-msg').value.trim().slice(0, 30);
   if (e === '💬' && !c) return toast('보낼 메시지를 적어주세요 ✍️');
@@ -571,6 +578,8 @@ const Snd = (() => {
       g.gain.setTargetAtTime(.11, a.currentTime, .5); cv = { g, os, iv, f };
     },
     tense() { if (!cv || !ac) return; const t = ac.currentTime; cv.f.frequency.setTargetAtTime(1500, t, .6); cv.g.gain.setTargetAtTime(.17, t, .5); cv.os.forEach(o => o.detune.setTargetAtTime(-100, t, .8)); },
+    ding(i) { const f = 440 * Math.pow(2, [0, 4, 7, 12][Math.min(3, i)] / 12); tone('triangle', f, f, .28, .22); tone('sine', f * 2, f * 2, .4, .08, .04); },
+    nope() { tone('sine', 150, 90, .18, .25); },
     duck(d) { if (!bg || !ac) return; const t = ac.currentTime; bg.g.gain.setTargetAtTime(d ? .012 : .07, t, .25); bg.os.forEach(o => o.detune.setTargetAtTime(d ? -1200 : 0, t, .3)); },
     cycle() { mode = mode === '0' ? '1' : (mode === '1' ? '2' : '0'); ls.set('rocktree_snd', mode); this.bgm(mode === '2'); return mode; }
   };
@@ -778,6 +787,31 @@ function migBas(p) {
   }
   save();
 }
+// ================= 🗿 이스터에그 =================
+// 정답: 명예의 전당 은비땅(시즌1) → 조돌맹(시즌2) → 맨 위 부제 '시즌 3' → 등반벽 맨 위 V17 순서로 탭 / 또는 응원 메시지에 '0317'(시즌03 + 정상17)
+function eggFire() {
+  if (!me || !P[me] || !dbReady || ended) return;
+  const p = P[me];
+  if (p.eg === 'v1') return toast('🗿 …이미 선물을 받은 자여. 비밀은 한 번뿐이다.');
+  p.eg = 'v1'; p.itm = cleanItm(p.itm, 5); p.itm.m = Math.min(5, p.itm.m + 1); p.itm.c = Math.min(5, p.itm.c + 1);
+  p.bag = cleanBag(p.bag); p.bag.push(10, 10, 10); award(p, 'legend');   // 체력 결정 10 ×3 = 총 30 p._t = Date.now();
+  Snd.success(); setTimeout(() => Snd.reward(10), 500); rain('🗿'); $('egg').classList.add('on');
+  log(`🗿 ${me}님이 숨겨진 전설의 비밀을 풀었습니다!!`, 'success', `🗿 ${me}님이 어딘가에 숨겨진 비밀을 풀었어요! (힌트는 규칙 맨 아래…)`);
+  render(); save();
+}
+const EG_SEQ = ['h1', 'h2', 'sub', 'v17']; let egStep = 0, egT = 0;
+function egKind(t) {
+  const d = t.closest && t.closest('#hall > div'); if (d) { const i = [...$('hall').children].indexOf(d); return i === 0 ? 'h1' : (i === 1 ? 'h2' : 'x'); }
+  if (t.closest && t.closest('header p')) return 'sub';
+  const wl = t.closest && t.closest('.wl2'); if (wl && wl.style.getPropertyValue('--g') === '17') return 'v17';
+  return null;
+}
+document.addEventListener('click', (e) => {
+  const k = egKind(e.target); if (!k) return;
+  const now = Date.now(); if (now - egT > 15000) egStep = 0; egT = now;
+  if (k === EG_SEQ[egStep]) { Snd.ding(egStep); egStep++; if (egStep >= EG_SEQ.length) { egStep = 0; eggFire(); } }
+  else { if (egStep > 0) Snd.nope(); egStep = k === EG_SEQ[0] ? 1 : 0; if (egStep) Snd.ding(0); }
+}, true);
 const GIFT_ID = 'chungkiwa-1024';
 function checkGift() {
   if (!me || !P[me] || ended || !dbReady) return;
