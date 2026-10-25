@@ -201,7 +201,6 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
     <div id="e-text"></div>
     <button id="go" onclick="tryUpgrade()" disabled>⏳ 불러오는 중...</button>
     <button id="live-btn" class="small-btn" style="display:none;width:100%;margin-top:8px;padding:11px;background:#e03131" onclick="goLive()">🔴 생중계 도전 선언 (모두에게 알림!)</button>
-    <button id="req-btn" class="small-btn" style="display:none;width:100%;margin-top:8px;padding:11px;background:#2f9e44" onclick="reqBelay()">🆘 확보 요청 (모두에게 알림)</button>
     <div id="bas-box"></div>
     <div id="result"></div>
     <button id="share-btn" class="small-btn" style="width:100%;margin-top:8px;padding:11px;font-size:.9rem;display:none;background:#3742fa" onclick="openShare()">📸 자랑 카드 저장</button>
@@ -211,24 +210,19 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
     <div class="ebtns"><button onclick="sendCheer('🔥')">🔥</button><button onclick="sendCheer('👏')">👏</button><button onclick="sendCheer('😂')">😂</button><button onclick="sendCheer('🫵')">🫵</button><button onclick="sendCheer('🪦')">🪦</button><button onclick="sendCheer('🤡')">🤡</button></div>
     <div style="display:flex;gap:6px;margin-top:8px"><input id="cheer-msg" maxlength="30" placeholder="한 줄 메시지 (30자)" autocomplete="off" onkeydown="if(event.key==='Enter')sendCheer('💬')"><button class="small-btn" style="padding:0 16px;font-size:.9rem;white-space:nowrap;background:#3742fa" onclick="sendCheer('💬')">💬 보내기</button></div>
     <div class="pre"><button onclick="preset('내 발 아래구나~')">내 발 아래구나~</button><button onclick="preset('밟고 간다 ㅋㅋ')">밟고 간다 ㅋㅋ</button><button onclick="preset('꽉 잡아!')">꽉 잡아!</button><button onclick="preset('할래말래 하지마')">할래말래 하지마</button></div>
-    <button class="small-btn" style="margin-top:8px;padding:9px;background:#2f9e44;width:100%" onclick="belay()">🪢 확보 서주기 (상대 성공률 +8%p · 나는 체력 +1)</button>
     <button class="small-btn" style="margin-top:8px;padding:9px;background:#3742fa;width:100%" onclick="setRival()">🎯 라이벌로 지정하기</button></div>
   <div class="card"><div class="title">🏅 실시간 시상대 (터치하면 관전)</div><div id="podium"></div></div>
   <div class="card"><div class="title">🧗 실시간 등반 현황 (터치하면 관전)</div><div id="wall"></div><div id="titles" class="titles"></div></div>
   <div class="card"><div class="title">🔥 지금 오르는 사람들 (터치하여 관전)</div><div id="players"></div></div>
   <div class="card hall"><div class="title">🏆 명예의 전당</div><div id="hall"></div></div>
-  <div class="card rules"><div class="title">📜 시즌3 규칙 · 크럭스 정복전</div><ul>
-    <li>도전은 ❤️체력 1을 씁니다. 체력은 20분마다 1씩 차고 최대 10입니다. 체력을 얻는 길: 🎁 매일 출석 보너스 +2 · 🌙 락트리 타임 보너스 · 🪢 확보 서기 +1 · 🍀 도전에 성공하면 25% 확률로 +1 환급!</li>
-    <li>⛺ <b>캠프</b>는 V4·V8·V12·V15! 한 번 도착하면 그 아래로는 절대 떨어지지 않아요. 대신 캠프 사이 구간은 성공 확률이 낮고 추락이 잦습니다.</li>
-    <li>🧂 <b>초크 스택</b>: 연속으로 실패할수록 다음 도전 성공률이 오릅니다 (최대 +8%p). 성공하거나 추락하면 초기화됩니다.</li>
-    <li>🪢 <b>확보</b>: 다른 사람의 캐릭터를 관전하고 「확보 서주기」를 누르면 그 사람 성공률이 6시간 동안 +8%p! 확보를 선 사람도 체력 +1 (1시간에 1회). 🔒 <b>V16→V17은 확보자가 있어야만 도전할 수 있어요.</b> 혼자서는 정상에 설 수 없습니다.</li>
-    <li>🌙 매일 밤 9시~10시는 <b>락트리 타임</b>! 접속해서 체력 보너스를 받아가세요 (하루 1회). 요일마다 컨셉 데이도 바뀝니다.</li>
-    <li>🍃 시즌 3주차부터는 <b>순풍</b>이 불어 모두의 성공률이 조금씩 올라요 (3주차 +2%p, 4주차부터 +4%p). 대장정은 한 달 안팎으로 끝납니다.</li>
-    <li>예상 못한 일이 가끔 일어납니다. 한 번에 두 칸을 오르기도, 두 칸을 잃기도 해요. V16에서 실패하면 아주 가끔 <b>태초마을(V1)</b>로 돌아갈 수 있습니다 😈 (캠프도 소용없어요)</li>
-    <li>🪨 <b>현무암</b>: 도전에 실패할 때마다 쌓이고, 10번째마다 현무암을 1개 줍습니다. 조돌맹에게 가져가 「감정」을 받으면 주먹으로 깨주고, 안에서 <b>체력 결정(1~10)</b>이 나와 🎒 가방에 보관돼요. 원할 때 꺼내 쓰세요! (체력이 모자란 만큼만 쓰이고 나머지는 결정에 남아요)</li>
-    <li>✨ 감정할 때 <b>극악의 확률(각 3%)</b>로 현무암 속에서 🧂<b>초크 가루</b>(다음 도전 성공률 상승)나 🛡️<b>낙하 방지 매트</b>(다음 추락 1회 방지)가 나옵니다. 가방에서 사용하세요!</li>
-    <li>V17에 처음 오르는 사람이 나오면 <b>시즌이 종료</b>됩니다. 그 사람이 장경욱이 인정한 클라이머가 됩니다!</li>
-    <li>내 캐릭터는 비밀번호(숫자 4자리)로 지켜집니다. V15부터는 도전 성공 때마다 강력한 연출이 터지고, 자랑 카드를 이미지로 저장할 수 있어요.</li></ul></div>
+  <div class="card rules"><div class="title">📜 시즌3 규칙</div><ul>
+    <li>❤️ 도전 1회 = 체력 1. 20분마다 +1 (최대 10).</li>
+    <li>⛺ V4·V8·V12·V15 캠프에 닿으면 그 아래로 안 떨어져요.</li>
+    <li>🧂 연속 실패하면 다음 성공률이 조금씩 올라요.</li>
+    <li>🎁 매일 출석 +2 · 🌙 밤 9시 락트리 타임 보너스 · 🍀 성공하면 가끔 +1.</li>
+    <li>🆘 꼴찌는 매일 출석 때 ❤️결정 +4, 현무암 +1을 받고 성공률도 올라요.</li>
+    <li>🪨 실패 10번마다 현무암 1개 → 조돌맹에게 감정받으면 ❤️결정(1~10)! 🎒 가방에서 사용. 아주 가끔 🧂초크 가루·🛡️낙하 방지 매트도 나와요.</li>
+    <li>🍃 시즌 3주차부터 순풍이 불어요. V17에 처음 오르면 시즌 종료!</li></ul></div>
   <div class="card"><div class="title">🎖 업적 (선택한 캐릭터)</div><div id="ach"></div></div>
   <div class="card" id="admin" style="display:none"><div class="title">🛠 운영자 (조돌맹 전용) · 캐릭터 삭제</div><div id="admin-list"></div>
     <div class="title" style="margin-top:12px">📥 레벨 이야기 제안함 (복사해서 클로드에게 붙여넣기)</div><textarea id="idea-text" readonly rows="5"></textarea><button class="small-btn" style="margin-top:6px;padding:9px" onclick="copyIdeas()">📋 전체 복사</button></div>
@@ -269,11 +263,10 @@ const DAILY_E = 2, REFUND = 0.25;             // 🎁 출석 보너스 체력 +2
 const SEASON_START = new Date('2026-10-24T00:00:00+09:00').getTime();   // 시즌3 시작일 (순풍 계산용)
 const CAMPS = [4, 8, 12, 15];                 // ⛺ 캠프: 이 단계 아래로는 추락하지 않음
 const floorOf = (g) => CAMPS.filter(c => c <= g).pop() || 0;
-const CHALK_STEP = 1.5, CHALK_MAX = 8;        // 🧂 연속 실패 1회당 +1.5%p (최대 +8%p), 성공/추락하면 초기화
-const BEL_BONUS = 8, BEL_TTL = 6 * 3600 * 1000, BEL_CD = 60 * 60 * 1000;   // 🪢 확보: 상대 +8%p(6시간 유효), 서는 사람은 1시간마다 1회·체력 +1
+const CHALK_STEP = 0.1, CHALK_MAX = 0.5;        // 🧂 연속 실패 1회당 +1.5%p (최대 +8%p), 성공/추락하면 초기화
 const seasonDay = () => Math.floor((Date.now() - SEASON_START) / 864e5);
-const wind = () => { const d = seasonDay(); return d >= 21 ? 4 : (d >= 14 ? 2 : 0); };   // 🍃 순풍: 3주차 +2%p, 4주차~ +4%p (시즌이 너무 길어지지 않게)
-const RATE = [80, 76, 70, 62, 19, 17, 15, 13, 12, 11, 9, 8, 6, 5, 4, 3, 3];   // V(g)→V(g+1) 성공률 %
+const wind = () => { const d = seasonDay(); return d >= 21 ? 0.2 : (d >= 14 ? 0.1 : 0); };   // 🍃 순풍: 3주차 +2%p, 4주차~ +4%p (시즌이 너무 길어지지 않게)
+const RATE = [80, 76, 70, 62, 13.3, 11.9, 10.5, 9.1, 8.4, 7.7, 6.3, 5.6, 4.2, 3.5, 2.8, 2.1, 2.1];   // V(g)→V(g+1) 성공률 %
 const fall = (g) => floorOf(g) === g ? 0 : (g >= 14 ? 0.55 : (g >= 10 ? 0.4 : (g >= 5 ? 0.25 : 0)));                           // 실패 시 추락 확률
 const LV = [
   ['락트리 입장', '신발 끈부터 묶자. 아직 아무것도 모른다'],
@@ -326,8 +319,14 @@ function refill(p) {
   if (g > 0) { p.energy = Math.min(MAXE, p.energy + g); p.at = p.energy >= MAXE ? now : p.at + g * REGEN; }
 }
 function addE(p, n) { if (p.energy < MAXE) p.energy = Math.min(MAXE, p.energy + n); if (p.energy >= MAXE) p.at = Date.now(); }
-const belayOn = (p) => !!(p && p.bl && p.bl.at > Date.now());
-const bonusOf = (p, extra) => { const ck = Math.min(CHALK_MAX, p.ck * CHALK_STEP), bl = belayOn(p) ? BEL_BONUS : 0, w = wind(), it = (p.buf && p.buf.c) ? CHALK_ITEM(p.grade) : 0; return { ck, bl, w, it, ex: extra || 0, total: ck + bl + w + it + (extra || 0) }; };
+const belayOn = () => false;
+const f1 = (x) => (Math.round(x * 10) / 10).toString();
+const UNDER_REL = 0.3, UNDER_E = 4;   // 🆘 꼴찌 지원: 성공률 +30%(상대, V12 미만) · 매일 출석 때 체력 결정 +4 & 현무암 +1
+function underdog(p) {
+  if (!p) return false; const ns = NAMES.filter(n => P[n] && P[n].tries >= 3); if (ns.length < 3 || p.tries < 3) return false;
+  const gs = ns.map(n => P[n].grade), mn = Math.min(...gs), mx = Math.max(...gs); return p.grade <= mn && mx - mn >= 2;
+}
+const bonusOf = (p, extra) => { const g = p.grade, base = RATE[g] || 0, ck = base * Math.min(CHALK_MAX, p.ck * CHALK_STEP), w = base * wind(), un = (g < 12 && underdog(p)) ? base * UNDER_REL : 0, it = (p.buf && p.buf.c) ? base * CHALK_ITEM(g) : 0, ex = (extra || 0) * Math.min(1, base / 30); return { ck, bl: 0, w, un, it, ex, total: ck + w + un + it + ex }; };
 const hueOf = (n) => [...n].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7) % 360;
 async function hashPin(n, pin) {
   const s = n + '|' + pin + '|rocktree4';
@@ -410,8 +409,6 @@ function incoming(v) {
   if (v.k === 'cheer') { if (v.to === me || v.to === view) { rain(v.e || '🔥'); if (v.to === me && v.c) toast(`${v.u}: ${v.c}`); } return; }
   if (v.k === 'reset') { rain('😂'); rain('🪦'); toast(v.b || '💀 태초마을 귀환!'); return; }
   if (v.k === 'live') { toast(v.b, v.u); celebrate(15); return; }
-  if (v.k === 'belay') { if (v.to === me) { toast(`🪢 ${v.u}님이 확보를 서줬어요! (+${BEL_BONUS}%p)`); rain('🪢'); } return; }
-  if (v.k === 'belayreq') { toast(v.b || `🆘 ${v.u}님이 확보자를 찾고 있어요!`, v.u); return; }
   if (v.k === 'rival') { if (v.to === me) toast(`🎯 ${v.u}님이 당신을 라이벌로 지정했습니다!`); return; }
   if (v.b) { toast(v.b); celebrate(15); }
 }
@@ -425,28 +422,6 @@ window.sendCheer = function (e) {
   rain(e); log(`${e} ${me} → ${view}${c ? ': ' + c : ''}`, 'cheer', '', { k: 'cheer', to: view, e, c });
 };
 window.preset = (t) => { $('cheer-msg').value = t; };
-window.belay = function () {
-  if (!dbReady || !me || ended || view === me || !P[view] || !P[me]) return;
-  const p = P[me], t = P[view]; refill(p);
-  if (t.grade >= 17) return;
-  const left = p.blAt + BEL_CD - Date.now();
-  if (left > 0) return toast(`🪢 확보는 ${Math.ceil(left / 60000)}분 뒤에 다시 설 수 있어요`);
-  if (belayOn(t)) return toast(`🪢 ${view}님은 이미 ${t.bl.by}님이 확보 중이에요`);
-  t.bl = { by: me, at: Date.now() + BEL_TTL };
-  update(ref(db, 's4/players/' + view), { bl: t.bl }).catch(onErr);
-  p.blAt = Date.now(); addE(p, 1); p._t = Date.now();
-  award(p, 'belay'); toast(`🪢 ${view}님의 확보자가 됐어요! (내 체력 +1)`); rain('🪢');
-  log(`🪢 ${me}님이 ${view}님의 확보를 섰습니다 (+${BEL_BONUS}%p)`, 'success', '', { k: 'belay', to: view });
-  render(); save();
-};
-let reqAt = 0;
-window.reqBelay = function () {
-  if (!dbReady || !me || ended || !P[me]) return;
-  if (Date.now() - reqAt < 60000) return toast('확보 요청은 1분에 한 번만 보낼 수 있어요');
-  reqAt = Date.now(); const g = P[me].grade;
-  log(`🆘 ${me}님(V${g})이 확보자를 찾고 있어요!`, 'success', `🆘 ${me}님이 확보자를 찾고 있어요! (눌러서 보러가기 → 확보 서주기)`, { k: 'belayreq' });
-  toast('🆘 모두에게 확보 요청을 보냈어요');
-};
 window.adminReset = (n) => {
   if (me !== ADMIN || n === ADMIN) return;
   askPin(ADMIN, 'check', () => update(ref(db, 's4/players/' + n), { pin: null }).then(() => { toast(`'${n}' 비밀번호를 초기화했어요. 새로 설정할 수 있어요.`); log(`🔑 운영자가 '${n}' 비밀번호를 초기화했습니다.`, 'fail'); }).catch(onErr), `'${n}' 비밀번호 초기화`);
@@ -481,11 +456,11 @@ const todayStr = () => new Date().toLocaleDateString('sv');
 const LT_HOUR = 21, ltOn = () => new Date().getHours() === LT_HOUR, ltBonus = () => dayInfo().lt || 3;
 let ideas = [], liveBusy = false, curEv = null, lastCmp;
 const EVENTS = [
-  { t: '꼬북린의 다이나믹 할래말래', d: '꼬북린이 속삭인다… 할래? 말래?', o: [{ l: '할래! (성공률 +10%p, 실패하면 추락)', rate: 10, forceFall: 1 }, { l: '말래… (체력 소모 없이 넘기기)', skip: 1 }] },
-  { t: '리치맨의 필라이트 유혹', d: '리치맨이 한 모금을 권한다. 취기 아니고 기세!', o: [{ l: '한 모금! (성공률 +6%p, 실패하면 추락)', rate: 6, forceFall: 1 }, { l: '참는다 (이번엔 추락 면제)', noFall: 1 }] },
-  { t: '조돌맹의 사진 요청', d: '조돌맹이 캐논 R7을 들었다. 자세 잡아줘!', o: [{ l: '포즈 잡기 (성공률 +8%p, 체력 1 추가 소모)', rate: 8, cost: 1 }, { l: '그냥 오른다', rate: 0 }] },
-  { t: '닿이노기린의 팔', d: '닿이노기린이 긴 팔을 쭉 뻗어준다.', o: [{ l: '팔을 잡는다 (성공률 +5%p)', rate: 5 }, { l: '내 힘으로 (추락 면제)', noFall: 1 }] },
-  { t: '치킨맨의 쫄보 모드', d: '치킨맨이 벌벌 떨며 쳐다본다…', o: [{ l: '용기를 낸다 (성공률 +7%p, 실패하면 추락)', rate: 7, forceFall: 1 }, { l: '쫄아서 내려온다 (체력 소모 없음)', skip: 1 }] }
+  { t: '꼬북린의 다이나믹 할래말래', d: '꼬북린이 속삭인다… 할래? 말래?', o: [{ l: '할래! (성공률 상승, 실패하면 추락)', rate: 10, forceFall: 1 }, { l: '말래… (체력 소모 없이 넘기기)', skip: 1 }] },
+  { t: '리치맨의 필라이트 유혹', d: '리치맨이 한 모금을 권한다. 취기 아니고 기세!', o: [{ l: '한 모금! (성공률 상승, 실패하면 추락)', rate: 6, forceFall: 1 }, { l: '참는다 (이번엔 추락 면제)', noFall: 1 }] },
+  { t: '조돌맹의 사진 요청', d: '조돌맹이 캐논 R7을 들었다. 자세 잡아줘!', o: [{ l: '포즈 잡기 (성공률 상승, 체력 1 추가 소모)', rate: 8, cost: 1 }, { l: '그냥 오른다', rate: 0 }] },
+  { t: '닿이노기린의 팔', d: '닿이노기린이 긴 팔을 쭉 뻗어준다.', o: [{ l: '팔을 잡는다 (성공률 상승)', rate: 5 }, { l: '내 힘으로 (추락 면제)', noFall: 1 }] },
+  { t: '치킨맨의 쫄보 모드', d: '치킨맨이 벌벌 떨며 쳐다본다…', o: [{ l: '용기를 낸다 (성공률 상승, 실패하면 추락)', rate: 7, forceFall: 1 }, { l: '쫄아서 내려온다 (체력 소모 없음)', skip: 1 }] }
 ];
 function openEvent() {
   curEv = pick(EVENTS); $('ev-title').textContent = curEv.t; $('ev-desc').textContent = curEv.d;
@@ -500,7 +475,10 @@ window.claimDaily = function () {
   if (!dbReady || !me || ended) return;
   const p = P[me], t = todayStr(); if (p.dc === t) return;
   refill(p); addE(p, DAILY_E); p.dc = t; p._t = Date.now();
-  toast(`🎁 출석 보너스! 체력 +${DAILY_E}`); log(`🎁 ${me}님이 출석 보너스를 받았습니다 (체력 +${DAILY_E})`, 'success'); render(); save();
+  const ud = underdog(p);
+  if (ud) { p.bag = cleanBag(p.bag); p.bag.push(UNDER_E); p.bas = Math.min(99, p.bas + 1); }
+  toast(ud ? `🆘 꼴찌 지원금! 체력 +${DAILY_E} · ❤️결정 +${UNDER_E} · 현무암 +1` : `🎁 출석 보너스! 체력 +${DAILY_E}`);
+  log(ud ? `🆘 ${me}님이 꼴찌 지원금을 받았습니다 (체력 결정 +${UNDER_E}, 현무암 +1)` : `🎁 ${me}님이 출석 보너스를 받았습니다 (체력 +${DAILY_E})`, 'success'); render(); save();
 };
 window.claimLT = function () {
   if (!dbReady || !me || ended) return;
@@ -645,7 +623,7 @@ let pinCtx = null;
 
 // ================= 🪨 현무암 감정소 (조돌맹) =================
 const RARE_P = 0.03;   // 감정 1회당 희귀 아이템 확률: 초크 가루 3% · 낙하 방지 매트 3% (체력10과 같은 극악 확률)
-const CHALK_ITEM = (g) => g >= 12 ? 2 : 5;   // 🧂 초크 가루: 다음 도전 성공률 +5%p (V12 이상은 +2%p)
+const CHALK_ITEM = (g) => g >= 12 ? 0.4 : 0.6;   // 🧂 초크 가루: 다음 도전 성공률 상승 (V12 이상은 +2%p)
 const BAS_W = [20, 17, 14, 12, 10, 8, 7, 5, 4, 3];     // 체력 1~10 확률(%) · 평균 약 4
 const rollBas = () => { let r = Math.random() * 100, a = 0; for (let i = 0; i < 10; i++) { a += BAS_W[i]; if (r < a) return i + 1; } return 1; };
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -732,7 +710,7 @@ window.openBasalt = async function () {
   if (drop) {
     await bSay('조돌맹', '…잠깐. 돌 속에 뭐가 더 박혀 있었군.', false);
     bFlash(); Snd.reward(10); rain(drop === 'c' ? '🧂' : '🛡️');
-    await bSay('조돌맹', drop === 'c' ? '🧂 초크 가루다! 이건 아주 귀한 거야.\n(가방에서 사용하면 다음 도전 성공률이 올라간다)' : '🛡️ 낙하 방지 매트로군! 이런 건 평생 한 번 볼까 말까지.\n(가방에서 장착하면 다음 추락을 한 번 막아준다)');
+    await bSay('조돌맹', drop === 'c' ? '🧂 초크 가루다! 이건 아주 귀한 거야.\n(가방에서 사용하면 다음 도전 성공률이 크게 올라간다)' : '🛡️ 낙하 방지 매트로군! 이런 건 평생 한 번 볼까 말까지.\n(가방에서 장착하면 다음 추락을 한 번 막아준다)');
     log(`✨ ${me}님이 현무암 속에서 ${drop === 'c' ? '🧂 초크 가루' : '🛡️ 낙하 방지 매트'}를 발견했습니다!! (확률 3%)`, 'success', `✨ ${me}님이 현무암 속에서 희귀 아이템을 발견했어요!`);
   }
   log(`🪨 ${me}님이 조돌맹에게 현무암 감정을 받아 ❤️체력 결정 ${n}을 얻었습니다!${n >= 9 ? ' 🎉 대박!' : ''}`, n >= 6 ? 'success' : 'fail');
@@ -747,7 +725,7 @@ window.useItem = function (k) {
   if (p.itm[k] < 1) return;
   if (p.buf[k]) return toast(k === 'c' ? '🧂 이미 초크 가루를 묻혔어요! 한 번 도전해서 쓰고 오세요' : '🛡️ 이미 낙하 방지 매트가 깔려 있어요');
   p.itm[k]--; p.buf[k] = 1; p._t = Date.now();
-  toast(k === 'c' ? `🧂 초크 가루를 묻혔다! 다음 도전 성공률 +${CHALK_ITEM(p.grade)}%p` : '🛡️ 낙하 방지 매트를 깔았다! 다음 추락 1회를 막아줘요'); rain(k === 'c' ? '🧂' : '🛡️');
+  toast(k === 'c' ? `🧂 초크 가루를 묻혔다! 다음 도전 성공률 ×${1 + CHALK_ITEM(p.grade)}` : '🛡️ 낙하 방지 매트를 깔았다! 다음 추락 1회를 막아줘요'); rain(k === 'c' ? '🧂' : '🛡️');
   render(); save();
 };
 window.useBag = function (i) {
@@ -764,7 +742,7 @@ window.useBag = function (i) {
 };
 function itemRows(p) {
   const it = cleanItm(p.itm, 5), bf = cleanItm(p.buf, 1), row = (k, name, desc) => (it[k] || bf[k]) ? `<div class="bag-it"><span>${name} <b>×${it[k]}</b>${bf[k] ? ' <span style="color:#69db7c;font-size:.72rem">(장착 중)</span>' : ''}<br><span style="color:#b9a48e;font-size:.7rem">${desc}</span></span><button class="small-btn" ${(!it[k] || bf[k]) ? 'disabled style="opacity:.45"' : ''} onclick="useItem('${k}')">${bf[k] ? '장착됨' : '사용'}</button></div>` : '';
-  return row('c', '🧂 초크 가루', `다음 도전 성공률 +${CHALK_ITEM(p.grade)}%p (V12 이상은 +2%p)`) + row('m', '🛡️ 낙하 방지 매트', '다음 추락 1회를 막아줘요');
+  return row('c', '🧂 초크 가루', `다음 도전 성공률 ×${1 + CHALK_ITEM(p.grade)} (V12 이상은 ×1.4)`) + row('m', '🛡️ 낙하 방지 매트', '다음 추락 1회를 막아줘요');
 }
 function basBoxRender(p, mine) {
   const el = $('bas-box'); if (!el) return;
@@ -858,7 +836,6 @@ window.tryUpgrade = function (mods) {
   const p = P[me]; if (p.grade >= 17) return;
   refill(p);
   if (p.energy < 1) return toast('❤️ 체력이 없어요! 충전되면 다시 도전하세요');
-  if (p.grade === 16 && !belayOn(p)) return toast('🪢 V17 도전은 확보자가 필요해요! 아래 「확보 요청」을 눌러 친구를 불러보세요');
   const D = dayInfo();
   if (!mods && p.grade >= 1 && Math.random() < 0.07 * (D.em || 1)) return openEvent();
   mods = mods || {};
@@ -867,7 +844,7 @@ window.tryUpgrade = function (mods) {
   p.energy = Math.max(0, p.energy - 1 - (mods.cost || 0)); p.tries++; p._t = Date.now();
   const tk = todayStr(); if (p.dKey !== tk) { p.dKey = tk; p.dFall = 0; p.dTries = 0; } p.dTries++;
   const g = p.grade; let to = g, kind = 'fail', msg = pick(FAIL), b = '';
-  const bo = bonusOf(p, mods.rate || 0), usedBelay = belayOn(p), wasCk = p.ck, usedChalk = !!p.buf.c; p.buf.c = 0;
+  const bo = bonusOf(p, mods.rate || 0), usedBelay = false, wasCk = p.ck, usedChalk = !!p.buf.c; p.buf.c = 0;
   if (g === 14 && Math.random() < EGG) { to = 16; kind = 'egg'; msg = '(나.. 조돌맹..) 조돌맹 빙의했더니 안되던게 뚫렸다!'; award(p, 'egg'); b = `👻 ${me}님이 조돌맹에 빙의해 V14→V16 순간이동!`; }
   else if (Math.random() * 100 < Math.min(95, RATE[g] + bo.total)) {
     to = g + 1; kind = 'win'; msg = pick(WIN);
@@ -885,7 +862,6 @@ window.tryUpgrade = function (mods) {
   if (to > g) p.ck = 0; else if (kind === 'reset') p.ck = 0; else p.ck++;
   if (to <= g) { p.fl++; if (p.fl % 10 === 0 && p.bas < 99) { p.bas++; setTimeout(() => { toast(`🪨 바닥에서 묵직한 현무암을 주웠다! (보유 ${p.bas}개) 조돌맹에게 가져가 보자`); rain('🪨'); }, 1300); } }
   if (p.ck >= 6) award(p, 'chalk');
-  if (usedBelay) { p.bl = null; update(ref(db, 's4/players/' + me), { bl: null }).catch(() => {}); }
   if (g === 16 && to === 16) award(p, 'summit');
   if (to > g && CAMPS.includes(to) && g < to) { award(p, 'camp'); setTimeout(() => toast(`⛺ V${to} 캠프 도착! 이제 V${to} 아래로는 떨어지지 않아요`), 900); }
   if (to < g) { p.falls++; p.dFall++; }
@@ -940,13 +916,13 @@ function renderStage() {
   refill(p);
   document.documentElement.style.setProperty('--h', 250 - g * 13);
   $('stage').classList.toggle('hot', g >= 15);
-  const D = dayInfo(); $('daybar').textContent = `📅 시즌 ${Math.max(1, seasonDay() + 1)}일차 · ${D.n} — ${D.d}${wind() ? ` · 🍃순풍 +${wind()}%p` : ''}`;
+  const D = dayInfo(); $('daybar').textContent = `📅 시즌 ${Math.max(1, seasonDay() + 1)}일차 · ${D.n} — ${D.d}${wind() ? ` · 🍃순풍 +${Math.round(wind() * 100)}%` : ''}`;
   const lt = $('ltbar'), canLT = dbReady && me && P[me] && ltOn() && !ended && P[me].ltDay !== todayStr();
   lt.style.display = ltOn() && !ended ? 'block' : 'none';
   lt.innerHTML = canLT ? `🌙 락트리 타임! 오늘 한 번 <button class="small-btn" style="margin-left:6px;padding:5px 10px" onclick="claimLT()">체력 +${ltBonus()} 받기</button>` : '🌙 락트리 타임 진행 중 (오늘 보너스는 이미 받았어요)';
   const dbr = $('dbar'), canD = dbReady && me && P[me] && !ended && P[me].dc !== todayStr();
   dbr.style.display = canD ? 'block' : 'none';
-  dbr.innerHTML = canD ? `🎁 오늘의 출석 보너스! <button class="small-btn" style="margin-left:6px;padding:5px 10px;background:#2f9e44" onclick="claimDaily()">체력 +${DAILY_E} 받기</button>` : '';
+  dbr.innerHTML = canD ? `${underdog(P[me]) ? '🆘 꼴찌 지원금 포함! ' : ''}🎁 오늘의 출석 보너스! <button class="small-btn" style="margin-left:6px;padding:5px 10px;background:#2f9e44" onclick="claimDaily()">${underdog(P[me]) ? `체력 +${DAILY_E} · ❤️+${UNDER_E} · 🪨+1` : `체력 +${DAILY_E}`} 받기</button>` : '';
   $('live-btn').style.display = dbReady && mine && g >= 13 && g < 17 && !ended && p.energy >= 1 && !liveBusy ? 'block' : 'none';
   $('me-name').textContent = me || '미설정';
   const sp = SPRITE[sk(view)], ik = sp ? 'S' + view : 'E' + ICON[g];
@@ -956,8 +932,7 @@ function renderStage() {
   $('story').textContent = LV[g][1];
   const fl = fall(g) * (dayInfo().fm || 1), bo = bonusOf(p), eff = Math.min(95, RATE[g] + bo.total);
   $('rate').textContent = g >= 17 ? '🏆 정복 완료' : `성공 확률 ${eff.toFixed(1).replace('.0', '')}%${fl ? ` · 실패 시 추락 ${Math.round(Math.min(.9, fl) * 100)}%` : (floorOf(g) === g && g ? ' · ⛺ 캠프: 추락 없음' : '')}`;
-  $('bonus').textContent = g >= 17 ? '' : `기본 ${RATE[g]}%` + (bo.ck ? ` · 🧂초크 +${bo.ck}` : '') + (bo.bl ? ` · 🪢확보(${p.bl.by}) +${bo.bl}` : '') + (bo.w ? ` · 🍃순풍 +${bo.w}` : '') + (bo.it ? ` · 🧂초크가루 +${bo.it}` : '') + (p.buf && p.buf.m ? ' · 🛡️매트 장착' : '') + (g === 16 ? (belayOn(p) ? ' · 🪢 확보 OK!' : ' · 🔒 확보자 필요') : '');
-  $('req-btn').style.display = dbReady && mine && g === 16 && !ended && !belayOn(p) ? 'block' : 'none';
+  $('bonus').textContent = g >= 17 ? '' : `기본 ${RATE[g]}%` + (bo.ck ? ` · 🧂연속실패 +${f1(bo.ck)}` : '') + (bo.w ? ` · 🍃순풍 +${f1(bo.w)}` : '') + (bo.un ? ` · 🆘꼴찌지원 +${f1(bo.un)}` : '') + (bo.it ? ` · 🧂초크가루 +${f1(bo.it)}` : '') + (p.buf && p.buf.m ? ' · 🛡️매트 장착' : '') ;
   basBoxRender(P[me] || p, mine && dbReady);
   $('next').textContent = g >= 17 ? '' : `다음 V${g + 1}: 「${LV[g + 1][0]}」`;
   $('e-fill').style.width = Math.min(100, p.energy / MAXE * 100) + '%';
