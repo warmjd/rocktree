@@ -29,7 +29,7 @@ header p { font-size:.8rem; color:#b8c0cc; margin-top:2px; }
 #rate { font-size:.82rem; color:#ffd7a0; margin-bottom:6px; }
 #next { font-size:.75rem; color:#9aa6b8; margin-bottom:10px; }
 .energy { height:10px; background:rgba(0,0,0,.4); border-radius:6px; overflow:hidden; margin:6px 0 4px; }
-#e-fill { height:100%; background:linear-gradient(90deg,#ffd43b,#ff922b); width:100%; transition:width .4s; }
+#e-fill { height:100%; background:linear-gradient(90deg,#ff8fa3,#ff4757); width:100%; transition:width .4s; }
 #e-text { font-size:.78rem; color:#ffe08a; margin-bottom:10px; }
 #go { width:100%; border:none; color:#fff; font-size:1.15rem; font-weight:bold; padding:15px; border-radius:12px; background:hsl(var(--h),75%,50%); box-shadow:0 4px 15px rgba(0,0,0,.4); }
 #go:active { transform:scale(.96); } #go:disabled { background:#57606f; box-shadow:none; }
@@ -136,7 +136,7 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
 #bs-jd img { width:100%; image-rendering:pixelated; filter:drop-shadow(0 6px 10px #000); }
 #bs-jd .seat { font-size:2.4rem; margin-top:-22px; display:block; filter:brightness(.7); }
 @keyframes breathe { 50% { transform:translateY(-3px) scale(1.01); } }
-#bs-pl { position:absolute; left:-90px; bottom:8%; width:26%; max-width:130px; transition:left 2.5s linear; text-align:center; }
+#bs-pl { position:absolute; left:-90px; bottom:8%; width:26%; max-width:130px; transition:left 1.5s linear; text-align:center; }
 #bs-pl.in { left:8%; } #bs-pl.back { left:2%; transition:left .5s ease-out; }
 #bs-pl .body { animation:none; } #bs-pl.walk .body { animation:stepb .32s infinite alternate ease-in-out; }
 @keyframes stepb { from { transform:translateY(0) rotate(-3deg); } to { transform:translateY(-7px) rotate(3deg); } }
@@ -146,7 +146,7 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
 @keyframes rdrop { 0% { transform:translate(-50%,0); } 70% { transform:translate(130%,92px) rotate(40deg); } 82% { transform:translate(130%,76px) rotate(30deg); } 100% { transform:translate(130%,92px) rotate(36deg); } }
 #bs-rock.drop.hit { animation:rhit .5s infinite alternate; } @keyframes rhit { to { filter:drop-shadow(0 0 16px #ffd43b) brightness(1.6); } }
 #bs-fist { position:absolute; right:30%; bottom:30%; font-size:3rem; opacity:0; pointer-events:none; transform-origin:center; }
-#bs-fist.charge { opacity:1; animation:chg 1.6s forwards; } @keyframes chg { 0% { transform:scale(.6); } 100% { transform:scale(2.6) rotate(-14deg); filter:drop-shadow(0 0 22px #ff6b6b); } }
+#bs-fist.charge { opacity:1; animation:chg 1s forwards; } @keyframes chg { 0% { transform:scale(.6); } 100% { transform:scale(2.6) rotate(-14deg); filter:drop-shadow(0 0 22px #ff6b6b); } }
 #bs-fist.punch { opacity:1; animation:pnch .28s forwards; } @keyframes pnch { 0% { transform:scale(2.6) rotate(-14deg); } 100% { transform:translate(-200%,100%) scale(3.2) rotate(8deg); opacity:0; } }
 #bs-ov2 { position:absolute; inset:0; background:#000; opacity:0; pointer-events:none; transition:opacity .6s; } #bs-ov2.dark { opacity:.55; }
 #bs-flash { position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; } #bs-flash.go { animation:fl2 .7s ease-out; } @keyframes fl2 { 0% { opacity:1; } 100% { opacity:0; } }
@@ -218,7 +218,7 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
   <div class="card"><div class="title">🔥 지금 오르는 사람들 (터치하여 관전)</div><div id="players"></div></div>
   <div class="card hall"><div class="title">🏆 명예의 전당</div><div id="hall"></div></div>
   <div class="card rules"><div class="title">📜 시즌3 규칙 · 크럭스 정복전</div><ul>
-    <li>도전은 ⚡체력 1을 씁니다. 체력은 20분마다 1씩 차고 최대 10입니다. 체력을 얻는 길: 🎁 매일 출석 보너스 +2 · 🌙 락트리 타임 보너스 · 🪢 확보 서기 +1 · 🍀 도전에 성공하면 25% 확률로 +1 환급!</li>
+    <li>도전은 ❤️체력 1을 씁니다. 체력은 20분마다 1씩 차고 최대 10입니다. 체력을 얻는 길: 🎁 매일 출석 보너스 +2 · 🌙 락트리 타임 보너스 · 🪢 확보 서기 +1 · 🍀 도전에 성공하면 25% 확률로 +1 환급!</li>
     <li>⛺ <b>캠프</b>는 V4·V8·V12·V15! 한 번 도착하면 그 아래로는 절대 떨어지지 않아요. 대신 캠프 사이 구간은 성공 확률이 낮고 추락이 잦습니다.</li>
     <li>🧂 <b>초크 스택</b>: 연속으로 실패할수록 다음 도전 성공률이 오릅니다 (최대 +8%p). 성공하거나 추락하면 초기화됩니다.</li>
     <li>🪢 <b>확보</b>: 다른 사람의 캐릭터를 관전하고 「확보 서주기」를 누르면 그 사람 성공률이 6시간 동안 +8%p! 확보를 선 사람도 체력 +1 (1시간에 1회). 🔒 <b>V16→V17은 확보자가 있어야만 도전할 수 있어요.</b> 혼자서는 정상에 설 수 없습니다.</li>
@@ -226,6 +226,7 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
     <li>🍃 시즌 3주차부터는 <b>순풍</b>이 불어 모두의 성공률이 조금씩 올라요 (3주차 +2%p, 4주차부터 +4%p). 대장정은 한 달 안팎으로 끝납니다.</li>
     <li>예상 못한 일이 가끔 일어납니다. 한 번에 두 칸을 오르기도, 두 칸을 잃기도 해요. V16에서 실패하면 아주 가끔 <b>태초마을(V1)</b>로 돌아갈 수 있습니다 😈 (캠프도 소용없어요)</li>
     <li>🪨 <b>현무암</b>: 도전에 실패할 때마다 쌓이고, 10번째마다 현무암을 1개 줍습니다. 조돌맹에게 가져가 「감정」을 받으면 주먹으로 깨주고, 안에서 <b>체력 결정(1~10)</b>이 나와 🎒 가방에 보관돼요. 원할 때 꺼내 쓰세요! (체력이 모자란 만큼만 쓰이고 나머지는 결정에 남아요)</li>
+    <li>✨ 감정할 때 <b>극악의 확률(각 3%)</b>로 현무암 속에서 🧂<b>초크 가루</b>(다음 도전 성공률 상승)나 🛡️<b>낙하 방지 매트</b>(다음 추락 1회 방지)가 나옵니다. 가방에서 사용하세요!</li>
     <li>V17에 처음 오르는 사람이 나오면 <b>시즌이 종료</b>됩니다. 그 사람이 장경욱이 인정한 클라이머가 됩니다!</li>
     <li>내 캐릭터는 비밀번호(숫자 4자리)로 지켜집니다. V15부터는 도전 성공 때마다 강력한 연출이 터지고, 자랑 카드를 이미지로 저장할 수 있어요.</li></ul></div>
   <div class="card"><div class="title">🎖 업적 (선택한 캐릭터)</div><div id="ach"></div></div>
@@ -309,14 +310,15 @@ const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt
 const $ = (id) => document.getElementById(id);
 const ls = { get: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
 const cleanBag = (b) => (Array.isArray(b) ? b : (b && typeof b === 'object' ? Object.values(b) : [])).map(v => Math.floor(Number(v))).filter(v => v >= 1 && v <= 10).slice(0, 30);
-const fresh = () => ({ season: 4, grade: 0, energy: MAXE, at: Date.now(), tries: 0, best: 0, cleared: 0, pin: '', ach: {}, rival: '', live: 0, ltDay: '', dKey: '', dFall: 0, dTries: 0, falls: 0, ck: 0, blAt: 0, bl: null, dc: '', gift: '', bas: 0, fl: 0, bag: [], mig: '' });
+const cleanItm = (o, mx) => { const f = (v) => Math.max(0, Math.min(mx, Math.floor(Number(v)) || 0)); return { c: f(o && o.c), m: f(o && o.m) }; };
+const fresh = () => ({ season: 4, grade: 0, energy: MAXE, at: Date.now(), tries: 0, best: 0, cleared: 0, pin: '', ach: {}, rival: '', live: 0, ltDay: '', dKey: '', dFall: 0, dTries: 0, falls: 0, ck: 0, blAt: 0, bl: null, dc: '', gift: '', bas: 0, fl: 0, bag: [], mig: '', itm: { c: 0, m: 0 }, buf: { c: 0, m: 0 } });
 const NAME_RE = /^[가-힣A-Za-z0-9_-]{1,8}$/;
 const num = (v, lo, hi, d) => { v = Number(v); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
 function norm(raw) {
   if (!raw || typeof raw !== 'object' || raw.season !== 4) return null;     // 시즌1 데이터는 초기화 대상
-  return { season: 4, grade: Math.floor(num(raw.grade, 0, 17, 0)), energy: Math.floor(num(raw.energy, 0, 40, MAXE)), at: num(raw.at, 0, 4e12, Date.now()), tries: Math.floor(num(raw.tries, 0, 1e9, 0)), best: Math.floor(num(raw.best, 0, 17, 0)), cleared: num(raw.cleared, 0, 4e12, 0), pin: typeof raw.pin === 'string' ? raw.pin.slice(0, 80) : '', ach: cleanAch(raw.ach), rival: NAME_RE.test(raw.rival) ? raw.rival : '', live: num(raw.live, 0, 4e12, 0), ltDay: typeof raw.ltDay === 'string' ? raw.ltDay.slice(0, 10) : '', dKey: typeof raw.dKey === 'string' ? raw.dKey.slice(0, 10) : '', dFall: Math.floor(num(raw.dFall, 0, 1e6, 0)), dTries: Math.floor(num(raw.dTries, 0, 1e6, 0)), falls: Math.floor(num(raw.falls, 0, 1e9, 0)), ck: Math.floor(num(raw.ck, 0, 99, 0)), blAt: num(raw.blAt, 0, 4e12, 0), dc: typeof raw.dc === 'string' ? raw.dc.slice(0, 10) : '', gift: typeof raw.gift === 'string' ? raw.gift.slice(0, 20) : '', bas: Math.floor(num(raw.bas, 0, 99, 0)), fl: Math.floor(num(raw.fl, 0, 1e6, 0)), bag: cleanBag(raw.bag), mig: typeof raw.mig === 'string' ? raw.mig.slice(0, 12) : '', bl: (raw.bl && typeof raw.bl === 'object' && NAME_RE.test(raw.bl.by)) ? { by: raw.bl.by, at: num(raw.bl.at, 0, 4e12, 0) } : null };
+  return { season: 4, grade: Math.floor(num(raw.grade, 0, 17, 0)), energy: Math.floor(num(raw.energy, 0, 40, MAXE)), at: num(raw.at, 0, 4e12, Date.now()), tries: Math.floor(num(raw.tries, 0, 1e9, 0)), best: Math.floor(num(raw.best, 0, 17, 0)), cleared: num(raw.cleared, 0, 4e12, 0), pin: typeof raw.pin === 'string' ? raw.pin.slice(0, 80) : '', ach: cleanAch(raw.ach), rival: NAME_RE.test(raw.rival) ? raw.rival : '', live: num(raw.live, 0, 4e12, 0), ltDay: typeof raw.ltDay === 'string' ? raw.ltDay.slice(0, 10) : '', dKey: typeof raw.dKey === 'string' ? raw.dKey.slice(0, 10) : '', dFall: Math.floor(num(raw.dFall, 0, 1e6, 0)), dTries: Math.floor(num(raw.dTries, 0, 1e6, 0)), falls: Math.floor(num(raw.falls, 0, 1e9, 0)), ck: Math.floor(num(raw.ck, 0, 99, 0)), blAt: num(raw.blAt, 0, 4e12, 0), dc: typeof raw.dc === 'string' ? raw.dc.slice(0, 10) : '', gift: typeof raw.gift === 'string' ? raw.gift.slice(0, 20) : '', bas: Math.floor(num(raw.bas, 0, 99, 0)), fl: Math.floor(num(raw.fl, 0, 1e6, 0)), bag: cleanBag(raw.bag), mig: typeof raw.mig === 'string' ? raw.mig.slice(0, 12) : '', itm: cleanItm(raw.itm, 5), buf: cleanItm(raw.buf, 1), bl: (raw.bl && typeof raw.bl === 'object' && NAME_RE.test(raw.bl.by)) ? { by: raw.bl.by, at: num(raw.bl.at, 0, 4e12, 0) } : null };
 }
-const pub = (p) => ({ season: 4, grade: p.grade, energy: p.energy, at: p.at, tries: p.tries, best: p.best, cleared: p.cleared, ltDay: p.ltDay, dKey: p.dKey, dFall: p.dFall, dTries: p.dTries, falls: p.falls, ck: p.ck, blAt: p.blAt, dc: p.dc, gift: p.gift, bas: p.bas, fl: p.fl, bag: p.bag, mig: p.mig });
+const pub = (p) => ({ season: 4, grade: p.grade, energy: p.energy, at: p.at, tries: p.tries, best: p.best, cleared: p.cleared, ltDay: p.ltDay, dKey: p.dKey, dFall: p.dFall, dTries: p.dTries, falls: p.falls, ck: p.ck, blAt: p.blAt, dc: p.dc, gift: p.gift, bas: p.bas, fl: p.fl, bag: p.bag, mig: p.mig, itm: p.itm, buf: p.buf });
 function refill(p) {
   const now = Date.now();
   if (p.energy >= MAXE) { p.at = now; return; }        // 가득(또는 초과)이면 자연충전 정지
@@ -325,7 +327,7 @@ function refill(p) {
 }
 function addE(p, n) { if (p.energy < MAXE) p.energy = Math.min(MAXE, p.energy + n); if (p.energy >= MAXE) p.at = Date.now(); }
 const belayOn = (p) => !!(p && p.bl && p.bl.at > Date.now());
-const bonusOf = (p, extra) => { const ck = Math.min(CHALK_MAX, p.ck * CHALK_STEP), bl = belayOn(p) ? BEL_BONUS : 0, w = wind(); return { ck, bl, w, ex: extra || 0, total: ck + bl + w + (extra || 0) }; };
+const bonusOf = (p, extra) => { const ck = Math.min(CHALK_MAX, p.ck * CHALK_STEP), bl = belayOn(p) ? BEL_BONUS : 0, w = wind(), it = (p.buf && p.buf.c) ? CHALK_ITEM(p.grade) : 0; return { ck, bl, w, it, ex: extra || 0, total: ck + bl + w + it + (extra || 0) }; };
 const hueOf = (n) => [...n].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7) % 360;
 async function hashPin(n, pin) {
   const s = n + '|' + pin + '|rocktree4';
@@ -398,7 +400,7 @@ function celebrate(g) {
 }
 
 // ── 업적 · 응원 · 운영자 ──
-const ACH = { first10:['🧗','V10 돌파'], v16:['😱','V16 입성'], reset:['🏘️','태초마을 관광객'], jump:['🚿','물대포 승천'], egg:['👻','조돌맹 빙의'], murphy:['☁️','머피의 피해자'], quake:['🌋','땅울림 생존자'], furn:['🪑','가구 붕괴 생존자'], dbl:['⚡','2단계 점프'], camp:['⛺','캠프 입성'], belay:['🪢','든든한 확보자'], chalk:['🧂','초크 장인'], summit:['🌤️','정상 직전 V16 확보'], basalt:['🪨','현무암 감정 의뢰인'], bas10:['💎','현무암 대박 (체력 10)'] };
+const ACH = { first10:['🧗','V10 돌파'], v16:['😱','V16 입성'], reset:['🏘️','태초마을 관광객'], jump:['🚿','물대포 승천'], egg:['👻','조돌맹 빙의'], murphy:['☁️','머피의 피해자'], quake:['🌋','땅울림 생존자'], furn:['🪑','가구 붕괴 생존자'], dbl:['⚡','2단계 점프'], camp:['⛺','캠프 입성'], belay:['🪢','든든한 확보자'], chalk:['🧂','초크 장인'], summit:['🌤️','정상 직전 V16 확보'], basalt:['🪨','현무암 감정 의뢰인'], bas10:['💎','현무암 대박 (체력 10)'], rare:['✨','희귀 아이템 발견'] };
 const achQ = new Set();
 function cleanAch(raw) { const o = {}; if (raw && typeof raw === 'object') Object.keys(ACH).forEach(k => { if (raw[k]) o[k] = Number(raw[k]) || 1; }); return o; }
 function award(p, id) { if (p.ach[id]) return; p.ach[id] = Date.now(); achQ.add(id); setTimeout(() => toast(`🎖 업적 달성! ${ACH[id][0]} ${ACH[id][1]}`), 1400); }
@@ -510,7 +512,7 @@ function countdown(n, cb) { const c = $('cd'); c.style.display = 'flex'; let i =
 window.goLive = function () {
   if (!dbReady || !me || view !== me || ended || liveBusy) return;
   const p = P[me]; if (p.grade < 13 || p.grade >= 17) return;
-  refill(p); if (p.energy < 1) return toast('⚡ 체력이 없어요');
+  refill(p); if (p.energy < 1) return toast('❤️ 체력이 없어요');
   liveBusy = true; p.live = Date.now() + 25000; update(ref(db, 's4/players/' + me), { live: p.live }).catch(() => {});
   log(`🔴 ${me}님이 V${p.grade}→V${p.grade + 1} 도전을 선언했습니다! 지금 모두 주목!`, 'success', `🔴 ${me}님이 V${p.grade + 1} 도전 중! (눌러서 보러가기)`, { k: 'live' });
   countdown(3, () => { liveBusy = false; tryUpgrade({ live: 1 }); });
@@ -550,7 +552,7 @@ window.openReport = function () {
 const CHARGE_MS = 1800;
 let charging = false;
 const Snd = (() => {
-  let ac = null, master = null, bg = null, mode = ls.get('rocktree_snd') || '1';   // 0 무음 · 1 효과음 · 2 효과음+BGM
+  let ac = null, master = null, bg = null, cv = null, mode = ls.get('rocktree_snd') || '1';   // 0 무음 · 1 효과음 · 2 효과음+BGM
   const ctx = () => { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); master = ac.createGain(); master.gain.value = .6; master.connect(ac.destination); } catch (e) { ac = null; } } if (ac && ac.state === 'suspended') ac.resume(); return ac; };
   const tone = (type, f0, f1, dur, vol, delay = 0) => { const a = mode !== '0' && ctx(); if (!a) return; const t = a.currentTime + delay, o = a.createOscillator(), g = a.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(1, f1), t + dur); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + dur); o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + .05); };
   const noise = (dur, vol, delay = 0, hp = 0) => { const a = mode !== '0' && ctx(); if (!a) return; const n = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n); const s = a.createBufferSource(), g = a.createGain(), f = a.createBiquadFilter(), t = a.currentTime + delay; s.buffer = buf; f.type = hp ? 'highpass' : 'lowpass'; f.frequency.value = hp || 900; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur); s.connect(f); f.connect(g); g.connect(master); s.start(t); };
@@ -569,6 +571,28 @@ const Snd = (() => {
       const iv = setInterval(() => { k = (k + 1) % 4; os.forEach((o, i) => o.frequency.setTargetAtTime(ch[k][i], a.currentTime, .4)); }, 3500);
       g.gain.setTargetAtTime(.07, a.currentTime, .6); bg = { g, os, iv };
     },
+    // ---- 🪨 현무암 감정소 전용 사운드 ----
+    step() { noise(.05, .22, 0, 400); tone('sine', 95, 50, .09, .4); },
+    thud() { tone('sine', 130, 32, .4, .95); noise(.22, .5, 0, 0); tone('square', 70, 35, .2, .25); },
+    blip(low) { tone('square', (low ? 150 : 330) + Math.random() * 40, (low ? 140 : 300), .035, .05); },
+    punch() { tone('sine', 220, 28, .6, 1); noise(.4, .95); tone('square', 110, 40, .3, .45); tone('sawtooth', 600, 60, .25, .3); },
+    crack() { noise(.5, .45, .02, 2500); [0, 1, 2, 3, 4, 5].forEach(i => noise(.04, .4, .05 + i * .05 + Math.random() * .03, 2000)); tone('triangle', 900, 120, .4, .25, .05); },
+    reward(n) {
+      if (n >= 9) { this.success(); [1047, 1319, 1568, 2093].forEach((f, i) => tone('triangle', f, f, .5, .22, .5 + i * .08)); return; }
+      const cnt = n >= 6 ? 4 : (n >= 3 ? 3 : 2), base = n >= 6 ? 523 : (n >= 3 ? 440 : 330), sc = [0, 4, 7, 12];
+      for (let i = 0; i < cnt; i++) { const f = base * Math.pow(2, sc[i] / 12); tone('triangle', f, f, n >= 3 ? .4 : .25, .26, i * .1); }
+      if (n < 3) tone('sine', 180, 110, .35, .2, cnt * .1);
+    },
+    cave(on) {
+      const a = ctx(); if (!a) return;
+      if (!on || mode !== '2') { if (cv) { const old = cv; cv = null; old.g.gain.setTargetAtTime(0, a.currentTime, .25); setTimeout(() => { old.os.forEach(o => { try { o.stop(); } catch (e) {} }); clearInterval(old.iv); }, 900); } return; }
+      if (cv) return;
+      const g = a.createGain(), f = a.createBiquadFilter(); g.gain.value = 0; f.type = 'lowpass'; f.frequency.value = 420; f.connect(g); g.connect(master);
+      const os = [55, 82.4, 110.5].map((fr, i) => { const o = a.createOscillator(); o.type = i ? 'triangle' : 'sine'; o.frequency.value = fr; o.connect(f); o.start(); return o; });
+      let k = 0; const iv = setInterval(() => { k++; tone('sine', 1500 + Math.random() * 600, 900, .16, .05); if (k % 4 === 0) { tone('sine', 60, 40, .3, .12); tone('sine', 60, 40, .3, .1, .22); } }, 1700);
+      g.gain.setTargetAtTime(.11, a.currentTime, .5); cv = { g, os, iv, f };
+    },
+    tense() { if (!cv || !ac) return; const t = ac.currentTime; cv.f.frequency.setTargetAtTime(1500, t, .6); cv.g.gain.setTargetAtTime(.17, t, .5); cv.os.forEach(o => o.detune.setTargetAtTime(-100, t, .8)); },
     duck(d) { if (!bg || !ac) return; const t = ac.currentTime; bg.g.gain.setTargetAtTime(d ? .012 : .07, t, .25); bg.os.forEach(o => o.detune.setTargetAtTime(d ? -1200 : 0, t, .3)); },
     cycle() { mode = mode === '0' ? '1' : (mode === '1' ? '2' : '0'); ls.set('rocktree_snd', mode); this.bgm(mode === '2'); return mode; }
   };
@@ -620,16 +644,20 @@ function fxResult(ok, kind) {
 let pinCtx = null;
 
 // ================= 🪨 현무암 감정소 (조돌맹) =================
+const RARE_P = 0.03;   // 감정 1회당 희귀 아이템 확률: 초크 가루 3% · 낙하 방지 매트 3% (체력10과 같은 극악 확률)
+const CHALK_ITEM = (g) => g >= 12 ? 2 : 5;   // 🧂 초크 가루: 다음 도전 성공률 +5%p (V12 이상은 +2%p)
 const BAS_W = [20, 17, 14, 12, 10, 8, 7, 5, 4, 3];     // 체력 1~10 확률(%) · 평균 약 4
 const rollBas = () => { let r = Math.random() * 100, a = 0; for (let i = 0; i < 10; i++) { a += BAS_W[i]; if (r < a) return i + 1; } return 1; };
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-let basBusy = false, basLock = false;
-function basEnd() { basBusy = false; basLock = false; $('bas').classList.remove('on'); render(); }
+let basBusy = false, basLock = false, bSkip = false;
+$('bs-box').addEventListener('click', () => { bSkip = true; });
+function basEnd() { basBusy = false; basLock = false; Snd.cave(false); Snd.duck(false); clearInterval(stepIv); $('bas').classList.remove('on'); render(); }
+let stepIv = 0;
 window.leaveBasalt = function () { if (basLock) return; basEnd(); };
 async function bSay(who, text, wait) {
   $('bs-name').textContent = who; const tx = $('bs-text'); tx.textContent = ''; $('bs-choices').innerHTML = ''; $('bs-tap').textContent = '';
-  for (const ch of text) { tx.textContent += ch; await sleep(ch === ' ' ? 16 : (ch === '.' || ch === '…' ? 140 : 32)); }
-  if (wait === false) { await sleep(700); return; }
+  bSkip = false; let ci = 0; for (const ch of text) { if (bSkip) { tx.textContent = text; break; } tx.textContent += ch; if (ch !== ' ' && ch !== '\n' && ++ci % 2 === 0) Snd.blip(who === '조돌맹'); await sleep(ch === ' ' ? 8 : (ch === '.' || ch === '…' ? 70 : 16)); } bSkip = false;
+  if (wait === false) { await sleep(350); return; }
   $('bs-tap').textContent = '▼ 탭';
   await new Promise(res => { const b = $('bs-box'), t = setTimeout(done, 9000); function done() { clearTimeout(t); b.removeEventListener('click', done); res(); } b.addEventListener('click', done); });
   $('bs-tap').textContent = '';
@@ -653,15 +681,14 @@ window.openBasalt = async function () {
   const pl = $('bs-pl'), rock = $('bs-rock'), fist = $('bs-fist'), big = $('bs-big');
   pl.className = ''; rock.className = ''; rock.textContent = '🪨'; rock.style.display = ''; fist.className = ''; big.className = ''; $('bs-ov2').classList.remove('dark'); document.querySelectorAll('.bs-bolt').forEach(e => e.remove());
   $('bs-name').textContent = ''; $('bs-text').textContent = ''; $('bs-choices').innerHTML = '';
-  await sleep(300);
+  Snd.duck(true); Snd.cave(true); await sleep(150);
   // 1) 뚜벅뚜벅 걸어오기
   $('bs-name').textContent = '…'; $('bs-text').textContent = `(${me}이(가) 묵직한 현무암을 끌어안고 뚜벅뚜벅 걸어간다…)`;
-  pl.classList.add('walk'); void pl.offsetWidth; pl.classList.add('in');
-  await sleep(2700); pl.classList.remove('walk');
+  pl.classList.add('walk'); void pl.offsetWidth; pl.classList.add('in'); Snd.step(); stepIv = setInterval(() => Snd.step(), 330);
+  await sleep(1600); clearInterval(stepIv); pl.classList.remove('walk');
   // 2) 내려놓기
-  rock.classList.add('drop'); await sleep(520); bShake();
-  $('bs-text').textContent = '쿵.'; await sleep(900);
-  await bSay('조돌맹', '…');
+  rock.classList.add('drop'); await sleep(430); Snd.thud(); bShake();
+  $('bs-text').textContent = '쿵.'; await sleep(450);
   await bSay('조돌맹', '여기 왜 왔는가?', false);
   const c = await bChoose(['🪨 현무암을 감정받고싶습니다', '그냥 왔는데요?']);
   if (c === 1) {
@@ -673,61 +700,80 @@ window.openBasalt = async function () {
   }
   // ----- 감정 의뢰 -----
   await bSay(me, '현무암을 감정받고싶습니다.', false);
-  await bSay('조돌맹', '…현무암이라.');
-  await bSay('조돌맹', '(돌을 번쩍 들어 빙글빙글 돌려본다)\n음… 음… 소리가 다르군.');
-  await bSay('조돌맹', '잘 듣게. 이건 눈으로 보는 게 아니야.\n주먹으로 묻는 거지.');
-  await bSay('조돌맹', '…뒤로 물러서 있게.');
-  pl.classList.add('back'); await sleep(550);
+  await bSay('조돌맹', '…현무암이라. (돌을 빙글빙글 돌려본다)\n눈으로 보는 게 아니야. 주먹으로 묻는 거지.\n…뒤로 물러서 있게.');
+  pl.classList.add('back'); Snd.step(); await sleep(400);
   // 결과를 먼저 확정·저장 (연출 도중 나가도 보상 유지)
   const n = rollBas(); p.bas--; p.bag = cleanBag(p.bag); p.bag.push(n); p._t = Date.now();
-  award(p, 'basalt'); if (n === 10) award(p, 'bas10'); save();
+  award(p, 'basalt'); if (n === 10) award(p, 'bas10');
+  const rr0 = Math.random(), drop = rr0 < RARE_P ? 'c' : (rr0 < RARE_P * 2 ? 'm' : '');
+  if (drop) { p.itm = cleanItm(p.itm, 5); p.itm[drop] = Math.min(5, p.itm[drop] + 1); award(p, 'rare'); }
+  save();
   $('bs-name').textContent = ''; $('bs-text').textContent = '(조돌맹이 천천히 주먹을 말아쥔다…)';
-  $('bs-ov2').classList.add('dark'); fist.classList.add('charge'); await sleep(1700);
-  $('bs-text').textContent = '…하앗!!!'; await sleep(350);
-  fist.classList.remove('charge'); void fist.offsetWidth; fist.classList.add('punch'); await sleep(240);
+  $('bs-ov2').classList.add('dark'); fist.classList.add('charge'); Snd.tense(); Snd.riser(1000); await sleep(1050);
+  $('bs-text').textContent = '…하앗!!!'; await sleep(200);
+  fist.classList.remove('charge'); void fist.offsetWidth; fist.classList.add('punch'); await sleep(200);
   // 쾅!
-  bFlash(); bShake(); rock.textContent = '💥'; $('bs-ov2').classList.remove('dark');
+  Snd.punch(); Snd.crack(); bFlash(); bShake(); rock.textContent = '💥'; $('bs-ov2').classList.remove('dark');
   $('bs-text').textContent = '쾅!!!!!';
   const sc = $('bs-scene'), rr = rock.getBoundingClientRect(), sr = sc.getBoundingClientRect();
   const ox = rr.left - sr.left + rr.width / 2, oy = rr.top - sr.top + rr.height / 2;
   for (let i = 0; i < n; i++) {
-    const e = document.createElement('span'); e.className = 'bs-bolt'; e.textContent = '⚡';
+    const e = document.createElement('span'); e.className = 'bs-bolt'; e.textContent = '❤️';
     e.style.left = (ox - 14) + 'px'; e.style.top = (oy - 14) + 'px';
     const ang = (-Math.PI / 2) + (i - (n - 1) / 2) * (Math.PI / Math.max(5, n)) * 0.9 + (Math.random() - .5) * .25, d = 90 + Math.random() * 70;
     e.style.setProperty('--dx', Math.cos(ang) * d + 'px'); e.style.setProperty('--dy', Math.sin(ang) * d + 'px'); e.style.setProperty('--rot', (Math.random() * 60 - 30) + 'deg');
-    e.style.animationDelay = (i * 90) + 'ms'; sc.appendChild(e);
+    e.style.animationDelay = (i * 50) + 'ms'; sc.appendChild(e);
   }
-  await sleep(500 + n * 90); rock.textContent = '✨'; await sleep(300);
-  big.textContent = `⚡ ${n}`; big.classList.add('go'); rain('⚡');
-  await sleep(1400);
+  await sleep(350 + n * 50); rock.textContent = '✨'; Snd.reward(n); await sleep(150);
+  big.textContent = `❤️ ${n}`; big.classList.add('go'); rain('❤️');
+  await sleep(800);
   const tier = n >= 9 ? ['…!! 이건… 내 평생 처음 보는 결이군!', '자네, 오늘 운이 하늘을 찔렀네. 가져가게!'] : n >= 6 ? ['오오, 알이 꽉 찼군! 이 정도면 훌륭하네.', '좋은 돌이야. 자네 손도 좋은 손이었군.'] : n >= 3 ? ['음. 쓸 만한 돌이군. 가져가게.', '나쁘지 않아. 이 정도면 한 번 더 오를 힘은 되겠지.'] : ['…돌멩이였군.', '이런. 속이 비었어. 그래도 아주 빈손은 아니니 가져가게.'];
-  await bSay('조돌맹', `체력이 ${n}만큼 들어있었네.\n${pick(tier)}\n(체력 결정 ⚡${n}을 가방에 넣어주었다)`);
-  log(`🪨 ${me}님이 조돌맹에게 현무암 감정을 받아 ⚡체력 결정 ${n}을 얻었습니다!${n >= 9 ? ' 🎉 대박!' : ''}`, n >= 6 ? 'success' : 'fail');
+  await bSay('조돌맹', `체력이 ${n}만큼 들어있었네.\n${pick(tier)}\n(체력 결정 ❤️${n}을 가방에 넣어주었다)`);
+  if (drop) {
+    await bSay('조돌맹', '…잠깐. 돌 속에 뭐가 더 박혀 있었군.', false);
+    bFlash(); Snd.reward(10); rain(drop === 'c' ? '🧂' : '🛡️');
+    await bSay('조돌맹', drop === 'c' ? '🧂 초크 가루다! 이건 아주 귀한 거야.\n(가방에서 사용하면 다음 도전 성공률이 올라간다)' : '🛡️ 낙하 방지 매트로군! 이런 건 평생 한 번 볼까 말까지.\n(가방에서 장착하면 다음 추락을 한 번 막아준다)');
+    log(`✨ ${me}님이 현무암 속에서 ${drop === 'c' ? '🧂 초크 가루' : '🛡️ 낙하 방지 매트'}를 발견했습니다!! (확률 3%)`, 'success', `✨ ${me}님이 현무암 속에서 희귀 아이템을 발견했어요!`);
+  }
+  log(`🪨 ${me}님이 조돌맹에게 현무암 감정을 받아 ❤️체력 결정 ${n}을 얻었습니다!${n >= 9 ? ' 🎉 대박!' : ''}`, n >= 6 ? 'success' : 'fail');
   $('bs-leave').style.display = ''; basLock = false;
   if (p.bas > 0) { await bSay('조돌맹', `…아직 ${p.bas}개나 더 있나? 줘보게. 한 번 더 깨주지.`, false); const c2 = await bChoose(['🪨 또 감정받겠습니다', '오늘은 여기까지']); basEnd(); if (c2 === 0) setTimeout(() => window.openBasalt(), 250); return; }
   await bSay('조돌맹', '또 돌이 쌓이거든 언제든 오게. 난 늘 여기 앉아 있으니.', false);
   await bChoose(['고맙습니다']); basEnd();
+};
+window.useItem = function (k) {
+  if (!dbReady || !me || ended || !P[me]) return;
+  const p = P[me]; p.itm = cleanItm(p.itm, 5); p.buf = cleanItm(p.buf, 1);
+  if (p.itm[k] < 1) return;
+  if (p.buf[k]) return toast(k === 'c' ? '🧂 이미 초크 가루를 묻혔어요! 한 번 도전해서 쓰고 오세요' : '🛡️ 이미 낙하 방지 매트가 깔려 있어요');
+  p.itm[k]--; p.buf[k] = 1; p._t = Date.now();
+  toast(k === 'c' ? `🧂 초크 가루를 묻혔다! 다음 도전 성공률 +${CHALK_ITEM(p.grade)}%p` : '🛡️ 낙하 방지 매트를 깔았다! 다음 추락 1회를 막아줘요'); rain(k === 'c' ? '🧂' : '🛡️');
+  render(); save();
 };
 window.useBag = function (i) {
   if (!dbReady || !me || ended || !P[me]) return;
   const p = P[me]; refill(p); p.bag = cleanBag(p.bag);
   const v = p.bag[i]; if (!v) return;
   const room = MAXE - p.energy;
-  if (room <= 0) return toast('⚡ 체력이 이미 가득이에요! 도전해서 체력을 쓰고 오세요');
+  if (room <= 0) return toast('❤️ 체력이 이미 가득이에요! 도전해서 체력을 쓰고 오세요');
   const use = Math.min(room, v), left = v - use;
   p.energy += use; if (p.energy >= MAXE) p.at = Date.now();
   if (left > 0) p.bag[i] = left; else p.bag.splice(i, 1);
-  p._t = Date.now(); toast(left > 0 ? `⚡ 체력 +${use} 사용! (결정에 ${left} 남음)` : `⚡ 체력 +${use} 사용!`); rain('⚡');
+  p._t = Date.now(); toast(left > 0 ? `❤️ 체력 +${use} 사용! (결정에 ${left} 남음)` : `❤️ 체력 +${use} 사용!`); rain('❤️');
   render(); save();
 };
+function itemRows(p) {
+  const it = cleanItm(p.itm, 5), bf = cleanItm(p.buf, 1), row = (k, name, desc) => (it[k] || bf[k]) ? `<div class="bag-it"><span>${name} <b>×${it[k]}</b>${bf[k] ? ' <span style="color:#69db7c;font-size:.72rem">(장착 중)</span>' : ''}<br><span style="color:#b9a48e;font-size:.7rem">${desc}</span></span><button class="small-btn" ${(!it[k] || bf[k]) ? 'disabled style="opacity:.45"' : ''} onclick="useItem('${k}')">${bf[k] ? '장착됨' : '사용'}</button></div>` : '';
+  return row('c', '🧂 초크 가루', `다음 도전 성공률 +${CHALK_ITEM(p.grade)}%p (V12 이상은 +2%p)`) + row('m', '🛡️ 낙하 방지 매트', '다음 추락 1회를 막아줘요');
+}
 function basBoxRender(p, mine) {
   const el = $('bas-box'); if (!el) return;
   if (!mine || ended) { el.style.display = 'none'; return; }
   el.style.display = 'block'; const r = p.fl % 10, bag = cleanBag(p.bag), full = p.energy >= MAXE;
-  const items = bag.length ? bag.map((v, i) => `<div class="bag-it"><span>⚡ 체력 결정 <b>+${v}</b></span><button class="small-btn" ${full ? 'disabled style="opacity:.45"' : ''} onclick="useBag(${i})">사용</button></div>`).join('') : '<div style="color:#9a8672;font-size:.78rem;padding:4px 0">가방이 비었어요. 현무암을 감정받으면 체력 결정이 들어와요.</div>';
+  const items = bag.length ? bag.map((v, i) => `<div class="bag-it"><span>❤️ 체력 결정 <b>+${v}</b></span><button class="small-btn" ${full ? 'disabled style="opacity:.45"' : ''} onclick="useBag(${i})">사용</button></div>`).join('') : '<div style="color:#9a8672;font-size:.78rem;padding:4px 0">가방이 비었어요. 현무암을 감정받으면 체력 결정이 들어와요.</div>';
   el.innerHTML = `<div style="font-weight:800;margin-bottom:6px">🎒 내 아이템 가방</div>`
     + `<div class="bag-it"><span>🪨 현무암 <b>${p.bas}개</b> <span style="color:#b9a48e;font-size:.72rem">(실패 ${r}/10 <span class="dots">${'●'.repeat(r)}${'○'.repeat(10 - r)}</span>)</span></span>${p.bas > 0 ? `<button class="small-btn" style="background:#8b5e34" onclick="openBasalt()">감정받기</button>` : ''}</div>`
-    + items + (me === ADMIN ? `<button class="small-btn" style="width:100%;margin-top:6px;padding:8px;background:#555;font-size:.75rem" onclick="testBasalt()">🧪 [운영자 테스트] 현무암 +1</button>` : '') + `<div style="font-size:.7rem;color:#b9a48e;margin-top:6px">실패 10번마다 현무암 1개 → 조돌맹이 깨주면 체력 결정(1~10) → 가방에서 원할 때 사용! 체력이 모자란 만큼만 쓰이고 나머지는 결정에 남아요.</div>`;
+    + items + itemRows(p) + `<div style="font-size:.7rem;color:#b9a48e;margin-top:6px">실패 10번마다 현무암 1개 → 조돌맹이 깨주면 체력 결정(1~10) → 가방에서 원할 때 사용! 체력이 모자란 만큼만 쓰이고 나머지는 결정에 남아요.</div>`;
 }
 
 // 🪨 소급 지급: 지금까지의 시도 횟수 기준 (실패 ≈ 시도 − 최고단계, 10번당 1개). 이미 실패 카운트로 얻은 몫은 제외, 1회만.
@@ -741,7 +787,6 @@ function migBas(p) {
   }
   save();
 }
-window.testBasalt = function () { const p = P[me]; if (!p || me !== ADMIN) return; p.bas = Math.min(99, p.bas + 1); p._t = Date.now(); toast('🧪 [테스트] 현무암 +1'); render(); save(); };
 const GIFT_ID = 'chungkiwa-1024';
 function checkGift() {
   if (!me || !P[me] || ended || !dbReady) return;
@@ -812,7 +857,7 @@ window.tryUpgrade = function (mods) {
   if (ended) return toast('🔒 시즌이 종료되었어요');
   const p = P[me]; if (p.grade >= 17) return;
   refill(p);
-  if (p.energy < 1) return toast('⚡ 체력이 없어요! 충전되면 다시 도전하세요');
+  if (p.energy < 1) return toast('❤️ 체력이 없어요! 충전되면 다시 도전하세요');
   if (p.grade === 16 && !belayOn(p)) return toast('🪢 V17 도전은 확보자가 필요해요! 아래 「확보 요청」을 눌러 친구를 불러보세요');
   const D = dayInfo();
   if (!mods && p.grade >= 1 && Math.random() < 0.07 * (D.em || 1)) return openEvent();
@@ -822,7 +867,7 @@ window.tryUpgrade = function (mods) {
   p.energy = Math.max(0, p.energy - 1 - (mods.cost || 0)); p.tries++; p._t = Date.now();
   const tk = todayStr(); if (p.dKey !== tk) { p.dKey = tk; p.dFall = 0; p.dTries = 0; } p.dTries++;
   const g = p.grade; let to = g, kind = 'fail', msg = pick(FAIL), b = '';
-  const bo = bonusOf(p, mods.rate || 0), usedBelay = belayOn(p), wasCk = p.ck;
+  const bo = bonusOf(p, mods.rate || 0), usedBelay = belayOn(p), wasCk = p.ck, usedChalk = !!p.buf.c; p.buf.c = 0;
   if (g === 14 && Math.random() < EGG) { to = 16; kind = 'egg'; msg = '(나.. 조돌맹..) 조돌맹 빙의했더니 안되던게 뚫렸다!'; award(p, 'egg'); b = `👻 ${me}님이 조돌맹에 빙의해 V14→V16 순간이동!`; }
   else if (Math.random() * 100 < Math.min(95, RATE[g] + bo.total)) {
     to = g + 1; kind = 'win'; msg = pick(WIN);
@@ -835,6 +880,7 @@ window.tryUpgrade = function (mods) {
     else { to = Math.max(fl, g - 1); kind = 'fall'; }
     if (to === g) { kind = 'fail'; msg += ' (⛺ 캠프 덕분에 추락은 면했다)'; }
   }
+  if (p.buf.m && to < g) { to = g; kind = 'fail'; msg = '🛡️ 낙하 방지 매트가 몸을 받쳐줬다! 추락을 막았다'; p.buf.m = 0; b = `🛡️ ${me}님이 낙하 방지 매트로 V${g}에서 추락을 막았습니다!`; }
   p.grade = to; p.best = Math.max(p.best, to);
   if (to > g) p.ck = 0; else if (kind === 'reset') p.ck = 0; else p.ck++;
   if (to <= g) { p.fl++; if (p.fl % 10 === 0 && p.bas < 99) { p.bas++; setTimeout(() => { toast(`🪨 바닥에서 묵직한 현무암을 주웠다! (보유 ${p.bas}개) 조돌맹에게 가져가 보자`); rain('🪨'); }, 1300); } }
@@ -847,7 +893,7 @@ window.tryUpgrade = function (mods) {
   if (to >= 16) award(p, 'v16');
   const adv = to > g;
   setResult(kind, g, to, msg, adv && LV[to] ? `「${LV[to][0]}」 ${LV[to][1]}` : (kind === 'reset' ? '🏘️ 업적 달성: 태초마을 관광객' : ''));
-  log(`${adv ? '🎉' : '💥'} ${me}님 V${g}→V${to}: ${msg}${usedBelay ? ' 🪢' : ''}`, adv ? 'success' : 'fail', b || (adv && to >= 13 && to < 17 ? `🔥 ${me}님이 V${to} 돌파!` : ''), kind === 'reset' ? { k: 'reset' } : null);
+  log(`${adv ? '🎉' : '💥'} ${me}님 V${g}→V${to}: ${msg}${usedBelay ? ' 🪢' : ''}${usedChalk ? ' 🧂' : ''}`, adv ? 'success' : 'fail', b || (adv && to >= 13 && to < 17 ? `🔥 ${me}님이 V${to} 돌파!` : ''), kind === 'reset' ? { k: 'reset' } : null);
   if (adv && to < 17 && Math.random() < REFUND) { addE(p, 1); setTimeout(() => toast('🍀 기분 좋은 성공! 체력 +1 환급'), 1600); }
   if (adv) pop(to);
   else if (to < g) { const s = $('stage'); s.classList.remove('hit'); void s.offsetWidth; s.classList.add('hit'); }
@@ -910,21 +956,21 @@ function renderStage() {
   $('story').textContent = LV[g][1];
   const fl = fall(g) * (dayInfo().fm || 1), bo = bonusOf(p), eff = Math.min(95, RATE[g] + bo.total);
   $('rate').textContent = g >= 17 ? '🏆 정복 완료' : `성공 확률 ${eff.toFixed(1).replace('.0', '')}%${fl ? ` · 실패 시 추락 ${Math.round(Math.min(.9, fl) * 100)}%` : (floorOf(g) === g && g ? ' · ⛺ 캠프: 추락 없음' : '')}`;
-  $('bonus').textContent = g >= 17 ? '' : `기본 ${RATE[g]}%` + (bo.ck ? ` · 🧂초크 +${bo.ck}` : '') + (bo.bl ? ` · 🪢확보(${p.bl.by}) +${bo.bl}` : '') + (bo.w ? ` · 🍃순풍 +${bo.w}` : '') + (g === 16 ? (belayOn(p) ? ' · 🪢 확보 OK!' : ' · 🔒 확보자 필요') : '');
+  $('bonus').textContent = g >= 17 ? '' : `기본 ${RATE[g]}%` + (bo.ck ? ` · 🧂초크 +${bo.ck}` : '') + (bo.bl ? ` · 🪢확보(${p.bl.by}) +${bo.bl}` : '') + (bo.w ? ` · 🍃순풍 +${bo.w}` : '') + (bo.it ? ` · 🧂초크가루 +${bo.it}` : '') + (p.buf && p.buf.m ? ' · 🛡️매트 장착' : '') + (g === 16 ? (belayOn(p) ? ' · 🪢 확보 OK!' : ' · 🔒 확보자 필요') : '');
   $('req-btn').style.display = dbReady && mine && g === 16 && !ended && !belayOn(p) ? 'block' : 'none';
   basBoxRender(P[me] || p, mine && dbReady);
   $('next').textContent = g >= 17 ? '' : `다음 V${g + 1}: 「${LV[g + 1][0]}」`;
   $('e-fill').style.width = Math.min(100, p.energy / MAXE * 100) + '%';
   const ms = Math.max(0, p.at + REGEN - Date.now());
-  $('e-text').textContent = `⚡ 체력 ${p.energy}/${MAXE}${p.energy < MAXE ? ` · 다음 충전 ${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}` : ' (가득)'}`;
+  $('e-text').textContent = `❤️ 체력 ${p.energy}/${MAXE}${p.energy < MAXE ? ` · 다음 충전 ${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}` : ' (가득)'}`;
   const go = $('go');
   if (!dbReady) { go.disabled = true; go.textContent = '⏳ 불러오는 중...'; }
   else if (!mine) { go.disabled = true; go.textContent = '👀 관전 중 (조작 불가)'; }
   else if (g >= 17) { go.disabled = true; go.textContent = '🏆 완등 완료!'; }
   else if (charging) { go.disabled = true; go.textContent = '⚡ 기를 모으는 중...'; }
   else if (ended) { go.disabled = true; go.textContent = '🔒 시즌 종료'; }
-  else if (p.energy < 1) { go.disabled = true; go.textContent = '⚡ 체력 충전 중...'; }
-  else { go.disabled = false; go.textContent = '🧗 도전하기! (⚡-1)'; }
+  else if (p.energy < 1) { go.disabled = true; go.textContent = '❤️ 체력 충전 중...'; }
+  else { go.disabled = false; go.textContent = '🧗 도전하기! (❤️-1)'; }
   $('share-btn').style.display = me && P[me] ? 'block' : 'none';
   $('cheer').style.display = dbReady && me && view && view !== me && P[view] ? 'block' : 'none';
   $('cheer-to').textContent = view;
