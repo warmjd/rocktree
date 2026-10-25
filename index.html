@@ -309,14 +309,14 @@ const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt
 const $ = (id) => document.getElementById(id);
 const ls = { get: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
 const cleanBag = (b) => (Array.isArray(b) ? b : (b && typeof b === 'object' ? Object.values(b) : [])).map(v => Math.floor(Number(v))).filter(v => v >= 1 && v <= 10).slice(0, 30);
-const fresh = () => ({ season: 4, grade: 0, energy: MAXE, at: Date.now(), tries: 0, best: 0, cleared: 0, pin: '', ach: {}, rival: '', live: 0, ltDay: '', dKey: '', dFall: 0, dTries: 0, falls: 0, ck: 0, blAt: 0, bl: null, dc: '', gift: '', bas: 0, fl: 0, bag: [] });
+const fresh = () => ({ season: 4, grade: 0, energy: MAXE, at: Date.now(), tries: 0, best: 0, cleared: 0, pin: '', ach: {}, rival: '', live: 0, ltDay: '', dKey: '', dFall: 0, dTries: 0, falls: 0, ck: 0, blAt: 0, bl: null, dc: '', gift: '', bas: 0, fl: 0, bag: [], mig: '' });
 const NAME_RE = /^[가-힣A-Za-z0-9_-]{1,8}$/;
 const num = (v, lo, hi, d) => { v = Number(v); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
 function norm(raw) {
   if (!raw || typeof raw !== 'object' || raw.season !== 4) return null;     // 시즌1 데이터는 초기화 대상
-  return { season: 4, grade: Math.floor(num(raw.grade, 0, 17, 0)), energy: Math.floor(num(raw.energy, 0, 40, MAXE)), at: num(raw.at, 0, 4e12, Date.now()), tries: Math.floor(num(raw.tries, 0, 1e9, 0)), best: Math.floor(num(raw.best, 0, 17, 0)), cleared: num(raw.cleared, 0, 4e12, 0), pin: typeof raw.pin === 'string' ? raw.pin.slice(0, 80) : '', ach: cleanAch(raw.ach), rival: NAME_RE.test(raw.rival) ? raw.rival : '', live: num(raw.live, 0, 4e12, 0), ltDay: typeof raw.ltDay === 'string' ? raw.ltDay.slice(0, 10) : '', dKey: typeof raw.dKey === 'string' ? raw.dKey.slice(0, 10) : '', dFall: Math.floor(num(raw.dFall, 0, 1e6, 0)), dTries: Math.floor(num(raw.dTries, 0, 1e6, 0)), falls: Math.floor(num(raw.falls, 0, 1e9, 0)), ck: Math.floor(num(raw.ck, 0, 99, 0)), blAt: num(raw.blAt, 0, 4e12, 0), dc: typeof raw.dc === 'string' ? raw.dc.slice(0, 10) : '', gift: typeof raw.gift === 'string' ? raw.gift.slice(0, 20) : '', bas: Math.floor(num(raw.bas, 0, 99, 0)), fl: Math.floor(num(raw.fl, 0, 1e6, 0)), bag: cleanBag(raw.bag), bl: (raw.bl && typeof raw.bl === 'object' && NAME_RE.test(raw.bl.by)) ? { by: raw.bl.by, at: num(raw.bl.at, 0, 4e12, 0) } : null };
+  return { season: 4, grade: Math.floor(num(raw.grade, 0, 17, 0)), energy: Math.floor(num(raw.energy, 0, 40, MAXE)), at: num(raw.at, 0, 4e12, Date.now()), tries: Math.floor(num(raw.tries, 0, 1e9, 0)), best: Math.floor(num(raw.best, 0, 17, 0)), cleared: num(raw.cleared, 0, 4e12, 0), pin: typeof raw.pin === 'string' ? raw.pin.slice(0, 80) : '', ach: cleanAch(raw.ach), rival: NAME_RE.test(raw.rival) ? raw.rival : '', live: num(raw.live, 0, 4e12, 0), ltDay: typeof raw.ltDay === 'string' ? raw.ltDay.slice(0, 10) : '', dKey: typeof raw.dKey === 'string' ? raw.dKey.slice(0, 10) : '', dFall: Math.floor(num(raw.dFall, 0, 1e6, 0)), dTries: Math.floor(num(raw.dTries, 0, 1e6, 0)), falls: Math.floor(num(raw.falls, 0, 1e9, 0)), ck: Math.floor(num(raw.ck, 0, 99, 0)), blAt: num(raw.blAt, 0, 4e12, 0), dc: typeof raw.dc === 'string' ? raw.dc.slice(0, 10) : '', gift: typeof raw.gift === 'string' ? raw.gift.slice(0, 20) : '', bas: Math.floor(num(raw.bas, 0, 99, 0)), fl: Math.floor(num(raw.fl, 0, 1e6, 0)), bag: cleanBag(raw.bag), mig: typeof raw.mig === 'string' ? raw.mig.slice(0, 12) : '', bl: (raw.bl && typeof raw.bl === 'object' && NAME_RE.test(raw.bl.by)) ? { by: raw.bl.by, at: num(raw.bl.at, 0, 4e12, 0) } : null };
 }
-const pub = (p) => ({ season: 4, grade: p.grade, energy: p.energy, at: p.at, tries: p.tries, best: p.best, cleared: p.cleared, ltDay: p.ltDay, dKey: p.dKey, dFall: p.dFall, dTries: p.dTries, falls: p.falls, ck: p.ck, blAt: p.blAt, dc: p.dc, gift: p.gift, bas: p.bas, fl: p.fl, bag: p.bag });
+const pub = (p) => ({ season: 4, grade: p.grade, energy: p.energy, at: p.at, tries: p.tries, best: p.best, cleared: p.cleared, ltDay: p.ltDay, dKey: p.dKey, dFall: p.dFall, dTries: p.dTries, falls: p.falls, ck: p.ck, blAt: p.blAt, dc: p.dc, gift: p.gift, bas: p.bas, fl: p.fl, bag: p.bag, mig: p.mig });
 function refill(p) {
   const now = Date.now();
   if (p.energy >= MAXE) { p.at = now; return; }        // 가득(또는 초과)이면 자연충전 정지
@@ -727,13 +727,25 @@ function basBoxRender(p, mine) {
   const items = bag.length ? bag.map((v, i) => `<div class="bag-it"><span>⚡ 체력 결정 <b>+${v}</b></span><button class="small-btn" ${full ? 'disabled style="opacity:.45"' : ''} onclick="useBag(${i})">사용</button></div>`).join('') : '<div style="color:#9a8672;font-size:.78rem;padding:4px 0">가방이 비었어요. 현무암을 감정받으면 체력 결정이 들어와요.</div>';
   el.innerHTML = `<div style="font-weight:800;margin-bottom:6px">🎒 내 아이템 가방</div>`
     + `<div class="bag-it"><span>🪨 현무암 <b>${p.bas}개</b> <span style="color:#b9a48e;font-size:.72rem">(실패 ${r}/10 <span class="dots">${'●'.repeat(r)}${'○'.repeat(10 - r)}</span>)</span></span>${p.bas > 0 ? `<button class="small-btn" style="background:#8b5e34" onclick="openBasalt()">감정받기</button>` : ''}</div>`
-    + items + `<div style="font-size:.7rem;color:#b9a48e;margin-top:6px">실패 10번마다 현무암 1개 → 조돌맹이 깨주면 체력 결정(1~10) → 가방에서 원할 때 사용! 체력이 모자란 만큼만 쓰이고 나머지는 결정에 남아요.</div>`;
+    + items + (me === ADMIN ? `<button class="small-btn" style="width:100%;margin-top:6px;padding:8px;background:#555;font-size:.75rem" onclick="testBasalt()">🧪 [운영자 테스트] 현무암 +1</button>` : '') + `<div style="font-size:.7rem;color:#b9a48e;margin-top:6px">실패 10번마다 현무암 1개 → 조돌맹이 깨주면 체력 결정(1~10) → 가방에서 원할 때 사용! 체력이 모자란 만큼만 쓰이고 나머지는 결정에 남아요.</div>`;
 }
 
+// 🪨 소급 지급: 지금까지의 시도 횟수 기준 (실패 ≈ 시도 − 최고단계, 10번당 1개). 이미 실패 카운트로 얻은 몫은 제외, 1회만.
+function migBas(p) {
+  if (p.mig === 'bas1') return;
+  const owed = Math.floor(Math.max(0, p.tries - p.best) / 10), got = Math.floor(p.fl / 10), add = Math.max(0, owed - got);
+  p.mig = 'bas1'; p.bas = Math.min(99, p.bas + add); p._t = Date.now();
+  if (add > 0) {
+    setTimeout(() => { toast(`🪨 지금까지의 도전 기록에 비례해 현무암 ${add}개가 지급됐어요! 🎒 가방에서 확인하세요`); rain('🪨'); }, 1500);
+    log(`🪨 ${me}님에게 지금까지의 도전 기록(${p.tries}회)에 비례해 현무암 ${add}개가 지급되었습니다`, 'success');
+  }
+  save();
+}
+window.testBasalt = function () { const p = P[me]; if (!p || me !== ADMIN) return; p.bas = Math.min(99, p.bas + 1); p._t = Date.now(); toast('🧪 [테스트] 현무암 +1'); render(); save(); };
 const GIFT_ID = 'chungkiwa-1024';
 function checkGift() {
   if (!me || !P[me] || ended || !dbReady) return;
-  const p = P[me]; if (p.gift === GIFT_ID) return;
+  const p = P[me]; migBas(p); if (p.gift === GIFT_ID) return;
   p.gift = GIFT_ID; p.energy = Math.max(p.energy, MAXE); p.at = Date.now(); p._t = Date.now();
   setTimeout(() => { toast('🍖 청기와 뼈찜 회식 이벤트! 체력이 가득 찼어요 (+10)'); rain('🍖'); }, 800);
   log(`🍖 ${me}님이 청기와 뼈찜을 먹고 체력을 회복했습니다 (체력 +10)`, 'success'); save();
