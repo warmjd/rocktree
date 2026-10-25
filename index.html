@@ -217,7 +217,7 @@ body.shake { animation:shk .65s; } @keyframes shk { 0%,100% { transform:translat
   <div class="card hall"><div class="title">🏆 명예의 전당</div><div id="hall"></div></div>
   <div class="card rules"><div class="title">📜 시즌3 규칙</div><ul>
     <li>❤️ 도전 1회 = 체력 1. 20분마다 +1 (최대 10).</li>
-    <li>⛺ V4·V8·V12·V15 캠프에 닿으면 그 아래로 안 떨어져요.</li>
+    <li>📉 실패하면 가끔 한 칸(드물게 두 칸) 추락해요. 위로 갈수록 위험!</li>
     <li>🧂 연속 실패하면 다음 성공률이 조금씩 올라요.</li>
     <li>🎁 매일 출석 +2 · 🌙 밤 9시 락트리 타임 보너스 · 🍀 성공하면 가끔 +1.</li>
     <li>🆘 꼴찌는 매일 출석 때 ❤️결정 +4, 현무암 +1을 받고 성공률도 올라요.</li>
@@ -261,13 +261,13 @@ const ADMIN = '조돌맹';                       // 운영자(캐릭터 삭제 �
 const MAXE = 10, REGEN = 20 * 60 * 1000;      // 체력: 최대 10, 20분마다 +1
 const DAILY_E = 2, REFUND = 0.25;             // 🎁 출석 보너스 체력 +2 (하루 1회) · 🍀 성공 시 25% 확률로 체력 +1 환급
 const SEASON_START = new Date('2026-10-24T00:00:00+09:00').getTime();   // 시즌3 시작일 (순풍 계산용)
-const CAMPS = [4, 8, 12, 15];                 // ⛺ 캠프: 이 단계 아래로는 추락하지 않음
+const CAMPS = [];                             // ⛺ 캠프 폐지 (시즌3 밸런스 조정)
 const floorOf = (g) => CAMPS.filter(c => c <= g).pop() || 0;
 const CHALK_STEP = 0.1, CHALK_MAX = 0.5;        // 🧂 연속 실패 1회당 +1.5%p (최대 +8%p), 성공/추락하면 초기화
 const seasonDay = () => Math.floor((Date.now() - SEASON_START) / 864e5);
 const wind = () => { const d = seasonDay(); return d >= 21 ? 0.2 : (d >= 14 ? 0.1 : 0); };   // 🍃 순풍: 3주차 +2%p, 4주차~ +4%p (시즌이 너무 길어지지 않게)
-const RATE = [80, 76, 70, 62, 13.3, 11.9, 10.5, 9.1, 8.4, 7.7, 6.3, 5.6, 4.2, 3.5, 2.8, 2.1, 2.1];   // V(g)→V(g+1) 성공률 %
-const fall = (g) => floorOf(g) === g ? 0 : (g >= 14 ? 0.55 : (g >= 10 ? 0.4 : (g >= 5 ? 0.25 : 0)));                           // 실패 시 추락 확률
+const RATE = [80, 76, 70, 62, 19, 17, 15, 13, 12, 11, 9, 8, 6, 5, 4, 3, 3];   // V(g)→V(g+1) 성공률 %
+const fall = (g) => g >= 14 ? 0.25 : (g >= 10 ? 0.15 : (g >= 5 ? 0.10 : 0));                           // 실패 시 추락 확률
 const LV = [
   ['락트리 입장', '신발 끈부터 묶자. 아직 아무것도 모른다'],
   ['돌자비 검은비니', '비니를 눌러쓰고 첫 스타트 홀드를 잡았다'],
@@ -866,7 +866,7 @@ window.tryUpgrade = function (mods) {
   } else if (g === 16 && !mods.noFall && Math.random() < RESET) { to = 1; kind = 'reset'; msg = '정상 코앞에서 발이 미끄러졌다… 그대로 태초마을까지 굴러 내려갔다!'; award(p, 'reset'); b = `💀 ${me}님이 V16에서 태초마을(V1)로 귀환…! 다 같이 위로(?)해 주세요`; }
   else if (g > 0 && !mods.noFall && (mods.forceFall || Math.random() < Math.min(0.9, fall(g) * (D.fm || 1)))) {
     const fl = floorOf(g);
-    if (g >= 11 && g <= 14 && Math.random() < Math.min(0.8, 0.25 * (D.f2m || 1))) { const f = pick(F2); to = Math.max(fl, g - 2); kind = 'fall2'; msg = f[0]; award(p, f[1]); }
+    if (g >= 11 && g <= 14 && Math.random() < Math.min(0.8, 0.10 * (D.f2m || 1))) { const f = pick(F2); to = Math.max(fl, g - 2); kind = 'fall2'; msg = f[0]; award(p, f[1]); }
     else { to = Math.max(fl, g - 1); kind = 'fall'; }
     if (to === g) { kind = 'fail'; msg += ' (⛺ 캠프 덕분에 추락은 면했다)'; }
   }
